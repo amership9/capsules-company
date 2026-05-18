@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>English Capsules — Proposal Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:ital,wght@1,400;1,600&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            yellow: '#FFC72C',
+            'yellow-dark': '#E0A91A',
+            'yellow-light': '#FFD75C',
+            black: '#0A0A0A',
+            'black-soft': '#1F1F1F',
+            white: '#FFFFFF',
+            cream: '#FAFAF7',
+            'cream-deep': '#F2F1EB',
+          },
+          ui: {
+            border: '#E5E5E0',
+            'border-strong': '#0A0A0A',
+            'text-mid': '#6B6B6B',
+            'text-light': '#9B9B95',
+            danger: '#C0392B',
+            success: '#2D8659',
+          }
+        },
+        fontFamily: {
+          display: ['Poppins', 'system-ui', 'sans-serif'],
+          sans: ['Manrope', 'system-ui', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          fraunces: ['Fraunces', 'serif'],
+          ar: ['Cairo', 'system-ui', 'sans-serif'],
+        },
+        borderRadius: {
+          'sm': '2px',
+          DEFAULT: '4px',
+          'md': '6px',
+          'lg': '8px',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html, body { background: #FAFAF7; color: #0A0A0A; font-family: 'Manrope', system-ui, sans-serif; }
+  body { margin: 0; }
+  *:focus-visible { outline: 2px solid #0A0A0A; outline-offset: 1px; }
+  /* Hide default focus on buttons but keep accessibility for keyboard */
+  button:focus { outline: none; }
+  button:focus-visible { outline: 2px solid #0A0A0A; outline-offset: 2px; }
+
+  /* PDF page shadow */
+  .pdf-page {
+    box-shadow: 0 1px 2px rgba(10,10,10,.04), 0 8px 24px rgba(10,10,10,.08);
+    background: #fff;
+  }
+  /* Sharp inputs */
+  .ec-input {
+    background: #fff;
+    border: 1px solid #E5E5E0;
+    border-radius: 2px;
+    padding: 9px 12px;
+    font-size: 13px;
+    line-height: 1.4;
+    font-family: 'Manrope', sans-serif;
+    color: #0A0A0A;
+    width: 100%;
+    transition: border-color 80ms;
+  }
+  .ec-input:hover { border-color: #BFBFB8; }
+  .ec-input:focus { border-color: #0A0A0A; outline: none; box-shadow: 0 0 0 1px #0A0A0A; }
+  .ec-input::placeholder { color: #9B9B95; }
+  textarea.ec-input { resize: vertical; min-height: 64px; line-height: 1.5; }
+  select.ec-input { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%230A0A0A' stroke-width='1.4' fill='none' stroke-linecap='round'/></svg>"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+  /* Buttons */
+  .btn { display:inline-flex; align-items:center; gap:8px; padding: 9px 14px; font-size:13px; font-weight:600; border-radius:2px; transition: all 80ms; font-family: 'Manrope', sans-serif; line-height:1; cursor:pointer; border: 1px solid transparent; white-space: nowrap; }
+  .btn-primary { background: #FFC72C; color: #0A0A0A; border-color: #FFC72C; }
+  .btn-primary:hover { background: #E0A91A; border-color: #E0A91A; }
+  .btn-dark { background:#0A0A0A; color:#fff; }
+  .btn-dark:hover { background:#1F1F1F; }
+  .btn-ghost { background:transparent; color:#0A0A0A; border-color:#E5E5E0; }
+  .btn-ghost:hover { background:#fff; border-color:#0A0A0A; }
+  .btn-quiet { background:transparent; color:#0A0A0A; }
+  .btn-quiet:hover { background: rgba(10,10,10,.05); }
+  .btn-sm { padding: 6px 10px; font-size: 12px; }
+  .btn-icon { padding: 7px; }
+
+  /* Status pills (rect, sharp) */
+  .pill { display:inline-flex; align-items:center; gap:5px; padding: 3px 8px; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; border-radius:2px; font-family:'Manrope', sans-serif; }
+  .pill-draft { background: #F2F1EB; color: #6B6B6B; border:1px solid #E5E5E0; }
+  .pill-sent { background: #0A0A0A; color: #FFC72C; }
+  .pill-won { background: #2D8659; color: #fff; }
+  .pill-lost { background: #fff; color: #C0392B; border:1px solid #C0392B; }
+  .pill-yellow { background: #FFC72C; color: #0A0A0A; }
+  .pill-dot::before { content:''; width:5px; height:5px; border-radius:50%; background: currentColor; display:inline-block; margin-right:1px; }
+
+  /* yellow bar */
+  .yellow-bar { display:block; height:4px; background:#FFC72C; }
+
+  /* scrollbars (subtle) */
+  .nice-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+  .nice-scroll::-webkit-scrollbar-thumb { background: rgba(10,10,10,.15); border-radius:8px; border: 2px solid transparent; background-clip: content-box; }
+  .nice-scroll::-webkit-scrollbar-thumb:hover { background: rgba(10,10,10,.3); border: 2px solid transparent; background-clip: content-box; }
+
+  /* Animations: only on app chrome, not preview */
+  .fade-in { animation: fadeIn 140ms ease-out both; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(2px); } to { opacity:1; transform:none; } }
+  /* For html-to-image and safety: ensure the final state is visible even if animation glitches */
+  .fade-in { opacity: 1; }
+
+  /* Preview no-animation per requirements */
+  .no-anim, .no-anim * { transition: none !important; animation: none !important; }
+
+  /* PDF typography (locked) */
+  .pdf { font-family: 'Manrope', sans-serif; color: #0A0A0A; }
+  .pdf-display { font-family: 'Poppins', sans-serif; }
+  .pdf-mono { font-family: 'JetBrains Mono', monospace; }
+  .pdf-italic { font-family: 'Fraunces', serif; font-style: italic; }
+  .pdf[dir="rtl"], .pdf[dir="rtl"] .pdf-display { font-family: 'Cairo', sans-serif; }
+  .pdf[dir="rtl"] .pdf-mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* density helpers (applied via tweak) */
+  .density-compact .ec-input { padding: 6px 10px; font-size: 12.5px; }
+  .density-compact .form-row { gap: 6px; }
+  .density-compact .form-section { padding: 12px 14px; }
+  .density-compact .btn { padding: 7px 12px; font-size: 12.5px; }
+
+  /* line clamp */
+  .clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .clamp-1 { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+</style>
+
+<!-- React + Babel pinned -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="icons.jsx"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="ui.jsx"></script>
+<script type="text/babel" src="pdf.jsx"></script>
+<script type="text/babel" src="editor.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
