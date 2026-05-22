@@ -12,6 +12,7 @@ window.EMC.layout = {
     { id: 'segments',   label: 'الشرائح المستهدفة', href: 'segments.html', icon: 'target' },
     { id: 'pipeline',   label: 'خط الفرص',      href: 'contacts.html?zone=2', icon: 'columns' },
     { id: 'leads',      label: 'المتفاعلون',     href: 'leads.html', icon: 'magnet' },
+    { id: 'mql-alerts', label: 'تنبيهات MQL', href: 'mql-alerts.html', icon: 'bell', countKey: 'mqls', accent: 'red' },
     { id: 'sources',    label: 'المصادر و Landing', href: 'sources.html', icon: 'globe' },
     { id: 'templates',  label: 'قوالب الرسائل', href: 'templates.html', icon: 'mail' },
     { id: 'students',   label: 'العملاء النشطون', href: 'contacts.html?zone=3', icon: 'graduation' },
@@ -49,11 +50,13 @@ window.EMC.layout = {
     if (!session) return null;
 
     // counts
-    let counts = {};
+    let counts = { total: 0, mqls: 0 };
     try {
       const s = await EMC.contacts.stats();
-      counts = { total: s.total };
-    } catch (e) { counts = { total: 0 }; }
+      const all = await EMC.contacts.list();
+      const mqlCount = all.filter(c => c.currentStage === 4).length;
+      counts = { total: s.total, mqls: mqlCount };
+    } catch (e) { counts = { total: 0, mqls: 0 }; }
 
     const root = document.getElementById('emc-shell-root');
     if (!root) return;
@@ -75,7 +78,7 @@ window.EMC.layout = {
               <a href="${n.href}" class="${n.id === page ? 'active' : ''}">
                 ${this.icons[n.icon] || ''}
                 <span>${n.label}</span>
-                ${n.countKey && counts[n.countKey] != null ? `<span class="nav-badge">${counts[n.countKey]}</span>` : ''}
+                ${n.countKey && counts[n.countKey] != null && counts[n.countKey] > 0 ? `<span class="nav-badge" style="${n.accent === 'red' ? 'background: var(--emc-red); color: #fff;' : ''}">${counts[n.countKey]}</span>` : ''}
               </a>
             `).join('')}
           </nav>
