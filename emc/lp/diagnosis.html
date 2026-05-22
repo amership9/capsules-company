@@ -17,9 +17,455 @@
 <script src="../js/emc-touchpoints.js"></script>
 <script src="../js/emc-contacts.js"></script>
 <script src="tracker.js"></script>
+<style>
+  /* ─── Diagnosis Multi-Step Form ─── */
+  .dx-shell {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px 64px;
+  }
+
+  /* ─── Progress Bar ─── */
+  .dx-progress {
+    background: #fff;
+    border-bottom: 1px solid var(--emc-line);
+    padding: 22px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: 0 1px 0 rgba(11, 37, 69, 0.04);
+  }
+  .dx-progress-inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .dx-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+  .dx-progress-step-label {
+    font-size: 13px;
+    color: var(--emc-muted);
+    font-weight: 600;
+  }
+  .dx-progress-step-label strong {
+    color: var(--emc-navy);
+    font-weight: 800;
+  }
+  .dx-progress-percent {
+    font-size: 12px;
+    color: var(--emc-faint);
+    font-variant-numeric: tabular-nums;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .dx-progress-track {
+    height: 6px;
+    background: var(--emc-cream);
+    border-radius: 99px;
+    overflow: hidden;
+    position: relative;
+  }
+  .dx-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--emc-red), var(--emc-red-deep, var(--emc-red)));
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* ─── Steps badges (mobile-friendly) ─── */
+  .dx-steps-badges {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 14px;
+    gap: 6px;
+  }
+  .dx-step-badge {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--emc-faint);
+    background: transparent;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .dx-step-badge.active {
+    color: var(--emc-navy);
+    background: var(--emc-cream);
+  }
+  .dx-step-badge.done {
+    color: var(--emc-success, #2E7D5B);
+  }
+  .dx-step-badge.done::before {
+    content: "✓ ";
+  }
+
+  /* ─── Hero مختصر ─── */
+  .dx-hero {
+    text-align: center;
+    padding: 48px 24px 32px;
+    background: linear-gradient(180deg, var(--emc-navy-deep, var(--emc-navy)) 0%, var(--emc-navy) 100%);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .dx-hero::before {
+    content: "";
+    position: absolute;
+    top: -60px; left: -80px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(215, 38, 56, 0.16), transparent 60%);
+    filter: blur(20px);
+  }
+  .dx-hero-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--emc-red-soft, #E85A68);
+    font-weight: 700;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+  }
+  .dx-hero h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 12px;
+    letter-spacing: -0.01em;
+    position: relative;
+    z-index: 1;
+  }
+  .dx-hero p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.8);
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── Steps containers ─── */
+  .dx-card {
+    background: #fff;
+    border: 1px solid var(--emc-line);
+    border-radius: 16px;
+    margin-top: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(11, 37, 69, 0.06);
+  }
+  .dx-step {
+    padding: 32px 28px;
+    display: none;
+    animation: dxFadeIn 0.3s ease-out;
+  }
+  .dx-step.active { display: block; }
+
+  @keyframes dxFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .dx-step-head {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--emc-line);
+  }
+  .dx-step-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: var(--emc-cream);
+    color: var(--emc-navy);
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--emc-line);
+  }
+  .dx-step-head h2 {
+    font-size: 22px;
+    color: var(--emc-navy);
+    font-weight: 800;
+    margin: 0 0 6px;
+  }
+  .dx-step-head p {
+    color: var(--emc-muted);
+    font-size: 13.5px;
+    margin: 0;
+  }
+
+  /* ─── Fields ─── */
+  .dx-field {
+    margin-bottom: 16px;
+  }
+  .dx-field label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--emc-ink-2);
+    margin-bottom: 6px;
+  }
+  .dx-field .req { color: var(--emc-red); }
+  .dx-field .opt {
+    color: var(--emc-faint);
+    font-weight: 400;
+    font-size: 11.5px;
+  }
+  .dx-field input,
+  .dx-field select,
+  .dx-field textarea {
+    width: 100%;
+    border: 1px solid var(--emc-line);
+    border-radius: 10px;
+    padding: 0 14px;
+    font-size: 14.5px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--emc-ink);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .dx-field input,
+  .dx-field select {
+    height: 46px;
+  }
+  .dx-field textarea {
+    padding: 12px 14px;
+    min-height: 90px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  .dx-field input:focus,
+  .dx-field select:focus,
+  .dx-field textarea:focus {
+    outline: none;
+    border-color: var(--emc-navy);
+    box-shadow: 0 0 0 3px rgba(11, 37, 69, 0.08);
+  }
+  .dx-field input.error,
+  .dx-field select.error,
+  .dx-field textarea.error {
+    border-color: var(--emc-red);
+    background: #FEF7F8;
+  }
+  .dx-field .err-msg {
+    color: var(--emc-red);
+    font-size: 11.5px;
+    margin-top: 5px;
+    display: none;
+  }
+  .dx-field input.error + .err-msg,
+  .dx-field select.error + .err-msg,
+  .dx-field textarea.error + .err-msg {
+    display: block;
+  }
+
+  /* ─── Two columns layout ─── */
+  .dx-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 560px) {
+    .dx-row { grid-template-columns: 1fr; gap: 0; }
+  }
+
+  /* ─── Chip group (multi-select) ─── */
+  .dx-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .dx-chip {
+    padding: 8px 14px;
+    border: 1px solid var(--emc-line);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--emc-ink-2);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .dx-chip:hover {
+    border-color: var(--emc-navy);
+    color: var(--emc-navy);
+  }
+  .dx-chip.selected {
+    background: var(--emc-navy);
+    color: #fff;
+    border-color: var(--emc-navy);
+  }
+  .dx-chip-hint {
+    font-size: 11.5px;
+    color: var(--emc-faint);
+    margin-top: 6px;
+  }
+
+  /* ─── Range slider (hours) ─── */
+  .dx-range-wrap {
+    background: var(--emc-cream);
+    padding: 18px 16px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--emc-line);
+  }
+  .dx-range-value {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--emc-navy);
+    font-family: "JetBrains Mono", monospace;
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .dx-range-value small {
+    font-size: 12.5px;
+    color: var(--emc-muted);
+    font-family: "Cairo", sans-serif;
+    font-weight: 600;
+    margin-inline-start: 4px;
+  }
+  .dx-range-wrap input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border: 0;
+    padding: 0;
+    border-radius: 99px;
+    background: #fff;
+    accent-color: var(--emc-red);
+    cursor: pointer;
+  }
+  .dx-range-ticks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--emc-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ─── Nav buttons ─── */
+  .dx-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--emc-line);
+  }
+  .dx-btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14.5px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    border: 0;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dx-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .dx-btn-next {
+    background: var(--emc-red);
+    color: #fff;
+    flex: 1;
+    justify-content: center;
+    height: 50px;
+  }
+  .dx-btn-next:hover:not(:disabled) {
+    background: var(--emc-red-deep, #B81E2E);
+  }
+  .dx-btn-back {
+    background: transparent;
+    color: var(--emc-ink-2);
+    border: 1px solid var(--emc-line);
+  }
+  .dx-btn-back:hover {
+    border-color: var(--emc-navy);
+    color: var(--emc-navy);
+  }
+  .dx-btn-submit {
+    background: var(--emc-navy);
+    color: #fff;
+    flex: 1;
+    justify-content: center;
+    height: 50px;
+  }
+  .dx-btn-submit:hover:not(:disabled) {
+    background: var(--emc-navy-deep, #08172F);
+  }
+
+  /* ─── Success state ─── */
+  .dx-success {
+    text-align: center;
+    padding: 60px 28px;
+    display: none;
+  }
+  .dx-success.active { display: block; }
+  .dx-success-check {
+    width: 72px; height: 72px;
+    margin: 0 auto 18px;
+    background: #E1F1E8;
+    color: var(--emc-success, #2E7D5B);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    animation: dxPop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes dxPop {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  .dx-success h3 {
+    color: var(--emc-navy);
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0 0 10px;
+  }
+  .dx-success p {
+    color: var(--emc-ink-2);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 460px;
+    margin: 0 auto 22px;
+  }
+  .dx-success-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 22px;
+    background: var(--emc-cream);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--emc-ink-2);
+  }
+  .dx-success-meta strong { color: var(--emc-navy); font-weight: 700; }
+
+  /* ─── Privacy footer note ─── */
+  .dx-privacy {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 11.5px;
+    color: var(--emc-faint);
+  }
+</style>
 </head>
 <body class="lp-shell" data-landing-page="diagnosis" data-screen-label="LP diagnosis">
 
+<!-- ─── Top nav ─── -->
 <nav class="lp-nav">
   <div class="lp-nav-brand">
     <div class="lp-nav-brand-mark">
@@ -33,98 +479,219 @@
     </div>
     <div>
       <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
-      <div class="lp-nav-brand-sub">Diagnosis · المرحلة 2</div>
+      <div class="lp-nav-brand-sub">Diagnosis · تشخيص شركتك</div>
     </div>
   </div>
-  <span style="color: rgba(255,255,255,0.6); font-size: 12px;">3 دقائق · 7 أسئلة</span>
+  <span style="color: rgba(255,255,255,0.6); font-size: 12px;">3 دقائق · مجاناً</span>
 </nav>
 
-<!-- Hero -->
-<section class="lp-hero" style="padding: 48px 32px 56px;">
-  <div style="max-width: 720px; margin: 0 auto; text-align: center; position: relative; z-index: 1;">
-    <div class="lp-hero-eyebrow">المرحلة 2 من 2 · التشخيص الكامل</div>
-    <h1 class="lp-hero-title" style="font-size: 38px;">شركتك في 7 أسئلة</h1>
-    <p class="lp-hero-subtitle" style="margin: 16px auto 0; max-width: 580px;">
-      جاوب على 7 أسئلة هتاخد منك 3 دقائق، وفي خلال 24 ساعة هتستلم تقرير شخصي عن نقاط القوة والضعف في شركتك، مع توصيات عملية للأسبوع الجاي.
-    </p>
-
-    <div style="display: flex; justify-content: center; gap: 28px; margin-top: 28px; color: rgba(255,255,255,0.7); font-size: 13px; flex-wrap: wrap;">
-      <span>📊 <strong style="color: #fff;">تقرير شخصي</strong></span>
-      <span>🔒 <strong style="color: #fff;">بيانات محمية</strong></span>
-      <span>📞 <strong style="color: #fff;">مكالمة متابعة مجانية</strong></span>
-    </div>
-  </div>
+<!-- ─── Hero ─── -->
+<section class="dx-hero">
+  <div class="dx-hero-eyebrow">التشخيص الكامل لشركتك</div>
+  <h1>اعرف موقعك في 3 دقائق</h1>
+  <p>11 سؤال موزعين على 3 خطوات. هيوصلك تقرير شخصي خلال 24 ساعة، فيه تحليل لنقاط القوة والضعف في شركتك، وخطوات عملية تبدأها الأسبوع الجاي.</p>
 </section>
 
-<!-- Form -->
-<section class="lp-section" style="background: #fff; padding: 56px 32px;">
-  <div class="lp-form-card" style="max-width: 640px; margin: 0 auto; padding: 36px 40px;">
-    <div id="form-wrap">
-      <h3 style="text-align: center;">7 أسئلة عشان نقدر نخدمك بدقة</h3>
-      <div class="sub" style="text-align: center; margin-bottom: 22px;">كل البيانات إلزامية ما عدا آخر سؤال</div>
+<!-- ─── Progress bar ─── -->
+<div class="dx-progress">
+  <div class="dx-progress-inner">
+    <div class="dx-progress-meta">
+      <div class="dx-progress-step-label">الخطوة <strong id="cur-step">1</strong> من <strong>3</strong></div>
+      <div class="dx-progress-percent" id="progress-pct">33%</div>
+    </div>
+    <div class="dx-progress-track">
+      <div class="dx-progress-fill" id="progress-fill" style="width: 33%"></div>
+    </div>
+    <div class="dx-steps-badges">
+      <div class="dx-step-badge active" data-step="1">هويتك</div>
+      <div class="dx-step-badge" data-step="2">شركتك</div>
+      <div class="dx-step-badge" data-step="3">تحدياتك</div>
+    </div>
+  </div>
+</div>
 
-      <form id="lead-form">
-        <div class="lp-form-field">
-          <label for="fullName">الاسم الكامل <span style="color: var(--emc-red);">*</span></label>
-          <input type="text" id="fullName" name="fullName" required autocomplete="name" />
-        </div>
-        <div class="lp-form-field">
-          <label for="email">البريد الإلكتروني <span style="color: var(--emc-red);">*</span></label>
-          <input type="email" id="email" name="email" required autocomplete="email" />
-        </div>
-        <div class="lp-form-field">
-          <label for="mobile">رقم الموبايل (واتساب) <span style="color: var(--emc-red);">*</span></label>
-          <input type="tel" id="mobile" name="mobile" required placeholder="01xxxxxxxxx" autocomplete="tel" />
+<!-- ─── Main shell ─── -->
+<div class="dx-shell">
+
+  <form id="dx-form" novalidate>
+
+    <!-- ━━━━━━━ STEP 1: Identity ━━━━━━━ -->
+    <div class="dx-card">
+      <div class="dx-step active" data-step="1">
+        <div class="dx-step-head">
+          <div class="dx-step-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <h2>خلّينا نتعرف عليك</h2>
+          <p>3 حقول · يستغرق أقل من دقيقة</p>
         </div>
 
-        <div class="lp-form-field">
-          <label for="title">منصبك <span style="color: var(--emc-red);">*</span></label>
-          <input type="text" id="title" name="title" required placeholder="CEO / Founder / COO ..." />
+        <div class="dx-field">
+          <label for="fullName">الاسم الكامل <span class="req">*</span></label>
+          <input type="text" id="fullName" name="fullName" autocomplete="name" />
+          <div class="err-msg">من فضلك اكتب اسمك الكامل</div>
         </div>
 
-        <div class="lp-form-field">
-          <label for="companyName">اسم الشركة <span style="color: var(--emc-red);">*</span></label>
-          <input type="text" id="companyName" name="companyName" required />
+        <div class="dx-field">
+          <label for="email">البريد الإلكتروني <span class="req">*</span></label>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="name@company.com" />
+          <div class="err-msg">من فضلك اكتب بريد إلكتروني صحيح</div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-          <div class="lp-form-field">
-            <label for="industry">المجال <span style="color: var(--emc-red);">*</span></label>
-            <select id="industry" name="industry" required style="width: 100%; height: 42px; border: 1px solid var(--emc-line); border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: inherit; background: #fff;">
+        <div class="dx-field">
+          <label for="mobile">رقم الموبايل (واتساب) <span class="req">*</span></label>
+          <input type="tel" id="mobile" name="mobile" autocomplete="tel" placeholder="01xxxxxxxxx" />
+          <div class="err-msg">من فضلك اكتب رقم موبايل صحيح (11 رقم)</div>
+        </div>
+
+        <div class="dx-nav">
+          <span></span>
+          <button type="button" class="dx-btn dx-btn-next" data-cta="step1-next" data-action="next">
+            التالي
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform: scaleX(-1);"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ━━━━━━━ STEP 2: Company ━━━━━━━ -->
+      <div class="dx-step" data-step="2">
+        <div class="dx-step-head">
+          <div class="dx-step-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+          </div>
+          <h2>كلمنا عن شركتك</h2>
+          <p>4 حقول · المعلومات دي بتساعدنا نخصّص التحليل</p>
+        </div>
+
+        <div class="dx-field">
+          <label for="title">منصبك في الشركة <span class="req">*</span></label>
+          <input type="text" id="title" name="title" placeholder="CEO / Founder / COO / Managing Director" />
+          <div class="err-msg">من فضلك اكتب منصبك</div>
+        </div>
+
+        <div class="dx-field">
+          <label for="companyName">اسم الشركة <span class="req">*</span></label>
+          <input type="text" id="companyName" name="companyName" />
+          <div class="err-msg">من فضلك اكتب اسم الشركة</div>
+        </div>
+
+        <div class="dx-row">
+          <div class="dx-field">
+            <label for="industry">المجال <span class="req">*</span></label>
+            <select id="industry" name="industry">
               <option value="">— اختر —</option>
             </select>
+            <div class="err-msg">اختر المجال</div>
           </div>
-          <div class="lp-form-field">
-            <label for="companySize">حجم الفريق <span style="color: var(--emc-red);">*</span></label>
-            <select id="companySize" name="companySize" required style="width: 100%; height: 42px; border: 1px solid var(--emc-line); border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: inherit; background: #fff;">
+          <div class="dx-field">
+            <label for="companySize">حجم الفريق <span class="req">*</span></label>
+            <select id="companySize" name="companySize">
               <option value="">— اختر —</option>
             </select>
+            <div class="err-msg">اختر حجم الفريق</div>
           </div>
         </div>
 
-        <div class="lp-form-field">
-          <label for="eosFamiliarity">علاقتك بـ EOS <span style="color: var(--emc-faint); font-weight: 400;">(اختياري)</span></label>
-          <select id="eosFamiliarity" name="eosFamiliarity" style="width: 100%; height: 42px; border: 1px solid var(--emc-line); border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: inherit; background: #fff;">
+        <div class="dx-nav">
+          <button type="button" class="dx-btn dx-btn-back" data-action="back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            السابق
+          </button>
+          <button type="button" class="dx-btn dx-btn-next" data-cta="step2-next" data-action="next">
+            التالي
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform: scaleX(-1);"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ━━━━━━━ STEP 3: Diagnostic Questions ━━━━━━━ -->
+      <div class="dx-step" data-step="3">
+        <div class="dx-step-head">
+          <div class="dx-step-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h2>الأسئلة التشخيصية</h2>
+          <p>4 أسئلة جوهرية · هتاخد منك دقيقتين</p>
+        </div>
+
+        <!-- Q1: Ceilings (multi-select chips) -->
+        <div class="dx-field">
+          <label>إيه السقف اللي شركتك وصلتله؟ <span class="req">*</span></label>
+          <div class="dx-chips" id="chips-ceilings" data-name="ceilings"></div>
+          <div class="dx-chip-hint">تقدر تختار أكتر من سقف</div>
+          <div class="err-msg" id="err-ceilings">اختار سقف واحد على الأقل</div>
+        </div>
+
+        <!-- Q2: Primary EOS component (single select) -->
+        <div class="dx-field">
+          <label for="primaryComponent">أي مكون من EOS الستة شايف إنه أضعف عندك؟ <span class="req">*</span></label>
+          <select id="primaryComponent" name="primaryComponent">
+            <option value="">— اختر مكون —</option>
+          </select>
+          <div class="err-msg">اختار المكون</div>
+        </div>
+
+        <!-- Q3: Work hours (range) -->
+        <div class="dx-field">
+          <label for="workHours">بتشتغل تقريباً كم ساعة في الأسبوع؟ <span class="req">*</span></label>
+          <div class="dx-range-wrap">
+            <div class="dx-range-value">
+              <span id="hours-value">50</span><small>ساعة في الأسبوع</small>
+            </div>
+            <input type="range" id="workHours" name="workHours" min="30" max="90" step="5" value="50" />
+            <div class="dx-range-ticks">
+              <span>30</span>
+              <span>50</span>
+              <span>70</span>
+              <span>90+</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Q4: Biggest challenge (textarea) -->
+        <div class="dx-field">
+          <label for="biggestChallenge">إيه أكبر تحدي بتواجهه في إدارة شركتك دلوقتي؟ <span class="opt">(اختياري)</span></label>
+          <textarea id="biggestChallenge" name="biggestChallenge" rows="3" placeholder="مثلاً: فريق القيادة بيتنازع في كل اجتماع، الإيرادات بتنمو لكن الأرباح ثابتة..."></textarea>
+        </div>
+
+        <!-- Q5: EOS familiarity (optional) -->
+        <div class="dx-field">
+          <label for="eosFamiliarity">علاقتك بـ EOS <span class="opt">(اختياري)</span></label>
+          <select id="eosFamiliarity" name="eosFamiliarity">
             <option value="">— اختر —</option>
           </select>
         </div>
 
-        <button type="submit" class="btn-cta" id="submit-btn" data-cta="diagnosis-submit">احصل على التقرير</button>
-        <div class="privacy">بياناتك محمية ومش بتتشارك مع أي طرف ثالث.</div>
-      </form>
-    </div>
-
-    <div id="form-success" style="display:none;">
-      <div class="lp-form-success">
-        <div class="check">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="dx-nav">
+          <button type="button" class="dx-btn dx-btn-back" data-action="back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            السابق
+          </button>
+          <button type="button" class="dx-btn dx-btn-submit" data-cta="diagnosis-submit" data-action="submit" id="submit-btn">
+            احصل على التقرير
+          </button>
         </div>
-        <h4>تم استلام بياناتك ✓</h4>
-        <p id="success-msg">التقرير في طريقه لبريدك خلال 24 ساعة. فريق EMC هيتواصل معاك على الواتساب لتأكيد التشخيص.</p>
+
+        <div class="dx-privacy">🔒 بياناتك محمية ولن يتم مشاركتها مع أي طرف ثالث.</div>
       </div>
-    </div>
-  </div>
-</section>
+
+      <!-- ━━━━━━━ SUCCESS ━━━━━━━ -->
+      <div class="dx-success" id="dx-success">
+        <div class="dx-success-check">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 id="success-title">تم استلام بياناتك ✓</h3>
+        <p id="success-msg">التقرير الشخصي في طريقه لبريدك خلال 24 ساعة. فريق EMC هيتواصل معاك على الواتساب لتأكيد التشخيص ومناقشة التوصيات.</p>
+        <div class="dx-success-meta">
+          <span>📊 <strong>تقرير شخصي</strong></span>
+          <span>📞 <strong>مكالمة متابعة</strong></span>
+        </div>
+      </div>
+
+    </div><!-- /dx-card -->
+
+  </form>
+</div>
 
 <footer class="lp-footer">
   <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
@@ -132,31 +699,120 @@
 
 <script>
 (function () {
-  // populate selects
+  'use strict';
+
+  // ─── State ───
+  const STORAGE_KEY = 'emc_diagnosis_draft';
+  let currentStep = 1;
+  const totalSteps = 3;
+  let selectedCeilings = [];
+
+  // ─── DOM refs ───
+  const stepsEls = document.querySelectorAll('.dx-step');
+  const badges = document.querySelectorAll('.dx-step-badge');
+  const progressFill = document.getElementById('progress-fill');
+  const progressPct = document.getElementById('progress-pct');
+  const curStepLabel = document.getElementById('cur-step');
+  const form = document.getElementById('dx-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const successEl = document.getElementById('dx-success');
+  const cardEl = document.querySelector('.dx-card');
+
+  // ─── Populate selects ───
   function populate(id, dict) {
     const sel = document.getElementById(id);
     Object.entries(dict).forEach(([k, v]) => {
       const opt = document.createElement('option');
-      opt.value = k; opt.textContent = v;
+      opt.value = k;
+      opt.textContent = v;
       sel.appendChild(opt);
     });
   }
   populate('industry', EMC.INDUSTRIES);
   populate('companySize', EMC.COMPANY_SIZES);
+  populate('primaryComponent', EMC.EOS_COMPONENTS);
   populate('eosFamiliarity', EMC.EOS_FAMILIARITY);
 
-  // prefill email from URL ?email=...
-  const params = new URLSearchParams(window.location.search);
-  const prefillEmail = params.get('email');
+  // ─── Populate ceiling chips ───
+  const chipsContainer = document.getElementById('chips-ceilings');
+  Object.entries(EMC.CEILINGS).forEach(([k, v]) => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'dx-chip';
+    chip.dataset.value = k;
+    chip.textContent = v;
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('selected');
+      if (chip.classList.contains('selected')) {
+        if (!selectedCeilings.includes(k)) selectedCeilings.push(k);
+      } else {
+        selectedCeilings = selectedCeilings.filter(x => x !== k);
+      }
+      document.getElementById('err-ceilings').style.display = 'none';
+      saveDraft();
+    });
+    chipsContainer.appendChild(chip);
+  });
+
+  // ─── Hours slider ───
+  const hoursInput = document.getElementById('workHours');
+  const hoursValue = document.getElementById('hours-value');
+  hoursInput.addEventListener('input', () => {
+    const v = parseInt(hoursInput.value);
+    hoursValue.textContent = v >= 90 ? '90+' : v;
+    saveDraft();
+  });
+
+  // ─── Prefill from URL ?email= ───
+  const urlParams = new URLSearchParams(window.location.search);
+  const prefillEmail = urlParams.get('email');
   if (prefillEmail) document.getElementById('email').value = prefillEmail;
 
-  document.getElementById('lead-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('submit-btn');
-    btn.disabled = true;
-    btn.textContent = 'جاري الإرسال…';
+  // ─── Draft (auto-save in localStorage) ───
+  function saveDraft() {
+    const draft = {
+      step: currentStep,
+      data: collectAllData(),
+      ceilings: selectedCeilings,
+      savedAt: Date.now()
+    };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(draft)); } catch (e) {}
+  }
 
-    const data = {
+  function loadDraft() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      // expire after 7 days
+      if (Date.now() - (draft.savedAt || 0) > 7 * 86400000) {
+        localStorage.removeItem(STORAGE_KEY);
+        return;
+      }
+      // restore fields
+      Object.entries(draft.data || {}).forEach(([k, v]) => {
+        const el = document.getElementById(k);
+        if (el && v) el.value = v;
+      });
+      // restore ceilings
+      (draft.ceilings || []).forEach(c => {
+        const chip = chipsContainer.querySelector(`[data-value="${c}"]`);
+        if (chip) { chip.classList.add('selected'); selectedCeilings.push(c); }
+      });
+      // restore hours display
+      const h = parseInt(hoursInput.value);
+      hoursValue.textContent = h >= 90 ? '90+' : h;
+    } catch (e) {}
+  }
+  loadDraft();
+
+  // Auto-save على كل تغيير في الحقول
+  form.addEventListener('input', saveDraft);
+  form.addEventListener('change', saveDraft);
+
+  // ─── Collect all data ───
+  function collectAllData() {
+    return {
       fullName: document.getElementById('fullName').value.trim(),
       email: document.getElementById('email').value.trim().toLowerCase(),
       mobile: document.getElementById('mobile').value.trim(),
@@ -164,30 +820,133 @@
       companyName: document.getElementById('companyName').value.trim(),
       industry: document.getElementById('industry').value,
       companySize: document.getElementById('companySize').value,
+      primaryComponent: document.getElementById('primaryComponent').value,
+      workHours: parseInt(document.getElementById('workHours').value) || 50,
+      biggestChallenge: document.getElementById('biggestChallenge').value.trim(),
       eosFamiliarity: document.getElementById('eosFamiliarity').value
     };
+  }
 
-    if (!window.EMC_LP || !window.EMC_LP.submitIdentified) {
-      btn.disabled = false;
-      btn.textContent = 'احصل على التقرير';
-      alert('النظام لسه بيحمّل، حاول بعد ثانيتين');
-      return;
+  // ─── Step navigation ───
+  function showStep(n) {
+    stepsEls.forEach(el => el.classList.toggle('active', parseInt(el.dataset.step) === n));
+    badges.forEach(b => {
+      const s = parseInt(b.dataset.step);
+      b.classList.remove('active', 'done');
+      if (s < n) b.classList.add('done');
+      else if (s === n) b.classList.add('active');
+    });
+    const pct = Math.round((n / totalSteps) * 100);
+    progressFill.style.width = pct + '%';
+    progressPct.textContent = pct + '%';
+    curStepLabel.textContent = n;
+    currentStep = n;
+    saveDraft();
+    // scroll to top of card smoothly
+    cardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ─── Validation per step ───
+  function validateStep(n) {
+    let valid = true;
+    const checks = {
+      1: ['fullName', 'email', 'mobile'],
+      2: ['title', 'companyName', 'industry', 'companySize'],
+      3: ['primaryComponent']
+    };
+    (checks[n] || []).forEach(id => {
+      const el = document.getElementById(id);
+      const val = el.value.trim();
+      let bad = !val;
+      if (id === 'email' && val && !/^\S+@\S+\.\S+$/.test(val)) bad = true;
+      if (id === 'mobile' && val && val.replace(/\D/g, '').length < 10) bad = true;
+      el.classList.toggle('error', bad);
+      if (bad) valid = false;
+    });
+    // step 3 also needs ceiling
+    if (n === 3 && selectedCeilings.length === 0) {
+      document.getElementById('err-ceilings').style.display = 'block';
+      valid = false;
     }
+    return valid;
+  }
 
-    const result = await window.EMC_LP.submitIdentified(data);
-    if (result.success) {
-      const msg = result.upserted
-        ? 'تم تحديث ملفك بنجاح. هتستلم التقرير المخصص خلال 24 ساعة، وفريقنا هيتواصل معاك على واتساب.'
-        : 'التقرير في طريقه لبريدك خلال 24 ساعة. فريق EMC هيتواصل معاك على الواتساب لتأكيد التشخيص.';
-      document.getElementById('success-msg').textContent = msg;
-      document.getElementById('form-wrap').style.display = 'none';
-      document.getElementById('form-success').style.display = 'block';
-    } else {
-      btn.disabled = false;
-      btn.textContent = 'احصل على التقرير';
-      alert('حدث خطأ: ' + (result.error || 'حاول مرة أخرى'));
+  // remove error class when user starts typing
+  form.addEventListener('input', (e) => {
+    if (e.target.classList.contains('error')) e.target.classList.remove('error');
+  });
+
+  // ─── Button handlers ───
+  form.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+
+    if (action === 'next') {
+      if (!validateStep(currentStep)) return;
+      // track step completion as touchpoint
+      if (typeof EMC !== 'undefined' && EMC.touchpoints) {
+        EMC.touchpoints.create({
+          sessionId: window.EMC_LP?.sessionId || '',
+          landingPage: 'diagnosis',
+          source: window.EMC_LP?.source || 'direct',
+          type: 'cta_click',
+          data: { ctaId: 'step' + currentStep + '-completed' }
+        }).catch(() => {});
+      }
+      if (currentStep < totalSteps) showStep(currentStep + 1);
+    }
+    else if (action === 'back') {
+      if (currentStep > 1) showStep(currentStep - 1);
+    }
+    else if (action === 'submit') {
+      if (!validateStep(currentStep)) return;
+      btn.disabled = true;
+      btn.textContent = 'جاري الإرسال…';
+
+      if (!window.EMC_LP || !window.EMC_LP.submitIdentified) {
+        btn.disabled = false;
+        btn.textContent = 'احصل على التقرير';
+        alert('النظام لسه بيحمّل، حاول بعد ثانيتين');
+        return;
+      }
+
+      // Build payload with new diagnostic fields
+      const data = collectAllData();
+      data.ceilings = selectedCeilings;
+
+      const result = await window.EMC_LP.submitIdentified(data);
+      if (result.success) {
+        const successMsg = result.upserted
+          ? 'تم تحديث ملفك بالبيانات الكاملة. التقرير الشخصي في طريقه لبريدك خلال 24 ساعة، وفريق EMC هيتواصل معاك على واتساب لتأكيد التشخيص.'
+          : 'التقرير الشخصي في طريقه لبريدك خلال 24 ساعة. فريق EMC هيتواصل معاك على الواتساب لتأكيد التشخيص ومناقشة التوصيات.';
+        document.getElementById('success-msg').textContent = successMsg;
+        document.querySelectorAll('.dx-step').forEach(s => s.classList.remove('active'));
+        successEl.classList.add('active');
+        progressFill.style.width = '100%';
+        progressPct.textContent = '100%';
+        badges.forEach(b => { b.classList.remove('active'); b.classList.add('done'); });
+        // clear draft
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'احصل على التقرير';
+        alert('حدث خطأ: ' + (result.error || 'حاول مرة أخرى'));
+      }
     }
   });
+
+  // ─── Restore step on load if draft has step > 1 ───
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const draft = JSON.parse(raw);
+      if (draft.step && draft.step > 1 && draft.step <= totalSteps) {
+        showStep(draft.step);
+      }
+    }
+  } catch (e) {}
+
 })();
 </script>
 
