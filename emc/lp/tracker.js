@@ -50,7 +50,7 @@
       if (r.includes('facebook')) return 'facebook';
       if (r.includes('linkedin')) return 'linkedin';
       if (r.includes('google')) return 'search';
-      if (r.includes('mahmoudfouad25.github.io') || r.includes('emc')) return 'direct';
+      if (r.includes('amership9.github.io') || r.includes('emc')) return 'direct';
       return 'other';
     }
     return 'direct';
@@ -81,7 +81,7 @@
   async function safeCreate(payload) {
     try {
       if (typeof EMC === 'undefined' || !EMC.touchpoints) return;
-      if (!baseData) return; // not initialized yet
+      if (!baseData) return;
       await EMC.touchpoints.create(payload);
     } catch (e) {
       console.warn('Touchpoint tracking error:', e?.message || e);
@@ -148,6 +148,7 @@
       get utm() { return utm; },
       get landingPage() { return landingPage; },
 
+      // ─── Lead form (المرحلة 2): اسم + إيميل + (اختياري شركة) ───
       async submitLead(formData) {
         try {
           if (typeof EMC === 'undefined' || !EMC.contacts) {
@@ -194,7 +195,6 @@
 
           await EMC.touchpoints.linkToContact(sessionId, contactId);
 
-          // ─── ريفريش السكور بعد التقديم ───
           if (EMC.utils?.refreshContactScore) {
             EMC.utils.refreshContactScore(contactId).catch(() => {});
           }
@@ -206,7 +206,12 @@
         }
       },
 
-      // ─── Smart Upsert: Lead → Identified أو إنشاء contact في المرحلة 3 ───
+      // ═══════════════════════════════════════════════════
+      // Smart Upsert — التشخيص الكامل (المرحلة 3 / Identified)
+      // ═══════════════════════════════════════════════════
+      // يستقبل 11 حقل (7 ID + 4 تشخيصية):
+      // - fullName, email, mobile, title, companyName, industry, companySize, eosFamiliarity
+      // - ceilings[] (multi-select), primaryComponent, workHours (number), biggestChallenge (text)
       async submitIdentified(formData) {
         try {
           if (typeof EMC === 'undefined' || !EMC.contacts) {
@@ -230,6 +235,29 @@
           let contactId;
           let upserted = false;
 
+          // ─── بناء eosProfile مُحسّن من البيانات التشخيصية ───
+          // ceilings[] قد تكون قائمة (multi-select من chips) أو فاضية
+          const ceilingsArr = Array.isArray(formData.ceilings) ? formData.ceilings : [];
+          // primaryCeiling = أول واحد في الـ array (للعرض السريع)، والباقي يدخل في pains
+          const primaryCeiling = ceilingsArr[0] || '';
+          const additionalPains = ceilingsArr.slice(1);
+
+          const eosProfileData = {
+            eosFamiliarity: formData.eosFamiliarity || '',
+            ceiling: primaryCeiling,
+            primaryComponent: formData.primaryComponent || '',
+            pains: additionalPains  // السقوف الإضافية بتدخل كـ pains
+          };
+
+          // لو فيه biggestChallenge، اضفه كـ goal
+          if (formData.biggestChallenge) {
+            eosProfileData.goals12Months = formData.biggestChallenge;
+          }
+
+          // ─── workHours بتدخل في engagement كحقل جديد ───
+          const workHours = parseInt(formData.workHours);
+          const validWorkHours = (workHours >= 30 && workHours <= 90) ? workHours : null;
+
           const enrichedData = {
             identity: {
               fullName: fullName,
@@ -248,9 +276,7 @@
               whatsapp: formData.mobile || '',
               preferredChannel: 'whatsapp'
             },
-            eosProfile: {
-              eosFamiliarity: formData.eosFamiliarity || ''
-            },
+            eosProfile: eosProfileData,
             context: {
               source: source || (existing?.context?.source) || 'direct',
               sourceDetails: 'Landing: التشخيص الكامل',
@@ -259,17 +285,42 @@
             }
           };
 
+          // أضف workHoursPerWeek في engagement
+          if (validWorkHours !== null) {
+            enrichedData.engagement = { workHoursPerWeek: validWorkHours };
+          }
+
           if (existing) {
+            // ─── UPSERT path: موجود → دمج البيانات + رفع المرحلة ───
             upserted = true;
+
+            // دمج الـ tags بدون تكرار
             const mergedTags = [...new Set([
               ...(existing.context?.tags || []),
               ...enrichedData.context.tags
             ])];
 
+            // دمج الـ pains (السقوف الإضافية + اللي كانوا موجودين)
+            const mergedPains = [...new Set([
+              ...(existing.eosProfile?.pains || []),
+              ...additionalPains
+            ])];
+
+            // دمج الـ engagement (نحافظ على scores موجودة + نضيف workHours)
+            const mergedEngagement = {
+              ...(existing.engagement || {}),
+              ...(enrichedData.engagement || {})
+            };
+
             await EMC.contacts.update(existing.id, {
               identity: { ...(existing.identity || {}), ...enrichedData.identity },
               channels: { ...(existing.channels || {}), ...enrichedData.channels },
-              eosProfile: { ...(existing.eosProfile || {}), ...enrichedData.eosProfile },
+              eosProfile: {
+                ...(existing.eosProfile || {}),
+                ...eosProfileData,
+                pains: mergedPains
+              },
+              engagement: mergedEngagement,
               context: {
                 ...(existing.context || {}),
                 ...enrichedData.context,
@@ -280,8 +331,27 @@
             if ((existing.currentStage || 0) < 3) {
               await EMC.contacts.moveToStage(existing.id, 3, 'تقديم نموذج التشخيص الكامل');
             }
+
+            // سجّل event منفصل بالـ diagnosis details (مفيد للـ analytics لاحقاً)
+            if (EMC.events?.log) {
+              EMC.events.log({
+                contactId: existing.id,
+                type: 'manual_note',
+                stage: 3,
+                channel: 'website',
+                data: {
+                  action: 'diagnosis_submitted',
+                  ceilings: ceilingsArr,
+                  primaryComponent: formData.primaryComponent || '',
+                  workHours: validWorkHours,
+                  hasChallenge: !!formData.biggestChallenge
+                }
+              }).catch(() => {});
+            }
+
             contactId = existing.id;
           } else {
+            // ─── CREATE path: جديد → ينشأ مباشرة في المرحلة 3 ───
             contactId = await EMC.contacts.create({
               ...enrichedData,
               context: {
@@ -291,13 +361,35 @@
               currentStage: 3,
               createdBy: 'landing-page-diagnosis'
             });
+
+            // سجّل event بالتفاصيل التشخيصية
+            if (EMC.events?.log) {
+              EMC.events.log({
+                contactId,
+                type: 'manual_note',
+                stage: 3,
+                channel: 'website',
+                data: {
+                  action: 'diagnosis_submitted',
+                  ceilings: ceilingsArr,
+                  primaryComponent: formData.primaryComponent || '',
+                  workHours: validWorkHours,
+                  hasChallenge: !!formData.biggestChallenge
+                }
+              }).catch(() => {});
+            }
           }
 
           await safeCreate({
             ...baseData,
             type: 'form_submit',
             contactId,
-            data: { fields: Object.keys(formData), upserted, formType: 'identified' }
+            data: {
+              fields: Object.keys(formData),
+              upserted,
+              formType: 'identified',
+              ceilingsCount: ceilingsArr.length
+            }
           });
 
           await EMC.touchpoints.linkToContact(sessionId, contactId);
