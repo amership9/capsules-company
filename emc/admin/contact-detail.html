@@ -542,7 +542,7 @@
             <div class="key">تفاصيل السكور</div>
             <div class="val" style="display: flex; flex-wrap: wrap; gap: 6px;">
               ${Object.entries(c.engagement.scoreBreakdown).map(([k, v]) =>
-                `<span class="badge">${scoreBreakdownLabels[k] || k}: +${v}</span>`
+                `<span class="badge">${({sessions:'زيارات',forms:'تقديمات نماذج',ctas:'نقرات CTA',deepScroll:'تمرير عميق',timeOnPage:'وقت على الصفحة',stageProgress:'تقدّم بين المراحل'}[k]||k)}: +${v}</span>`
               ).join('')}
               <button class="btn btn-ghost btn-sm" id="refresh-score-btn" style="padding: 3px 10px; font-size: 11.5px; margin-inline-start: 4px;">🔄 إعادة حساب</button>
             </div>
