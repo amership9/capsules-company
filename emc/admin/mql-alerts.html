@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>تنبيهات MQL · EMC CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-segments.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-templates.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-layout.js"></script>
+<style>
+  /* ─── MQL Alerts — غرفة العمليات الصباحية ─── */
+  .mql-hero {
+    background: linear-gradient(135deg, var(--emc-navy) 0%, var(--emc-navy-deep, #08172F) 100%);
+    color: #fff;
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mql-hero::before {
+    content: "";
+    position: absolute;
+    top: -80px; left: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(215, 38, 56, 0.2), transparent 60%);
+    filter: blur(30px);
+  }
+  .mql-hero-inner { position: relative; z-index: 1; }
+  .mql-hero-eyebrow {
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--emc-red-soft, #E85A68);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .mql-hero-headline {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 10px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .mql-hero-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.7;
+    max-width: 620px;
+    margin: 0;
+  }
+  .mql-hero-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 22px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+  }
+  .mql-hero-meta strong {
+    color: #fff;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ─── Reason badges ─── */
+  .reason-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 11.5px;
+    font-weight: 700;
+    border: 1px solid transparent;
+  }
+  .reason-badge.high_engagement {
+    background: #FBE0E2;
+    color: #A2202D;
+    border-color: #F1B6BB;
+  }
+  .reason-badge.strong_pain_signal {
+    background: #FAEEDB;
+    color: #8C5915;
+    border-color: #ECD3A6;
+  }
+  .reason-badge.repeat_visitor {
+    background: #E0EBF7;
+    color: #1B3A66;
+    border-color: #B5CFE8;
+  }
+
+  /* ─── Alert card ─── */
+  .alert-card {
+    background: #fff;
+    border: 1px solid var(--emc-line);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 14px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  .alert-card:hover {
+    border-color: var(--emc-navy);
+    box-shadow: 0 6px 20px rgba(11, 37, 69, 0.08);
+  }
+  .alert-card.snoozed {
+    opacity: 0.55;
+    background: var(--emc-cream);
+  }
+  .alert-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  .alert-card-identity {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+  }
+  .alert-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .alert-name {
+    font-size: 16.5px;
+    font-weight: 800;
+    color: var(--emc-navy);
+    margin: 0 0 3px;
+  }
+  .alert-meta-line {
+    font-size: 12.5px;
+    color: var(--emc-muted);
+    line-height: 1.5;
+  }
+  .alert-time-badge {
+    text-align: end;
+    flex-shrink: 0;
+  }
+  .alert-time-badge .relative {
+    font-size: 12px;
+    color: var(--emc-muted);
+    font-weight: 600;
+  }
+  .alert-time-badge .score {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--emc-navy);
+    font-family: "JetBrains Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+  }
+  .alert-card-body {
+    background: var(--emc-cream);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    border-inline-start: 3px solid var(--emc-red);
+  }
+  .alert-card-body-title {
+    font-size: 11.5px;
+    color: var(--emc-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .alert-reasons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .alert-detail {
+    font-size: 13.5px;
+    color: var(--emc-ink);
+    line-height: 1.7;
+  }
+  .alert-detail strong {
+    color: var(--emc-navy);
+    font-weight: 700;
+  }
+  .alert-detail .quote {
+    display: block;
+    background: #fff;
+    border: 1px solid var(--emc-line);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 8px;
+    font-style: italic;
+    color: var(--emc-ink-2);
+  }
+  .alert-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .alert-actions .wa-btn {
+    background: #25D366;
+    color: #fff;
+    border: 0;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .alert-actions .wa-btn:hover { background: #1FA851; }
+  .alert-actions .wa-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ─── Filters ─── */
+  .mql-filters {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .mql-filter-btn {
+    padding: 7px 14px;
+    background: #fff;
+    border: 1px solid var(--emc-line);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--emc-ink-2);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .mql-filter-btn:hover {
+    border-color: var(--emc-navy);
+    color: var(--emc-navy);
+  }
+  .mql-filter-btn.active {
+    background: var(--emc-navy);
+    color: #fff;
+    border-color: var(--emc-navy);
+  }
+  .mql-filter-count {
+    margin-inline-start: 6px;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.7;
+  }
+
+  /* ─── Empty state ─── */
+  .mql-empty {
+    background: #fff;
+    border: 1px dashed var(--emc-line);
+    border-radius: 16px;
+    padding: 56px 32px;
+    text-align: center;
+  }
+  .mql-empty-icon {
+    width: 64px; height: 64px;
+    margin: 0 auto 16px;
+    color: var(--emc-faint);
+  }
+  .mql-empty h3 {
+    color: var(--emc-navy);
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0 0 8px;
+  }
+  .mql-empty p {
+    color: var(--emc-muted);
+    font-size: 14.5px;
+    line-height: 1.7;
+    max-width: 460px;
+    margin: 0 auto 18px;
+  }
+</style>
+</head>
+<body data-screen-label="MQL Alerts">
+
+<div id="emc-shell-root"></div>
+
+<template id="mql-tpl">
+  <div class="emc-crumbs">
+    <a href="dashboard.html">لوحة التحكم</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>تنبيهات MQL</span>
+  </div>
+
+  <!-- Hero -->
+  <div class="mql-hero">
+    <div class="mql-hero-inner">
+      <div class="mql-hero-eyebrow">غرفة العمليات الصباحية</div>
+      <h1 class="mql-hero-headline" id="hero-headline">جاري التحميل…</h1>
+      <p class="mql-hero-sub" id="hero-sub">العملاء المؤهلون تسويقياً (MQL) — اللي وصلوا للمرحلة 4 بناءً على engagement score، إشارات ألم صريحة، أو زيارات متكررة. ابدأ يومك بمحادثة معاهم.</p>
+      <div class="mql-hero-meta" id="hero-meta"></div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="mql-filters" id="filters"></div>
+
+  <!-- Alerts list -->
+  <div id="alerts-list"></div>
+</template>
+
+<script>
+(async function () {
+  const main = await EMC.layout.render({ page: 'mql-alerts' });
+  if (!main) return;
+  await EMC.seedIfEmpty();
+
+  main.innerHTML = document.getElementById('mql-tpl').innerHTML;
+
+  // ─── Snooze management (localStorage) ───
+  const SNOOZE_KEY = 'emc_mql_snoozed';
+  function getSnoozed() {
+    try { return JSON.parse(localStorage.getItem(SNOOZE_KEY) || '{}'); }
+    catch (e) { return {}; }
+  }
+  function snoozeContact(id, days = 7) {
+    const snoozed = getSnoozed();
+    snoozed[id] = Date.now() + days * 86400000;
+    localStorage.setItem(SNOOZE_KEY, JSON.stringify(snoozed));
+  }
+  function unsnooze(id) {
+    const snoozed = getSnoozed();
+    delete snoozed[id];
+    localStorage.setItem(SNOOZE_KEY, JSON.stringify(snoozed));
+  }
+  function isSnoozed(id) {
+    const snoozed = getSnoozed();
+    if (!snoozed[id]) return false;
+    if (Date.now() > snoozed[id]) {
+      unsnooze(id);
+      return false;
+    }
+    return true;
+  }
+
+  // ─── Data load ───
+  const allContacts = await EMC.contacts.list();
+  const mqlContacts = allContacts.filter(c => c.currentStage === 4);
+
+  // اجلب الـ stage_change events للـ MQLs عشان نعرف ليه اترقوا
+  const allEvents = await EMC.store.list('emc_events');
+  const promotionEvents = {};
+  allEvents.forEach(e => {
+    if (e.type === 'stage_change' && e.data?.to === 4 && e.data?.automated && e.contactId) {
+      // الأحدث لكل contact
+      if (!promotionEvents[e.contactId] ||
+          new Date(e.timestamp) > new Date(promotionEvents[e.contactId].timestamp)) {
+        promotionEvents[e.contactId] = e;
+      }
+    }
+  });
+
+  // ─── Hero numbers ───
+  const total = mqlContacts.length;
+  const fresh = mqlContacts.filter(c => {
+    const stage4 = (c.stageHistory || []).find(s => s.stage === 4);
+    if (!stage4) return false;
+    return Date.now() - new Date(stage4.enteredAt).getTime() < 86400000;
+  }).length;
+  const snoozedCount = mqlContacts.filter(c => isSnoozed(c.id)).length;
+  const automated = mqlContacts.filter(c => !!promotionEvents[c.id]).length;
+
+  document.getElementById('hero-headline').textContent =
+    total === 0 ? 'لسه مفيش MQLs جاهزين' :
+    total === 1 ? 'عندك MQL واحد جاهز للتواصل' :
+    `عندك ${total} MQLs جاهزين للتواصل`;
+
+  document.getElementById('hero-meta').innerHTML = total > 0 ? `
+    <span>🟢 <strong>${fresh}</strong> ترقية جديدة آخر 24 ساعة</span>
+    <span>⚡ <strong>${automated}</strong> ترقيات تلقائية من النظام</span>
+    ${snoozedCount > 0 ? `<span>💤 <strong>${snoozedCount}</strong> مؤجلين</span>` : ''}
+  ` : '';
+
+  // ─── Filters ───
+  let activeFilter = 'active';
+  function renderFilters() {
+    const activeCount = total - snoozedCount;
+    document.getElementById('filters').innerHTML = `
+      <button class="mql-filter-btn ${activeFilter === 'active' ? 'active' : ''}" data-filter="active">
+        نشطة <span class="mql-filter-count">${activeCount}</span>
+      </button>
+      <button class="mql-filter-btn ${activeFilter === 'fresh' ? 'active' : ''}" data-filter="fresh">
+        🟢 جدد (24 ساعة) <span class="mql-filter-count">${fresh}</span>
+      </button>
+      <button class="mql-filter-btn ${activeFilter === 'snoozed' ? 'active' : ''}" data-filter="snoozed">
+        💤 مؤجلون <span class="mql-filter-count">${snoozedCount}</span>
+      </button>
+      <button class="mql-filter-btn ${activeFilter === 'all' ? 'active' : ''}" data-filter="all">
+        الكل <span class="mql-filter-count">${total}</span>
+      </button>
+    `;
+    document.querySelectorAll('.mql-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeFilter = btn.dataset.filter;
+        renderFilters();
+        renderAlerts();
+      });
+    });
+  }
+
+  // ─── Alerts list ───
+  function renderAlerts() {
+    let docs = [...mqlContacts];
+
+    if (activeFilter === 'active') {
+      docs = docs.filter(c => !isSnoozed(c.id));
+    } else if (activeFilter === 'fresh') {
+      docs = docs.filter(c => {
+        const stage4 = (c.stageHistory || []).find(s => s.stage === 4);
+        return stage4 && Date.now() - new Date(stage4.enteredAt).getTime() < 86400000;
+      });
+    } else if (activeFilter === 'snoozed') {
+      docs = docs.filter(c => isSnoozed(c.id));
+    }
+
+    // ترتيب: الأحدث في الترقية أولاً
+    docs.sort((a, b) => {
+      const sa = (a.stageHistory || []).find(s => s.stage === 4);
+      const sb = (b.stageHistory || []).find(s => s.stage === 4);
+      const ta = sa ? new Date(sa.enteredAt).getTime() : 0;
+      const tb = sb ? new Date(sb.enteredAt).getTime() : 0;
+      return tb - ta;
+    });
+
+    const list = document.getElementById('alerts-list');
+
+    if (docs.length === 0) {
+      list.innerHTML = `
+        <div class="mql-empty">
+          <svg class="mql-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <h3>${activeFilter === 'snoozed' ? 'مفيش MQLs مؤجلين' : 'الصندوق فاضي حالياً'}</h3>
+          <p>${activeFilter === 'snoozed'
+            ? 'لما تأجل أي MQL، هيظهر هنا. تقدر تنشّطه في أي وقت.'
+            : 'لسه مفيش contacts اترقوا لـ MQL. السبب: الـ Identified Contacts لسه ما حققوش شروط الترقية. لما حد منهم يوصل سكور 60+ أو يظهر إشارة ألم قوية، هيظهر هنا تلقائياً.'}</p>
+          <a href="contacts.html?stage=3" class="btn btn-outline btn-sm">شوف الـ Identified Contacts</a>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = docs.map(c => renderAlertCard(c)).join('');
+    attachActionHandlers();
+  }
+
+  function renderAlertCard(c) {
+    const event = promotionEvents[c.id];
+    const stage4 = (c.stageHistory || []).find(s => s.stage === 4);
+    const reasons = event?.data?.reasons || [];
+    const details = event?.data?.details || [];
+    const snoozed = isSnoozed(c.id);
+
+    const ceiling = c.eosProfile?.ceiling ? EMC.CEILINGS[c.eosProfile.ceiling] : null;
+    const primaryComp = c.eosProfile?.primaryComponent ? EMC.EOS_COMPONENTS[c.eosProfile.primaryComponent] : null;
+    const workHours = c.engagement?.workHoursPerWeek;
+    const challenge = c.eosProfile?.goals12Months;
+
+    const reasonsHTML = reasons.length ? reasons.map(r => {
+      const label = EMC.MQL_PROMOTION_REASONS?.[r] || r;
+      return `<span class="reason-badge ${r}">${label}</span>`;
+    }).join('') : (event ? '' : '<span class="reason-badge high_engagement">ترقية يدوية</span>');
+
+    const detailsHTML = details.length ? details.map(d =>
+      `<div>· ${d.detail}</div>`
+    ).join('') : '';
+
+    // واتساب link
+    const mobile = (c.channels?.mobile || c.channels?.whatsapp || '').replace(/\D/g, '');
+    const waNumber = mobile.startsWith('0') ? '2' + mobile : mobile.startsWith('20') ? mobile : '2' + mobile;
+    const firstName = c.identity?.firstName || (c.identity?.fullName || '').split(/\s+/)[0] || '';
+    const waMsg = encodeURIComponent(
+      `أهلاً ${firstName}،\n\nأنا عبدالله من Executive Mastery Camp. شكراً إنك ملأت التشخيص الكامل.\n\nقريت ردودك وحسيت إن فيه فرصة نتكلم 20 دقيقة عن وضع ${c.identity?.companyName || 'شركتك'}.\n\nهل عندك وقت بكره أو بعد بكره؟`
+    );
+    const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMsg}` : '#';
+
+    return `
+      <div class="alert-card ${snoozed ? 'snoozed' : ''}" data-id="${c.id}">
+        <div class="alert-card-header">
+          <div class="alert-card-identity">
+            <div class="alert-avatar" style="background:${EMC.utils.avatarColor(c.identity?.fullName)}">${EMC.utils.initials(c.identity?.fullName)}</div>
+            <div style="min-width:0;">
+              <h3 class="alert-name">${c.identity?.fullName || '—'}</h3>
+              <div class="alert-meta-line">
+                ${c.identity?.title || '—'} · ${c.identity?.companyName || '—'}
+                ${c.identity?.industry ? ' · ' + (EMC.INDUSTRIES[c.identity.industry] || '') : ''}
+                ${c.identity?.companySize ? ' · ' + (EMC.COMPANY_SIZES[c.identity.companySize] || '') : ''}
+              </div>
+            </div>
+          </div>
+          <div class="alert-time-badge">
+            <div class="relative">${stage4 ? EMC.utils.formatDate(stage4.enteredAt, { relative: true }) : '—'}</div>
+            <div class="score">${c.engagement?.engagementScore || 0}</div>
+          </div>
+        </div>
+
+        <div class="alert-card-body">
+          <div class="alert-card-body-title">سبب الترقية</div>
+          <div class="alert-reasons">${reasonsHTML}</div>
+          ${detailsHTML ? `<div class="alert-detail">${detailsHTML}</div>` : ''}
+          ${workHours || ceiling || primaryComp ? `
+            <div class="alert-detail" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--emc-line);">
+              ${workHours ? `<div>⏰ بيشتغل <strong>${workHours} ساعة/أسبوع</strong></div>` : ''}
+              ${ceiling ? `<div>🚧 السقف: <strong>${ceiling}</strong></div>` : ''}
+              ${primaryComp ? `<div>🎯 المكون الأضعف: <strong>${primaryComp}</strong></div>` : ''}
+              ${challenge ? `<div class="quote">"${challenge}"</div>` : ''}
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="alert-actions">
+          ${waNumber ? `
+            <a href="${waLink}" target="_blank" class="wa-btn" data-action="wa-clicked" data-id="${c.id}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-1 1.1-.2.2-.4.2-.7.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.5-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.5.1-.2.2-.3.3-.5.1-.2.1-.4 0-.5-.1-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1 2.9 1.2 3.1c.1.2 2 3 4.8 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M20.5 3.5C18.3 1.2 15.3 0 12 0 5.4 0 0 5.4 0 12c0 2.1.5 4.2 1.6 6L0 24l6.2-1.6c1.7.9 3.7 1.4 5.7 1.4 6.6 0 12-5.4 12-12 .1-3.2-1.2-6.2-3.4-8.3zM12 21.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4c-1-1.6-1.5-3.4-1.5-5.3 0-5.5 4.5-10 10-10 2.7 0 5.2 1 7.1 2.9 1.9 1.9 2.9 4.4 2.9 7.1-.1 5.4-4.6 9.9-10.1 9.9z"/></svg>
+              فتح واتساب
+            </a>
+          ` : ''}
+          <a href="contact-detail.html?id=${c.id}" class="btn btn-outline btn-sm">📋 الملف الكامل</a>
+          ${snoozed
+            ? `<button class="btn btn-ghost btn-sm" data-action="unsnooze" data-id="${c.id}">🔔 إلغاء التأجيل</button>`
+            : `<button class="btn btn-ghost btn-sm" data-action="snooze" data-id="${c.id}">💤 أجّل 7 أيام</button>`}
+        </div>
+      </div>
+    `;
+  }
+
+  function attachActionHandlers() {
+    document.querySelectorAll('[data-action="snooze"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        snoozeContact(btn.dataset.id, 7);
+        EMC.utils.toast('تم تأجيل التنبيه 7 أيام', 'default');
+        rerender();
+      });
+    });
+    document.querySelectorAll('[data-action="unsnooze"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        unsnooze(btn.dataset.id);
+        EMC.utils.toast('تم إلغاء التأجيل', 'success');
+        rerender();
+      });
+    });
+    document.querySelectorAll('[data-action="wa-clicked"]').forEach(link => {
+      link.addEventListener('click', async () => {
+        // سجل event للتتبع
+        if (EMC.events?.log) {
+          EMC.events.log({
+            contactId: link.dataset.id,
+            type: 'manual_note',
+            stage: 4,
+            channel: 'whatsapp',
+            data: { action: 'wa_outreach_initiated', source: 'mql-alerts' }
+          }).catch(() => {});
+        }
+      });
+    });
+  }
+
+  function rerender() {
+    // recalc snoozed count
+    const newSnoozed = mqlContacts.filter(c => isSnoozed(c.id)).length;
+    document.getElementById('hero-meta').innerHTML = total > 0 ? `
+      <span>🟢 <strong>${fresh}</strong> ترقية جديدة آخر 24 ساعة</span>
+      <span>⚡ <strong>${automated}</strong> ترقيات تلقائية من النظام</span>
+      ${newSnoozed > 0 ? `<span>💤 <strong>${newSnoozed}</strong> مؤجلين</span>` : ''}
+    ` : '';
+    renderFilters();
+    renderAlerts();
+  }
+
+  renderFilters();
+  renderAlerts();
+})();
+</script>
+</body>
+</html>
