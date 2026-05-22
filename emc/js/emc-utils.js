@@ -108,7 +108,6 @@ window.EMC.PREFERRED_CHANNELS = {
   whatsapp: 'واتساب', email: 'إيميل', phone: 'مكالمة هاتفية'
 };
 
-// ─── حالة الشريحة ───
 window.EMC.SEGMENT_STATUS = {
   active: 'نشطة',
   paused: 'مؤجلة',
@@ -121,7 +120,6 @@ window.EMC.SEGMENT_PRIORITY = {
   low: 'منخفضة'
 };
 
-// ─── ألوان الأولوية للـ badges ───
 window.EMC.SEGMENT_PRIORITY_COLORS = {
   high: { bg: '#FBE0E2', text: '#A2202D', border: '#F1B6BB' },
   medium: { bg: '#FAEEDB', text: '#8C5915', border: '#ECD3A6' },
@@ -136,7 +134,6 @@ window.EMC.COUNTRIES = {
   other: 'دولة أخرى'
 };
 
-// ─── أنواع نقاط التماس (المرحلة 2) ───
 window.EMC.TOUCHPOINT_TYPES = {
   page_view: 'زيارة صفحة',
   form_submit: 'تعبئة نموذج',
@@ -146,7 +143,6 @@ window.EMC.TOUCHPOINT_TYPES = {
   exit_intent: 'نية مغادرة'
 };
 
-// ─── الـ Landing Pages المتاحة ───
 window.EMC.LANDING_PAGES = {
   'eos-guide': {
     slug: 'eos-guide',
@@ -171,10 +167,17 @@ window.EMC.LANDING_PAGES = {
     cta: 'اقرأ التحليل الكامل',
     expectedStage: 2,
     formFields: ['fullName', 'email']
+  },
+  'diagnosis': {
+    slug: 'diagnosis',
+    title: 'التشخيص الكامل',
+    subtitle: 'شركتك في 7 أسئلة — تقرير شخصي بنقاط القوة والضعف',
+    cta: 'احصل على التقرير',
+    expectedStage: 3,
+    formFields: ['fullName', 'email', 'mobile', 'title', 'companyName', 'industry', 'companySize', 'ceilings', 'primaryComponent', 'workHours', 'biggestChallenge']
   }
 };
 
-// ─── ألوان المصادر ───
 window.EMC.SOURCE_COLORS = {
   facebook: '#1877F2',
   linkedin: '#0A66C2',
@@ -183,6 +186,13 @@ window.EMC.SOURCE_COLORS = {
   search: '#2E7D5B',
   direct: '#6B7689',
   other: '#94A3B8'
+};
+
+// ─── أسباب الترقية التلقائية لـ MQL ───
+window.EMC.MQL_PROMOTION_REASONS = {
+  high_engagement: '🔥 اشتعال تفاعلي — السكور وصل لـ Hot (60+)',
+  strong_pain_signal: '⚠️ إشارة ألم قوية — ساعات عمل عالية + سقوف صريحة',
+  repeat_visitor: '🔁 زائر متكرر — رجع 3+ مرات للموقع بعد التشخيص'
 };
 
 // ─── Helpers ───
@@ -245,7 +255,7 @@ window.EMC.utils = {
     return { cold: 'بارد', warm: 'دافئ', hot: 'حار', burning: 'مشتعل' }[t] || '—';
   },
 
-  // ─── حساب الـ Engagement Score من الـ touchpoints + events ───
+  // ─── حساب الـ Engagement Score ───
   calculateEngagementScore(touchpoints, events) {
     if (!Array.isArray(touchpoints)) touchpoints = [];
     if (!Array.isArray(events)) events = [];
@@ -304,7 +314,133 @@ window.EMC.utils = {
     return { score, temperature, breakdown };
   },
 
+  // ═══════════════════════════════════════════════════════
+  // فحص شروط الترقية التلقائية لـ MQL (المرحلة 4)
+  // ═══════════════════════════════════════════════════════
+  // يُستدعى تلقائياً من refreshContactScore بعد كل تحديث للسكور
+  // يفحص 3 شروط — يكفي تحقق واحد منهم لترقية الـ contact
+  //
+  // الشروط:
+  // (1) high_engagement: السكور ≥ 60 (Hot temperature)
+  // (2) strong_pain_signal: ساعات شغل ≥ 65 + سقف صريح في eosProfile
+  // (3) repeat_visitor: 3+ زيارات للموقع بعد تاريخ آخر submission
+  //
+  // ─── شروط المنع ───
+  // لا ترقّي contact إذا:
+  // - مرحلته الحالية ليست 3 (Identified بالظبط)
+  // - status = 'unsubscribed' أو 'blacklisted'
+  //
+  async checkMQLPromotion(contactId) {
+    if (!contactId) return { promoted: false, reason: 'no_id' };
+
+    try {
+      const contact = await EMC.contacts.get(contactId);
+      if (!contact) return { promoted: false, reason: 'not_found' };
+
+      // ─── فلتر: فقط Identified (المرحلة 3) ───
+      if (contact.currentStage !== 3) {
+        return { promoted: false, reason: 'wrong_stage', currentStage: contact.currentStage };
+      }
+
+      // ─── فلتر: status مسموح به ───
+      if (contact.status && ['unsubscribed', 'blacklisted'].includes(contact.status)) {
+        return { promoted: false, reason: 'inactive_status', status: contact.status };
+      }
+
+      // ─── فحص الشروط ───
+      const reasons = [];
+
+      // (1) High engagement
+      const score = contact.engagement?.engagementScore || 0;
+      if (score >= 60) {
+        reasons.push({
+          code: 'high_engagement',
+          detail: `السكور وصل ${score} (≥ 60)`
+        });
+      }
+
+      // (2) Strong pain signal
+      const workHours = contact.engagement?.workHoursPerWeek || 0;
+      const hasCeiling = !!(contact.eosProfile?.ceiling);
+      if (workHours >= 65 && hasCeiling) {
+        reasons.push({
+          code: 'strong_pain_signal',
+          detail: `يشتغل ${workHours} ساعة/أسبوع + سقف صريح: ${EMC.CEILINGS[contact.eosProfile.ceiling] || contact.eosProfile.ceiling}`
+        });
+      }
+
+      // (3) Repeat visitor (3+ page_views بعد تاريخ التحوّل لـ Identified)
+      try {
+        const touchpoints = await EMC.touchpoints.list({ contactId });
+        const stage3Entry = (contact.stageHistory || []).find(s => s.stage === 3);
+        if (stage3Entry) {
+          const stage3Time = new Date(stage3Entry.enteredAt).getTime();
+          const postIdentifiedViews = touchpoints.filter(tp =>
+            tp.type === 'page_view' &&
+            new Date(tp.timestamp).getTime() > stage3Time
+          ).length;
+          if (postIdentifiedViews >= 3) {
+            reasons.push({
+              code: 'repeat_visitor',
+              detail: `${postIdentifiedViews} زيارات بعد التشخيص`
+            });
+          }
+        }
+      } catch (e) {
+        // لو touchpoints مش متاحة لأي سبب، نتجاهل ده الشرط
+      }
+
+      // ─── لو مفيش شرط متحقق، ما نرقّيش ───
+      if (reasons.length === 0) {
+        return { promoted: false, reason: 'no_criteria_met', score, workHours };
+      }
+
+      // ─── الترقية ───
+      await EMC.contacts.moveToStage(
+        contactId,
+        4,
+        'ترقية تلقائية: ' + reasons.map(r => r.detail).join(' · ')
+      );
+
+      // سجّل event مفصّل
+      if (EMC.events?.log) {
+        await EMC.events.log({
+          contactId,
+          type: 'stage_change',
+          stage: 4,
+          channel: 'system',
+          data: {
+            from: 3,
+            to: 4,
+            automated: true,
+            reasons: reasons.map(r => r.code),
+            details: reasons,
+            triggerScore: score,
+            triggerWorkHours: workHours
+          },
+          performedBy: 'auto-promotion-engine'
+        });
+      }
+
+      console.log(`✅ Auto-promoted ${contact.identity?.fullName || contactId} → MQL`);
+      console.log('   Reasons:', reasons.map(r => r.code).join(', '));
+
+      return {
+        promoted: true,
+        contactId,
+        contactName: contact.identity?.fullName || '',
+        reasons,
+        newStage: 4
+      };
+
+    } catch (e) {
+      console.warn('checkMQLPromotion failed:', e?.message);
+      return { promoted: false, reason: 'error', error: e?.message };
+    }
+  },
+
   // ─── ريفريش السكور لـ contact واحد ───
+  // ⭐ بعد تحديث السكور، بنستدعي checkMQLPromotion تلقائياً
   async refreshContactScore(contactId) {
     if (!contactId) return null;
     try {
@@ -323,11 +459,44 @@ window.EMC.utils = {
           scoreBreakdown: breakdown
         }
       });
-      return { score, temperature, breakdown };
+
+      // ⭐ فحص ترقية MQL تلقائياً
+      const promotionResult = await window.EMC.utils.checkMQLPromotion(contactId);
+
+      return {
+        score,
+        temperature,
+        breakdown,
+        promoted: promotionResult.promoted,
+        promotionReasons: promotionResult.reasons || []
+      };
     } catch (e) {
       console.warn('refreshContactScore failed:', e?.message);
       return null;
     }
+  },
+
+  // ─── ريفريش جماعي لكل الـ contacts (لاختبار MQL bulk) ───
+  // يُستدعى يدوياً من Console: await EMC.utils.refreshAllScores()
+  async refreshAllScores() {
+    const all = await EMC.contacts.list();
+    const results = { processed: 0, promoted: 0, promotions: [] };
+    for (const c of all) {
+      const result = await window.EMC.utils.refreshContactScore(c.id);
+      results.processed++;
+      if (result?.promoted) {
+        results.promoted++;
+        results.promotions.push({
+          name: c.identity?.fullName,
+          reasons: result.promotionReasons?.map(r => r.code).join(', ')
+        });
+      }
+    }
+    console.log(`✅ Refreshed ${results.processed} contacts. Promoted ${results.promoted} to MQL.`);
+    if (results.promotions.length) {
+      console.table(results.promotions);
+    }
+    return results;
   },
 
   toast(msg, type = 'default') {
@@ -346,24 +515,17 @@ window.EMC.utils = {
     el._t = setTimeout(() => el.classList.remove('show'), 2400);
   },
 
-  // ─── EMC Logo SVG (للاستخدام في الـ headers) ───
   logoSVG(size = 42) {
     return `<svg width="${size}" height="${size}" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <!-- Director's chair, EMC mark -->
       <g fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <!-- back rest top -->
         <rect x="16" y="18" width="32" height="6" rx="1.5" fill="#FFFFFF"/>
-        <!-- seat -->
         <rect x="14" y="32" width="36" height="5" rx="1" fill="#D72638"/>
-        <!-- legs (X shape) -->
         <line x1="18" y1="24" x2="14" y2="50"/>
         <line x1="46" y1="24" x2="50" y2="50"/>
         <line x1="14" y1="50" x2="50" y2="24"/>
         <line x1="50" y1="50" x2="18" y2="24" opacity="0"/>
-        <!-- foot rests -->
         <line x1="12" y1="50" x2="22" y2="50"/>
         <line x1="42" y1="50" x2="52" y2="50"/>
-        <!-- canvas back stripes (small accent) -->
         <line x1="22" y1="20" x2="42" y2="20" stroke="#D72638" stroke-width="2.5"/>
       </g>
     </svg>`;
