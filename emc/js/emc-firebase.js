@@ -16,14 +16,15 @@
 
   // ─── Firebase Config ───
   const firebaseConfig = {
-    apiKey: "AIzaSyDj0bV5gsyRbqpxzW0Zd9wjYmq53-Xdj3w",
-    authDomain: "fouad-perspective.firebaseapp.com",
-    projectId: "fouad-perspective",
-    storageBucket: "fouad-perspective.firebasestorage.app",
-    messagingSenderId: "1068763865336",
-    appId: "1:1068763865336:web:b791abcd22d536aedd5b0d",
-    measurementId: "G-RY1FYVB3Q9"
-  };
+  apiKey: "AIzaSyDG8eQaToGjmLx_CczY6Vz1q59GetC-P9E",
+  authDomain: "emc-crm.firebaseapp.com",
+  projectId: "emc-crm",
+  storageBucket: "emc-crm.firebasestorage.app",
+  messagingSenderId: "75520877393",
+  appId: "1:75520877393:web:71931155b19155ad73e970",
+  measurementId: "G-ZS8YC5G6XQ"
+};
+
 
   // ─── تهيئة Firebase (لو الـ SDK محمّل) ───
   let firebaseReady = false;
@@ -805,35 +806,35 @@
           name: 'ترحيب — يوم 0 (إيميل)',
           channel: 'email', stage: 3, sequence: 'welcome', dayOffset: 0,
           subject: 'أهلاً {{firstName}}، الدليل في طريقه ليك',
-          body: 'أهلاً {{firstName}}،\n\nشكراً إنك حمّلت "دليل السقف القيادي" — هتلاقيه مرفق مع الإيميل ده.\n\nأنا عبدالله، مدرب EOS معتمد ومؤسس Executive Mastery Camp. اللي بنشتغل عليه في الـ EMC هو إن قائد شركة 50-250 موظف يقدر يدير شركته بكفاءة بدون ما يكون مختنق في كل تفصيلة.\n\nبصراحة، الـ 3 صفحات الأولى من الدليل هي الأهم — لو وقفت عندهم بس ودنت لنفسك 15 دقيقة للتفكير، هتلاقي حاجات ما كنتش بتركز عليها قبل كده.\n\nلو حابب تتعمق أكتر، خد التشخيص المجاني الكامل (3 دقايق) — هيوريك بالظبط منين تبدأ:\n\nhttps://mahmoudfouad25.github.io/fouad-perspective/emc/lp/diagnosis.html?email={{email}}\n\nشوفك قريب،\nعبدالله عامر\nExecutive Mastery Camp',
+          body: 'أهلاً {{firstName}}،\n\nشكراً إنك حمّلت "دليل السقف القيادي" — هتلاقيه مرفق مع الإيميل ده.\n\nأنا عبدالله، مدرب EOS معتمد ومؤسس Executive Mastery Camp. اللي بنشتغل عليه في الـ EMC هو إن قائد شركة 50-250 موظف يقدر يدير شركته بكفاءة بدون ما يكون مختنق في كل تفصيلة.\n\nبصراحة، الـ 3 صفحات الأولى من الدليل هي الأهم — لو وقفت عندهم بس ودنت لنفسك 15 دقيقة للتفكير، هتلاقي حاجات ما كنتش بتركز عليها قبل كده.\n\nلو حابب تتعمق أكتر، خد التشخيص المجاني الكامل (3 دقايق) — هيوريك بالظبط منين تبدأ:\n\nhttps://amership9.github.io/capsules-company/emc/lp/diagnosis.html?email={{email}}\n\nشوفك قريب،\nعبدالله عامر\nExecutive Mastery Camp',
           language: 'ar', isActive: true, tags: ['welcome', 'eos-guide']
         },
         {
           name: 'ترحيب — يوم 0 (واتساب)',
           channel: 'whatsapp', stage: 3, sequence: 'welcome', dayOffset: 0,
           subject: '',
-          body: 'أهلاً {{firstName}} 👋\n\nأنا عبدالله من Executive Mastery Camp. شكراً إنك حمّلت الدليل.\n\nلو حابب نتكلم بشكل سريع عن وضع {{companyName}} والسقف اللي وصلتوله، احجز مكالمة 20 دقيقة مجاناً من اللينك ده:\nhttps://mahmoudfouad25.github.io/fouad-perspective/emc/lp/diagnosis.html?email={{email}}\n\nمكالمة تشخيصية بحتة، مش بيع.',
+          body: 'أهلاً {{firstName}} 👋\n\nأنا عبدالله من Executive Mastery Camp. شكراً إنك حمّلت الدليل.\n\nلو حابب نتكلم بشكل سريع عن وضع {{companyName}} والسقف اللي وصلتوله، احجز مكالمة 20 دقيقة مجاناً من اللينك ده:\nhttps://amership9.github.io/capsules-company/emc/lp/diagnosis.html?email={{email}}\n\nمكالمة تشخيصية بحتة، مش بيع.',
           language: 'ar', isActive: true, tags: ['welcome']
         },
         {
           name: 'متابعة — يوم 5 (قصة عميل)',
           channel: 'email', stage: 3, sequence: 'welcome', dayOffset: 5,
           subject: 'كيف خفّض كريم ساعات شغله من 70 لـ 40 في 4 شهور',
-          body: 'أهلاً {{firstName}}،\n\nاتمنى الدليل أفادك.\n\nحبيت أحكيلك قصة سريعة عن كريم — مؤسس شركة تصنيع 80 موظف في القاهرة. لما جالنا، كان شغّال 70 ساعة في الأسبوع، فريق القيادة بيتنازع كل اجتماع، والقرارات بتتأجل لأسابيع.\n\nبعد 4 شهور من تطبيق EOS:\n- بيشتغل 40 ساعة في الأسبوع\n- فريق القيادة بيقرّر في 30 دقيقة بدل ساعتين\n- الإيرادات زادت 28%\n\nاللي عمله كريم مش معجزة — تطبيق منظم لـ 6 مكونات بسيطة، بمتابعة أسبوعية.\n\nلو حابب تشوف لو شركتك جاهزة لنفس التحوّل، التشخيص المجاني هيوريك بالظبط منين تبدأ:\nhttps://mahmoudfouad25.github.io/fouad-perspective/emc/lp/diagnosis.html?email={{email}}\n\nعبدالله',
+          body: 'أهلاً {{firstName}}،\n\nاتمنى الدليل أفادك.\n\nحبيت أحكيلك قصة سريعة عن كريم — مؤسس شركة تصنيع 80 موظف في القاهرة. لما جالنا، كان شغّال 70 ساعة في الأسبوع، فريق القيادة بيتنازع كل اجتماع، والقرارات بتتأجل لأسابيع.\n\nبعد 4 شهور من تطبيق EOS:\n- بيشتغل 40 ساعة في الأسبوع\n- فريق القيادة بيقرّر في 30 دقيقة بدل ساعتين\n- الإيرادات زادت 28%\n\nاللي عمله كريم مش معجزة — تطبيق منظم لـ 6 مكونات بسيطة، بمتابعة أسبوعية.\n\nلو حابب تشوف لو شركتك جاهزة لنفس التحوّل، التشخيص المجاني هيوريك بالظبط منين تبدأ:\nhttps://amership9.github.io/capsules-company/emc/lp/diagnosis.html?email={{email}}\n\nعبدالله',
           language: 'ar', isActive: true, tags: ['follow_up', 'case_study']
         },
         {
           name: 'متابعة — يوم 9 (فيديو شخصي)',
           channel: 'email', stage: 3, sequence: 'welcome', dayOffset: 9,
           subject: '{{firstName}}، 4 دقايق فيديو خصيصاً ليك',
-          body: 'أهلاً {{firstName}}،\n\nسجّلت فيديو قصير (4 دقايق) عن أكبر خطأ بيقع فيه قادة الشركات في حجم {{companyName}} لما بيحاولوا يبنوا نظام تشغيلي.\n\nمش محتاج تشترك ولا تسجل، اضغط واتفرج:\n[لينك الفيديو]\n\nبعد ما تشوفه، لو حسيت إن ده فعلاً بيلامس وضعك، احجز التشخيص المجاني:\nhttps://mahmoudfouad25.github.io/fouad-perspective/emc/lp/diagnosis.html?email={{email}}\n\nعبدالله',
+          body: 'أهلاً {{firstName}}،\n\nسجّلت فيديو قصير (4 دقايق) عن أكبر خطأ بيقع فيه قادة الشركات في حجم {{companyName}} لما بيحاولوا يبنوا نظام تشغيلي.\n\nمش محتاج تشترك ولا تسجل، اضغط واتفرج:\n[لينك الفيديو]\n\nبعد ما تشوفه، لو حسيت إن ده فعلاً بيلامس وضعك، احجز التشخيص المجاني:\nhttps://amership9.github.io/capsules-company/emc/lp/diagnosis.html?email={{email}}\n\nعبدالله',
           language: 'ar', isActive: true, tags: ['follow_up', 'video']
         },
         {
           name: 'متابعة — يوم 14 (دعوة ندوة، واتساب)',
           channel: 'whatsapp', stage: 3, sequence: 'welcome', dayOffset: 14,
           subject: '',
-          body: '{{firstName}} 👋\n\nبنعمل ندوة مجانية الأسبوع الجاي عن "العقل التشغيلي للقائد" — 90 دقيقة + Q&A مفتوحة.\n\nالمحتوى بيخدم {{companyName}} تحديداً — قادة شركات في حجمكوا.\n\nاحجز مقعدك من هنا:\nhttps://mahmoudfouad25.github.io/fouad-perspective/emc/lp/webinar.html\n\nالمقاعد محدودة (120) وعادةً بيتمليوا في 48 ساعة.\n\nعبدالله',
+          body: '{{firstName}} 👋\n\nبنعمل ندوة مجانية الأسبوع الجاي عن "العقل التشغيلي للقائد" — 90 دقيقة + Q&A مفتوحة.\n\nالمحتوى بيخدم {{companyName}} تحديداً — قادة شركات في حجمكوا.\n\nاحجز مقعدك من هنا:\nhttps://amership9.github.io/capsules-company/emc/lp/webinar.html\n\nالمقاعد محدودة (120) وعادةً بيتمليوا في 48 ساعة.\n\nعبدالله',
           language: 'ar', isActive: true, tags: ['follow_up', 'webinar']
         }
       ];
