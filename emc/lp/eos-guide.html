@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>دليل السقف القيادي · Executive Mastery Camp</title>
+<meta name="description" content="ليه قادة الشركات المتوسطة بيتعبوا في نفس النقطة، وإزاي تكسر السقف بـ 6 خطوات." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<link rel="stylesheet" href="lp-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="tracker.js"></script>
+</head>
+<body class="lp-shell" data-landing-page="eos-guide" data-screen-label="LP eos-guide">
+
+<!-- ───── Nav ───── -->
+<nav class="lp-nav">
+  <div class="lp-nav-brand">
+    <div class="lp-nav-brand-mark">
+      <svg width="100%" height="100%" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="18" width="32" height="7" rx="1" fill="#0B2545"/>
+        <rect x="14" y="31" width="36" height="6" rx="1" fill="#D72638"/>
+        <line x1="18" y1="25" x2="14" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="46" y1="25" x2="50" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="46" y2="25" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
+      <div class="lp-nav-brand-sub">Camp</div>
+    </div>
+  </div>
+  <a href="#form-top" class="btn btn-accent btn-sm" data-cta="nav-cta" style="background: var(--emc-red); border: 0;">حمّل الدليل</a>
+</nav>
+
+<!-- ───── Hero ───── -->
+<section class="lp-hero">
+  <div class="lp-hero-content">
+    <div>
+      <div class="lp-hero-eyebrow">دليل مجاني · 28 صفحة PDF</div>
+      <h1 class="lp-hero-title">لو وصلت لسقف<br/>ومش عارف ليه…</h1>
+      <p class="lp-hero-subtitle">
+        الدليل اللي بيشرح ليه قادة الشركات المتوسطة بيتعبوا في نفس النقطة بالظبط — وإزاي تكسر السقف بستة خطوات اشتغلت مع آلاف الشركات حول العالم.
+      </p>
+      <div class="lp-hero-meta">
+        <span><strong>+ 12,000</strong> قائد قراه</span>
+        <span><strong>4.8/5</strong> تقييم القرّاء</span>
+        <span><strong>15 دقيقة</strong> قراءة</span>
+      </div>
+    </div>
+
+    <!-- Lead Form -->
+    <div class="lp-form-card" id="form-top">
+      <div id="form-wrap">
+        <h3>حمّل الدليل الآن — مجاناً</h3>
+        <div class="sub">هتلاقي الـ PDF في بريدك خلال دقيقتين</div>
+        <form id="lead-form">
+          <div class="lp-form-field">
+            <label for="fullName">الاسم الكامل</label>
+            <input type="text" id="fullName" name="fullName" required placeholder="مثال: محمود فؤاد" />
+          </div>
+          <div class="lp-form-field">
+            <label for="email">البريد الإلكتروني</label>
+            <input type="email" id="email" name="email" required placeholder="name@company.com" />
+          </div>
+          <button type="submit" class="btn-cta" id="submit-btn" data-cta="hero-submit">حمّل الدليل (مجاناً)</button>
+          <div class="privacy">بتسجيلك بتوافق على استلام رسائل بريدية من EMC. تقدر تلغي الاشتراك في أي وقت.</div>
+        </form>
+      </div>
+
+      <div id="form-success" style="display:none;">
+        <div class="lp-form-success">
+          <div class="check">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h4>شكراً، استلمنا طلبك</h4>
+          <p>الدليل في طريقه لبريدك خلال دقايق. لو ما لقيتش، اتفقد مجلد البريد المزعج.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── Pain points ───── -->
+<section class="lp-section">
+  <div class="section-eyebrow">هل دي مشكلتك؟</div>
+  <h2>أربع علامات إنك وصلت لسقفك القيادي</h2>
+  <p class="section-intro">السقف القيادي مش مرحلة. هو ظاهرة قابلة للتشخيص بدقة. لو 3 من الـ 4 علامات دي بتنطبق عليك، فأنت في النقطة دي بالظبط.</p>
+
+  <div class="lp-pain-grid">
+    <div class="lp-pain-card">
+      <p>بتشتغل 70 ساعة في الأسبوع، وكل حاجة بترجعلك في الآخر لأنه "ما حدش هيعملها صح غيرك".</p>
+    </div>
+    <div class="lp-pain-card">
+      <p>فريق القيادة بيتنازع في الاجتماعات أكتر مما بيقرر — والقرارات الحاسمة بتتأجل لأسابيع.</p>
+    </div>
+    <div class="lp-pain-card">
+      <p>الإيرادات بتنمو على الورق، لكن الأرباح ثابتة أو بتنزل — والـ Cash Flow ضيق.</p>
+    </div>
+    <div class="lp-pain-card">
+      <p>بتاخد قرارات حدسية لأن البيانات اللي محتاجها مش متاحة، أو لما بتيجي بتيجي متأخر.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───── Value list ───── -->
+<section class="lp-section" style="background: #fff; max-width: none; padding-left: 0; padding-right: 0;">
+  <div style="max-width: 1180px; margin: 0 auto; padding: 0 32px;">
+    <div class="section-eyebrow">اللي هتلاقيه في الدليل</div>
+    <h2>خمسة محاور بيشرحوا الفجوة وبيقدّموا الحل</h2>
+    <p class="section-intro">مش كتاب نظري. كل محور فيه أداة قابلة للتطبيق من الأسبوع الجاي.</p>
+
+    <div class="lp-value-list">
+      <div class="lp-value-item">
+        <div class="lp-value-num">01</div>
+        <div class="lp-value-content">
+          <h4>الفرق بين Visionary و Integrator — وليه شركتك محتاجة الاتنين</h4>
+          <p>أعمق التحديات في الشركات المتوسطة بترجع لازدواجية الدور دي. هنشخّصها ونوريك إزاي تفصل بين عقل الرؤية وعقل التنفيذ.</p>
+        </div>
+      </div>
+      <div class="lp-value-item">
+        <div class="lp-value-num">02</div>
+        <div class="lp-value-content">
+          <h4>المكونات الستة اللي بتفصل شركة منظمة من شركة فوضوية</h4>
+          <p>الرؤية، الناس، البيانات، القضايا، العمليات، الإنجاز — نموذج EOS كامل بشكل عملي ومُختبر.</p>
+        </div>
+      </div>
+      <div class="lp-value-item">
+        <div class="lp-value-num">03</div>
+        <div class="lp-value-content">
+          <h4>ليه 80% من خطط التوسع بتفشل في السنة الأولى</h4>
+          <p>تحليل لأكثر 3 أخطاء تتكرر — ومتى تكتشفها قبل ما تستثمر فيها وقت أو فلوس.</p>
+        </div>
+      </div>
+      <div class="lp-value-item">
+        <div class="lp-value-num">04</div>
+        <div class="lp-value-content">
+          <h4>كيف تبني Accountability Chart يقضي على الازدواجية</h4>
+          <p>القالب الكامل + مثال تطبيقي على شركة 80 موظف اتعملت في 4 أسابيع.</p>
+        </div>
+      </div>
+      <div class="lp-value-item">
+        <div class="lp-value-num">05</div>
+        <div class="lp-value-content">
+          <h4>Level 10 Meeting — الاجتماع الأسبوعي اللي بيغيّر كل شيء</h4>
+          <p>أجندة 90 دقيقة بتحوّل اجتماعات فريق القيادة من "كلام كتير" لـ "قرارات محسوبة".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── Author ───── -->
+<section class="lp-section">
+  <div class="lp-author">
+    <div class="lp-author-avatar">ع.ع</div>
+    <div>
+      <div class="lp-author-name">عبدالله عامر</div>
+      <div class="lp-author-title">مدرب EOS معتمد · مؤسس Executive Mastery Camp</div>
+      <p class="lp-author-bio">
+        دربت أكثر من 200 قائد تنفيذي في الوطن العربي على منهجية EOS لـ Gino Wickman. الـ EMC هو البرنامج المكثف الوحيد بالعربي اللي بيوصّل الـ Implementation كاملة في 8 أسابيع — مش بس النظرية.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ───── Final CTA ───── -->
+<section class="lp-section" style="text-align: center; padding-top: 0;">
+  <div style="max-width: 580px; margin: 0 auto; padding: 36px 28px; background: var(--emc-cream); border: 1px solid var(--emc-line); border-radius: 14px;">
+    <h3 style="font-size: 22px; color: var(--emc-navy); font-weight: 800; margin: 0 0 8px;">جاهز تبدأ؟</h3>
+    <p style="color: var(--emc-ink-2); margin: 0 0 18px; font-size: 15px;">روح فوق وحمّل الدليل في دقيقة واحدة.</p>
+    <a href="#form-top" class="btn btn-accent" data-cta="bottom-cta" style="background: var(--emc-red); border: 0;">حمّل الدليل (مجاناً)</a>
+  </div>
+</section>
+
+<!-- ───── Footer ───── -->
+<footer class="lp-footer">
+  <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
+  <div style="margin-top: 6px; font-size: 11.5px; opacity: 0.7;">دليل مبني على EOS Methodology لـ Gino Wickman</div>
+</footer>
+
+<script>
+  document.getElementById('lead-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'جاري الإرسال…';
+    const data = {
+      fullName: document.getElementById('fullName').value.trim(),
+      email: document.getElementById('email').value.trim()
+    };
+    const result = await window.EMC_LP.submitLead(data);
+    if (result.success) {
+      document.getElementById('form-wrap').style.display = 'none';
+      document.getElementById('form-success').style.display = 'block';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'حمّل الدليل (مجاناً)';
+      alert('حدث خطأ: ' + (result.error || 'حاول مرة أخرى'));
+    }
+  });
+</script>
+
+</body>
+</html>

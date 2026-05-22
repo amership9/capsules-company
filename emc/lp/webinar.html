@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ندوة: العقل التشغيلي للقائد · Executive Mastery Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<link rel="stylesheet" href="lp-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="tracker.js"></script>
+</head>
+<body class="lp-shell" data-landing-page="webinar" data-screen-label="LP webinar">
+
+<nav class="lp-nav">
+  <div class="lp-nav-brand">
+    <div class="lp-nav-brand-mark">
+      <svg width="100%" height="100%" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="18" width="32" height="7" rx="1" fill="#0B2545"/>
+        <rect x="14" y="31" width="36" height="6" rx="1" fill="#D72638"/>
+        <line x1="18" y1="25" x2="14" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="46" y1="25" x2="50" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="46" y2="25" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
+      <div class="lp-nav-brand-sub">Webinar · مجانية</div>
+    </div>
+  </div>
+  <a href="#form-top" class="btn btn-accent btn-sm" data-cta="nav-cta" style="background: var(--emc-red); border: 0;">احجز مقعدك</a>
+</nav>
+
+<section class="lp-hero">
+  <div class="lp-hero-content">
+    <div>
+      <div class="lp-hero-eyebrow">ندوة مباشرة · مجانية · مقاعد محدودة</div>
+      <h1 class="lp-hero-title">العقل التشغيلي<br/>للقائد التنفيذي</h1>
+      <p class="lp-hero-subtitle">
+        إزاي تقود شركة 250 موظف بدون أن تكون مختنقاً في كل التفاصيل — جلسة 90 دقيقة بتشرح إزاي تبني نظام تشغيل بيدور بدونك.
+      </p>
+
+      <div class="lp-date-strip">
+        <div class="lp-date-cell">
+          <div class="label">التاريخ</div>
+          <div class="val">الثلاثاء 27 مايو</div>
+        </div>
+        <div class="lp-date-cell">
+          <div class="label">الوقت</div>
+          <div class="val">8 مساءً · توقيت القاهرة</div>
+        </div>
+        <div class="lp-date-cell">
+          <div class="label">المدة</div>
+          <div class="val">90 دقيقة + أسئلة</div>
+        </div>
+      </div>
+
+      <div class="lp-hero-meta">
+        <span><strong>120</strong> مقعد فقط</span>
+        <span><strong>تسجيل كامل</strong> للمشتركين</span>
+        <span><strong>Live Q&amp;A</strong> في الآخر</span>
+      </div>
+    </div>
+
+    <div class="lp-form-card" id="form-top">
+      <div id="form-wrap">
+        <h3>احجز مقعدك مجاناً</h3>
+        <div class="sub">3 حقول فقط — هنرسلك رابط الـ Zoom قبل الندوة بـ 24 ساعة</div>
+        <form id="lead-form">
+          <div class="lp-form-field">
+            <label for="fullName">الاسم الكامل</label>
+            <input type="text" id="fullName" name="fullName" required />
+          </div>
+          <div class="lp-form-field">
+            <label for="email">البريد الإلكتروني</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+          <div class="lp-form-field">
+            <label for="companyName">اسم الشركة</label>
+            <input type="text" id="companyName" name="companyName" required placeholder="عشان نقدر نخصص الجلسة لجمهور قادة الشركات" />
+          </div>
+          <button type="submit" class="btn-cta" id="submit-btn" data-cta="hero-submit">احجز مقعدي الآن</button>
+          <div class="privacy">المقاعد بتتحجز حسب الأسبقية. مفيش رسوم.</div>
+        </form>
+      </div>
+
+      <div id="form-success" style="display:none;">
+        <div class="lp-form-success">
+          <div class="check">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h4>تم حجز مقعدك ✓</h4>
+          <p>هتستلم رابط الـ Zoom + تذكيرات قبل الندوة. شوفك يوم الثلاثاء.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="section-eyebrow">في الـ 90 دقيقة</div>
+  <h2>خمسة محاور — كل واحد بأداة عملية</h2>
+  <p class="section-intro">مش محاضرة. ورشة تشخيصية — لو حضرتها بفهم، هترجع شركتك بـ 3 قرارات عملية تطبّقها الأسبوع اللي بعدها.</p>
+
+  <div class="lp-value-list">
+    <div class="lp-value-item">
+      <div class="lp-value-num">01</div>
+      <div class="lp-value-content">
+        <h4>إزاي تبني نظام تشغيل بيدور بدونك</h4>
+        <p>الفرق بين "العمل في الشركة" و "العمل على الشركة" — والأدوات اللي بتنقلك من الأول للتاني.</p>
+      </div>
+    </div>
+    <div class="lp-value-item">
+      <div class="lp-value-num">02</div>
+      <div class="lp-value-content">
+        <h4>الـ 3 أنواع من القرارات اللي ما يفترضش تاخدها أنت</h4>
+        <p>توصيف دقيق + إطار اتخاذ قرار "متى أتدخل ومتى أُفوّض".</p>
+      </div>
+    </div>
+    <div class="lp-value-item">
+      <div class="lp-value-num">03</div>
+      <div class="lp-value-content">
+        <h4>Rocks الفصلية: كيف تحدد الأولويات اللي فعلاً مهمة</h4>
+        <p>طريقة الـ Rocks لاختيار 3-7 أهداف فصلية والتأكد من تنفيذها — مع مثال حي.</p>
+      </div>
+    </div>
+    <div class="lp-value-item">
+      <div class="lp-value-num">04</div>
+      <div class="lp-value-content">
+        <h4>Scorecard الأسبوعي اللي بيخليك تنام مرتاح</h4>
+        <p>5-15 رقم بس بتقولك حالة الشركة دلوقتي — بدون ما تفتح تقرير كل يوم.</p>
+      </div>
+    </div>
+    <div class="lp-value-item">
+      <div class="lp-value-num">05</div>
+      <div class="lp-value-content">
+        <h4>إزاي تتعامل مع موظف موهوب لكن مش ملتزم</h4>
+        <p>أصعب قرار في إدارة الفرق — وإطار EOS لاتخاذه بعقلانية، بدون تردد.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-section" style="background: #fff; max-width: none;">
+  <div style="max-width: 1180px; margin: 0 auto; padding: 0 32px;">
+    <div class="section-eyebrow">الجلسة لمين بالظبط؟</div>
+    <h2>أربعة معايير تأكد إنك في المكان الصح</h2>
+    <p class="section-intro">عشان الجلسة تكون مفيدة فعلاً، الأمثل إنك تنطبق عليك على الأقل 3 من 4:</p>
+
+    <div class="lp-pain-grid">
+      <div class="lp-pain-card"><p>CEO أو شريك مؤسس في شركة من 10 إلى 250 موظف.</p></div>
+      <div class="lp-pain-card"><p>بتدير فريق قيادة من 2+ مدراء تنفيذيين على الأقل.</p></div>
+      <div class="lp-pain-card"><p>إيرادات سنوية فوق 5 مليون جنيه (أو ما يعادلها).</p></div>
+      <div class="lp-pain-card"><p>حاسس إنك وصلت لسقف تشغيلي — مهما اشتغلت، الشركة مش بتتقدّم.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="lp-author">
+    <div class="lp-author-avatar">ع.ع</div>
+    <div>
+      <div class="lp-author-name">عبدالله عامر</div>
+      <div class="lp-author-title">مدرب EOS معتمد · مؤسس Executive Mastery Camp</div>
+      <p class="lp-author-bio">
+        هقدّم الجلسة بنفسي. هنشتغل بشكل عملي مع 3 حالات حقيقية من شركات مصرية بحجم 80-200 موظف. الجلسة بتنتهي بـ 30 دقيقة Q&amp;A مفتوحة.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="lp-section" style="text-align: center; padding-top: 0;">
+  <div style="max-width: 580px; margin: 0 auto; padding: 36px 28px; background: var(--emc-cream); border: 1px solid var(--emc-line); border-radius: 14px;">
+    <h3 style="font-size: 22px; color: var(--emc-navy); font-weight: 800; margin: 0 0 8px;">120 مقعد فقط</h3>
+    <p style="color: var(--emc-ink-2); margin: 0 0 18px; font-size: 15px;">المقاعد بتمتلي خلال 48 ساعة عادةً.</p>
+    <a href="#form-top" class="btn btn-accent" data-cta="bottom-cta" style="background: var(--emc-red); border: 0;">احجز مقعدي</a>
+  </div>
+</section>
+
+<footer class="lp-footer">
+  <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
+</footer>
+
+<script>
+  document.getElementById('lead-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'جاري الحجز…';
+    const data = {
+      fullName: document.getElementById('fullName').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      companyName: document.getElementById('companyName').value.trim()
+    };
+    const result = await window.EMC_LP.submitLead(data);
+    if (result.success) {
+      document.getElementById('form-wrap').style.display = 'none';
+      document.getElementById('form-success').style.display = 'block';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'احجز مقعدي الآن';
+      alert('حدث خطأ: ' + (result.error || 'حاول مرة أخرى'));
+    }
+  });
+</script>
+
+</body>
+</html>

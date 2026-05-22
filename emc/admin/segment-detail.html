@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>تفاصيل الشريحة · EMC CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-segments.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-layout.js"></script>
+<style>
+  .seg-hero {
+    background: #fff;
+    border: 1px solid var(--emc-line);
+    border-radius: var(--radius);
+    padding: 26px 28px;
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .seg-hero::before {
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 4px; height: 100%;
+    background: var(--emc-navy);
+  }
+  .seg-hero.priority-high::before { background: var(--emc-red); }
+  .seg-hero.priority-medium::before { background: var(--emc-gold); }
+  .seg-hero.priority-low::before { background: var(--heat-cold); }
+
+  .counter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--emc-line-soft);
+  }
+  .counter-row:last-child { border-bottom: 0; }
+  .counter-controls { display: flex; align-items: center; gap: 6px; }
+  .counter-btn {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--emc-line);
+    background: #fff;
+    color: var(--emc-ink-2);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+  .counter-btn:hover { border-color: var(--emc-navy); background: var(--emc-cream); }
+  .counter-val {
+    min-width: 44px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+    color: var(--emc-navy);
+  }
+
+  .criteria-card {
+    background: #fff;
+    border: 1px solid var(--emc-line);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin-bottom: 14px;
+  }
+  .criteria-card-title {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--emc-muted);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .criteria-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .crit-chip {
+    padding: 5px 12px;
+    background: var(--emc-cream);
+    border: 1px solid var(--emc-line);
+    border-radius: 99px;
+    font-size: 12.5px;
+    color: var(--emc-ink-2);
+    font-weight: 500;
+  }
+  .crit-chip.ceiling { background: rgba(11, 37, 69, 0.06); color: var(--emc-navy); border-color: rgba(11, 37, 69, 0.12); font-weight: 600; }
+</style>
+</head>
+<body data-screen-label="08 Segment detail">
+
+<div id="emc-shell-root"></div>
+
+<template id="detail-tpl">
+  <div class="emc-crumbs">
+    <a href="dashboard.html">لوحة التحكم</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <a href="segments.html">الشرائح المستهدفة</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <span id="crumb-name">…</span>
+  </div>
+
+  <div id="detail-content"></div>
+</template>
+
+<script>
+(async function () {
+  const main = await EMC.layout.render({ page: 'segments' });
+  if (!main) return;
+  await EMC.seedIfEmpty();
+  main.innerHTML = document.getElementById('detail-tpl').innerHTML;
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if (!id) {
+    document.getElementById('detail-content').innerHTML = `<div class="empty"><h3>لا توجد شريحة محددة</h3><a href="segments.html" class="btn btn-primary" style="margin-top:14px;">عرض كل الشرائح</a></div>`;
+    return;
+  }
+
+  let segment = await EMC.segments.get(id);
+  if (!segment) {
+    document.getElementById('detail-content').innerHTML = `<div class="empty"><h3>الشريحة غير موجودة</h3></div>`;
+    return;
+  }
+
+  document.getElementById('crumb-name').textContent = segment.name;
+  document.title = `${segment.name} · EMC CRM`;
+
+  await render();
+
+  async function render() {
+    segment = await EMC.segments.get(id); // refresh
+    const linkedContacts = await EMC.segments.getLinkedContacts(id);
+    const priorityColors = EMC.SEGMENT_PRIORITY_COLORS[segment.priority] || EMC.SEGMENT_PRIORITY_COLORS.medium;
+    const c = segment.counters || { targeted: 0, engaged: 0, converted: 0 };
+    const engagedRate = c.targeted ? Math.round((c.engaged / c.targeted) * 100) : 0;
+    const conversionRate = c.engaged ? Math.round((c.converted / c.engaged) * 100) : 0;
+
+    document.getElementById('detail-content').innerHTML = `
+      <!-- HERO -->
+      <div class="seg-hero priority-${segment.priority}">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;">
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <span class="badge" style="background:${priorityColors.bg}; color:${priorityColors.text}; border-color:${priorityColors.border};">أولوية ${EMC.SEGMENT_PRIORITY[segment.priority]}</span>
+              <span class="badge ${segment.status === 'paused' ? 'badge-warn' : segment.status === 'exhausted' ? 'badge-danger' : 'badge-success'}">${EMC.SEGMENT_STATUS[segment.status]}</span>
+            </div>
+            <h1 style="font-size: 24px; font-weight: 800; color: var(--emc-navy); margin: 0 0 8px;">${segment.name}</h1>
+            <p style="color: var(--emc-ink-2); font-size: 14.5px; line-height: 1.65; margin: 0; max-width: 720px;">${segment.description || '<span style="color: var(--emc-faint); font-style: italic;">لا يوجد وصف</span>'}</p>
+          </div>
+          <div style="display: flex; gap: 8px; flex-shrink: 0;">
+            <button class="btn btn-outline btn-sm" id="edit-btn">✎ تعديل</button>
+            <button class="btn btn-ghost btn-sm" id="delete-btn" style="color: var(--emc-red);">🗑 حذف</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS STRIP -->
+      <div class="grid-4" style="margin-bottom: 22px;">
+        <div class="stat-card accent-navy">
+          <div class="stat-label">الحجم المُقدَّر</div>
+          <div class="stat-value">${EMC.utils.formatNumber(segment.estimatedSize || 0)}</div>
+          <div class="stat-meta">شركة في السوق</div>
+        </div>
+        <div class="stat-card accent-red">
+          <div class="stat-label">تم استهدافه</div>
+          <div class="stat-value">${EMC.utils.formatNumber(c.targeted)}</div>
+          <div class="stat-meta">${segment.estimatedSize ? Math.round((c.targeted / segment.estimatedSize) * 100) : 0}% من الحجم المُقدَّر</div>
+        </div>
+        <div class="stat-card accent-gold">
+          <div class="stat-label">تفاعلوا</div>
+          <div class="stat-value">${EMC.utils.formatNumber(c.engaged)}</div>
+          <div class="stat-meta">${engagedRate}% من المُستهدفين</div>
+        </div>
+        <div class="stat-card accent-success">
+          <div class="stat-label">تحوّلوا</div>
+          <div class="stat-value">${EMC.utils.formatNumber(c.converted)}</div>
+          <div class="stat-meta">${conversionRate}% من المتفاعلين</div>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div style="display: grid; grid-template-columns: 1fr 320px; gap: 22px; align-items: flex-start;">
+
+        <!-- LEFT: Tabs -->
+        <div>
+          <div class="tab-strip" id="tabs">
+            <button class="tab-btn active" data-tab="criteria"><span class="tab-letter">1</span>المعايير</button>
+            <button class="tab-btn" data-tab="strategy"><span class="tab-letter">2</span>استراتيجية الاقتناص</button>
+            <button class="tab-btn" data-tab="contacts"><span class="tab-letter">3</span>جهات الاتصال المرتبطة <span class="badge" style="margin-inline-start: 4px;">${linkedContacts.length}</span></button>
+          </div>
+
+          <!-- TAB: Criteria -->
+          <div class="tab-panel active" data-panel="criteria">
+            ${renderCriteria(segment.criteria)}
+          </div>
+
+          <!-- TAB: Strategy -->
+          <div class="tab-panel" data-panel="strategy">
+            <div class="criteria-card">
+              <div class="criteria-card-title">قنوات الاقتناص</div>
+              <div style="font-size: 14px; color: var(--emc-ink); line-height: 1.7; white-space: pre-wrap;">${segment.acquisitionStrategy || '<span style="color: var(--emc-faint); font-style: italic;">لم تُحدد قنوات بعد</span>'}</div>
+            </div>
+            <div class="criteria-card">
+              <div class="criteria-card-title">ملاحظات</div>
+              <div style="font-size: 14px; color: var(--emc-ink); line-height: 1.7; white-space: pre-wrap;">${segment.notes || '<span style="color: var(--emc-faint); font-style: italic;">لا توجد ملاحظات</span>'}</div>
+            </div>
+          </div>
+
+          <!-- TAB: Linked Contacts -->
+          <div class="tab-panel" data-panel="contacts">
+            ${renderLinkedContacts(linkedContacts)}
+          </div>
+        </div>
+
+        <!-- RIGHT: Sidebar -->
+        <div>
+          <!-- Counters control -->
+          <div class="card card-pad" style="margin-bottom: 16px;">
+            <h3 style="margin: 0 0 4px; font-size: 14px; font-weight: 700; color: var(--emc-navy); text-transform: uppercase; letter-spacing: 0.05em;">تحديث العدّادات</h3>
+            <div style="font-size: 12px; color: var(--emc-muted); margin-bottom: 14px;">سجّل التقدم مع الشريحة</div>
+
+            <div class="counter-row">
+              <div>
+                <div style="font-weight: 600; font-size: 13.5px;">تم استهدافه</div>
+                <div style="color: var(--emc-muted); font-size: 11.5px;">عدد اللي وصلتلهم</div>
+              </div>
+              <div class="counter-controls">
+                <button class="counter-btn" data-counter="targeted" data-delta="-1">−</button>
+                <span class="counter-val" id="cnt-targeted">${c.targeted}</span>
+                <button class="counter-btn" data-counter="targeted" data-delta="1">+</button>
+              </div>
+            </div>
+
+            <div class="counter-row">
+              <div>
+                <div style="font-weight: 600; font-size: 13.5px;">تفاعلوا</div>
+                <div style="color: var(--emc-muted); font-size: 11.5px;">اللي ردوا أو ظهر منهم اهتمام</div>
+              </div>
+              <div class="counter-controls">
+                <button class="counter-btn" data-counter="engaged" data-delta="-1">−</button>
+                <span class="counter-val" id="cnt-engaged">${c.engaged}</span>
+                <button class="counter-btn" data-counter="engaged" data-delta="1">+</button>
+              </div>
+            </div>
+
+            <div class="counter-row">
+              <div>
+                <div style="font-weight: 600; font-size: 13.5px;">تحوّلوا</div>
+                <div style="color: var(--emc-muted); font-size: 11.5px;">للمرحلة 4 (MQL) فما فوق</div>
+              </div>
+              <div class="counter-controls">
+                <button class="counter-btn" data-counter="converted" data-delta="-1">−</button>
+                <span class="counter-val" id="cnt-converted">${c.converted}</span>
+                <button class="counter-btn" data-counter="converted" data-delta="1">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dates -->
+          <div class="card card-pad" style="margin-bottom: 16px;">
+            <h3 style="margin: 0 0 12px; font-size: 14px; font-weight: 700; color: var(--emc-navy); text-transform: uppercase; letter-spacing: 0.05em;">التواريخ</h3>
+            <div style="font-size: 13px; color: var(--emc-ink-2); line-height: 1.9;">
+              <div><span style="color: var(--emc-muted);">أُنشئت:</span> ${EMC.utils.formatDate(segment.createdAt)}</div>
+              <div><span style="color: var(--emc-muted);">آخر تحديث:</span> ${EMC.utils.formatDate(segment.updatedAt, { relative: true })}</div>
+            </div>
+          </div>
+
+          <!-- Status change -->
+          <div class="card card-pad">
+            <h3 style="margin: 0 0 12px; font-size: 14px; font-weight: 700; color: var(--emc-navy); text-transform: uppercase; letter-spacing: 0.05em;">تغيير الحالة</h3>
+            <select class="select" id="status-change" style="margin-bottom: 10px;">
+              <option value="active" ${segment.status === 'active' ? 'selected' : ''}>نشطة</option>
+              <option value="paused" ${segment.status === 'paused' ? 'selected' : ''}>مؤجلة</option>
+              <option value="exhausted" ${segment.status === 'exhausted' ? 'selected' : ''}>مستنفدة</option>
+            </select>
+            <button class="btn btn-outline btn-sm" style="width: 100%;" id="save-status">حفظ التغييرات</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // ─── Tabs ───
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelector(`[data-panel="${btn.dataset.tab}"]`).classList.add('active');
+      });
+    });
+
+    // ─── Counter buttons ───
+    document.querySelectorAll('.counter-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const field = btn.dataset.counter;
+        const delta = parseInt(btn.dataset.delta);
+        try {
+          const newVal = await EMC.segments.incrementCounter(id, field, delta);
+          document.getElementById('cnt-' + field).textContent = newVal;
+        } catch (e) {
+          EMC.utils.toast('خطأ في التحديث', 'error');
+        }
+      });
+    });
+
+    // ─── Status change ───
+    document.getElementById('save-status').addEventListener('click', async () => {
+      const newStatus = document.getElementById('status-change').value;
+      if (newStatus === segment.status) {
+        EMC.utils.toast('لا تغيير في الحالة', 'default');
+        return;
+      }
+      try {
+        await EMC.segments.update(id, { status: newStatus });
+        EMC.utils.toast('تم تحديث الحالة', 'success');
+        setTimeout(render, 600);
+      } catch (e) {
+        EMC.utils.toast('خطأ في الحفظ', 'error');
+      }
+    });
+
+    // ─── Edit / Delete ───
+    document.getElementById('edit-btn').addEventListener('click', () => {
+      EMC.utils.toast('قريباً — تعديل المعايير الكاملة', 'default');
+    });
+
+    document.getElementById('delete-btn').addEventListener('click', async () => {
+      if (!confirm(`حذف الشريحة "${segment.name}"؟\n\nده هيشيل الربط من أي جهات اتصال مرتبطة بيها (مش هيحذفهم).`)) return;
+      try {
+        await EMC.segments.remove(id);
+        EMC.utils.toast('تم حذف الشريحة', 'success');
+        setTimeout(() => window.location.href = 'segments.html', 700);
+      } catch (e) {
+        EMC.utils.toast('خطأ في الحذف', 'error');
+      }
+    });
+  }
+
+  function renderCriteria(criteria) {
+    if (!criteria) return '<div class="empty"><h3>لا توجد معايير محددة</h3></div>';
+
+    const sections = [
+      { key: 'industries', title: 'الصناعات', dict: EMC.INDUSTRIES },
+      { key: 'companySizes', title: 'أحجام الشركات', dict: EMC.COMPANY_SIZES },
+      { key: 'revenueRanges', title: 'نطاقات الإيراد', dict: EMC.REVENUE_RANGES },
+      { key: 'yearsInBusiness', title: 'سنوات في السوق', dict: EMC.YEARS_IN_BUSINESS },
+      { key: 'countries', title: 'الدول', dict: EMC.COUNTRIES },
+      { key: 'eosFamiliarity', title: 'مستويات الإلمام بـ EOS', dict: EMC.EOS_FAMILIARITY },
+      { key: 'ceilings', title: 'السقوف المستهدفة', dict: EMC.CEILINGS, special: 'ceiling' }
+    ];
+
+    let html = '';
+    sections.forEach(s => {
+      const vals = criteria[s.key] || [];
+      if (!vals.length) return;
+      html += `
+        <div class="criteria-card">
+          <div class="criteria-card-title">${s.title}</div>
+          <div class="criteria-chips">
+            ${vals.map(v => `<span class="crit-chip ${s.special || ''}">${s.dict[v] || v}</span>`).join('')}
+          </div>
+        </div>
+      `;
+    });
+
+    // cities (free text)
+    if (criteria.cities?.length) {
+      html += `
+        <div class="criteria-card">
+          <div class="criteria-card-title">المدن</div>
+          <div class="criteria-chips">
+            ${criteria.cities.map(c => `<span class="crit-chip">${c}</span>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    return html || '<div class="empty"><h3>لا توجد معايير محددة</h3><div>افتح "تعديل" لإضافة معايير</div></div>';
+  }
+
+  function renderLinkedContacts(contacts) {
+    if (!contacts.length) {
+      return `<div class="empty">
+        <h3>لسه ما اتربط أي عميل بالشريحة دي</h3>
+        <div>لما يدخل عميل جديد، تقدر تختار الشريحة من خانة "السياق" في نموذج الإضافة.</div>
+      </div>`;
+    }
+    return `
+      <div class="card" style="overflow: hidden;">
+        <table class="emc-table">
+          <thead>
+            <tr><th>الاسم</th><th>الشركة</th><th>المرحلة</th><th>الحرارة</th></tr>
+          </thead>
+          <tbody>
+            ${contacts.map(c => {
+              const stage = EMC.utils.getStage(c.currentStage);
+              const temp = c.engagement?.temperature || 'cold';
+              return `
+                <tr onclick="window.location.href='contact-detail.html?id=${c.id}'">
+                  <td>
+                    <div class="contact-cell">
+                      <div class="contact-avatar" style="background:${EMC.utils.avatarColor(c.identity.fullName)}">${EMC.utils.initials(c.identity.fullName)}</div>
+                      <div>
+                        <div class="contact-name">${c.identity.fullName}</div>
+                        <div class="contact-meta">${c.identity.title || '—'}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>${c.identity.companyName || '—'}</td>
+                  <td><span class="badge badge-stage">${String(stage.id).padStart(2,'0')} · ${stage.name}</span></td>
+                  <td><span class="badge badge-heat-${temp}"><span class="heat-dot ${temp}"></span>${EMC.utils.temperatureLabel(temp)}</span></td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+})();
+</script>
+</body>
+</html>

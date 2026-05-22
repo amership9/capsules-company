@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>المتفاعلون · EMC CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-segments.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-layout.js"></script>
+</head>
+<body data-screen-label="09 Leads list">
+
+<div id="emc-shell-root"></div>
+
+<!-- Promote Modal -->
+<div class="emc-modal-overlay" id="promote-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 640px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.3);">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--emc-line); display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">نقل لـ Identified</h3>
+        <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;" id="promote-sub">—</div>
+      </div>
+      <button class="emc-icon-btn" id="promote-close" style="width: 32px; height: 32px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form id="promote-form" style="padding: 22px 24px; overflow-y: auto; flex: 1;">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">المنصب <span class="req">*</span></label>
+          <input class="input" name="title" required placeholder="CEO / Founder / COO ..." />
+        </div>
+        <div class="field">
+          <label class="field-label">اسم الشركة <span class="req">*</span></label>
+          <input class="input" name="companyName" required />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">الصناعة <span class="req">*</span></label>
+          <select class="select" name="industry" required><option value="">— اختر —</option></select>
+        </div>
+        <div class="field">
+          <label class="field-label">حجم الشركة <span class="req">*</span></label>
+          <select class="select" name="companySize" required><option value="">— اختر —</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">رقم الموبايل <span class="req">*</span></label>
+          <input class="input" name="mobile" required placeholder="01xxxxxxxxx" />
+        </div>
+        <div class="field">
+          <label class="field-label">علاقتك بـ EOS <span class="hint">(اختياري)</span></label>
+          <select class="select" name="eosFamiliarity"><option value="">— اختر —</option></select>
+        </div>
+      </div>
+    </form>
+    <div style="padding: 14px 24px; border-top: 1px solid var(--emc-line); display: flex; justify-content: flex-end; gap: 8px; background: var(--emc-cream);">
+      <button class="btn btn-ghost btn-sm" id="promote-cancel">إلغاء</button>
+      <button class="btn btn-primary btn-sm" id="promote-save">حفظ ونقل إلى Identified</button>
+    </div>
+  </div>
+</div>
+
+<template id="leads-tpl">
+  <div class="emc-crumbs">
+    <a href="dashboard.html">لوحة التحكم</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>المتفاعلون</span>
+  </div>
+
+  <div class="emc-page-head">
+    <div>
+      <h1 class="emc-page-title">المتفاعلون (Leads)</h1>
+      <div class="emc-page-sub" id="result-meta">جاري التحميل…</div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <a href="../lp/eos-guide.html" target="_blank" class="btn btn-outline">عرض landing eos-guide ↗</a>
+      <a href="add-contact.html" class="btn btn-primary">+ إضافة يدوياً</a>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="grid-4" style="margin-bottom: 22px;" id="stats-row"></div>
+
+  <!-- Table -->
+  <div class="card" style="overflow: hidden;" id="table-wrap">
+    <div style="padding: 14px 20px; border-bottom: 1px solid var(--emc-line); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap: 10px;">
+      <div style="font-weight: 700; color: var(--emc-navy); font-size: 14.5px;">قائمة المتفاعلين — المرحلة 2</div>
+      <div style="font-size: 12.5px; color: var(--emc-muted);">اضغط على صف لعرض التفاصيل، أو "نقل لـ Identified" لرفع المرحلة</div>
+    </div>
+    <table class="emc-table">
+      <thead>
+        <tr>
+          <th>المتفاعل</th>
+          <th>الإيميل</th>
+          <th>المصدر</th>
+          <th>Landing Page</th>
+          <th>وقت التحويل</th>
+          <th style="text-align: center;">إجراء</th>
+        </tr>
+      </thead>
+      <tbody id="leads-tbody"><tr><td colspan="6" class="empty">جاري التحميل…</td></tr></tbody>
+    </table>
+  </div>
+</template>
+
+<script>
+(async function () {
+  const main = await EMC.layout.render({ page: 'leads' });
+  if (!main) return;
+  await EMC.seedIfEmpty();
+  main.innerHTML = document.getElementById('leads-tpl').innerHTML;
+
+  await renderAll();
+
+  async function renderAll() {
+    const all = await EMC.contacts.list();
+    const leads = all.filter(c => c.currentStage === 2);
+
+    // Stats
+    const oneWeek = 7 * 86400000;
+    const now = Date.now();
+    const thisWeek = leads.filter(c => {
+      const t = new Date(c.createdAt || c.context?.firstTouchAt || 0).getTime();
+      return now - t < oneWeek;
+    }).length;
+
+    // أفضل landing page تحويلاً
+    const lpStats = await EMC.touchpoints.statsByLandingPage();
+    const topLP = lpStats.reduce((best, cur) => cur.leads > (best?.leads || 0) ? cur : best, null);
+
+    // متوسط زمن الاستجابة (من Lead لـ Identified)
+    const allProgressed = all.filter(c => c.currentStage >= 3 && (c.stageHistory || []).length);
+    let totalDays = 0, countDays = 0;
+    allProgressed.forEach(c => {
+      const h = c.stageHistory || [];
+      const stage2 = h.find(s => s.stage === 2);
+      const stage3 = h.find(s => s.stage === 3);
+      if (stage2 && stage3) {
+        const diff = (new Date(stage3.enteredAt) - new Date(stage2.enteredAt)) / 86400000;
+        if (diff > 0) { totalDays += diff; countDays++; }
+      }
+    });
+    const avgResponseDays = countDays > 0 ? (totalDays / countDays).toFixed(1) : '—';
+
+    document.getElementById('stats-row').innerHTML = `
+      <div class="stat-card accent-navy">
+        <div class="stat-label">إجمالي المتفاعلين</div>
+        <div class="stat-value">${leads.length}</div>
+        <div class="stat-meta">في المرحلة 2 حالياً</div>
+      </div>
+      <div class="stat-card accent-red">
+        <div class="stat-label">جدد هذا الأسبوع</div>
+        <div class="stat-value">${thisWeek}</div>
+        <div class="stat-meta">آخر 7 أيام</div>
+      </div>
+      <div class="stat-card accent-gold">
+        <div class="stat-label">متوسط زمن الاستجابة</div>
+        <div class="stat-value" style="font-size: 22px;">${avgResponseDays} ${avgResponseDays !== '—' ? 'يوم' : ''}</div>
+        <div class="stat-meta">من Lead لـ Identified</div>
+      </div>
+      <div class="stat-card accent-success">
+        <div class="stat-label">الأعلى تحويلاً</div>
+        <div class="stat-value" style="font-size: 16px;">${topLP?.title || '—'}</div>
+        <div class="stat-meta">${topLP ? topLP.leads + ' lead · ' + topLP.conversionRate + '%' : 'لا يوجد بيانات'}</div>
+      </div>
+    `;
+
+    document.getElementById('result-meta').textContent =
+      `${leads.length} متفاعل · ${thisWeek} هذا الأسبوع`;
+
+    renderTable(leads);
+  }
+
+  function renderTable(leads) {
+    const tbody = document.getElementById('leads-tbody');
+    if (!leads.length) {
+      tbody.innerHTML = `<tr><td colspan="6">
+        <div class="empty">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="color: var(--emc-faint); margin-bottom: 8px;">
+            <path d="M6 3v8a6 6 0 0 0 12 0V3"/><path d="M6 7h4"/><path d="M14 7h4"/>
+          </svg>
+          <h3>لسه ما اتولدش متفاعلين من Landing Pages</h3>
+          <div style="margin-bottom: 16px;">شغّل أول حملة على eos-guide واستقبل أول Lead.</div>
+          <a href="../lp/eos-guide.html" target="_blank" class="btn btn-primary">افتح landing page تجريبياً ↗</a>
+        </div>
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = leads.map(c => {
+      const src = c.context?.source || 'direct';
+      const srcColor = EMC.SOURCE_COLORS[src] || '#94A3B8';
+      const lpSlug = (c.context?.tags || []).find(t => EMC.LANDING_PAGES[t]);
+      const lpTitle = lpSlug ? EMC.LANDING_PAGES[lpSlug].title : '—';
+      return `
+        <tr>
+          <td onclick="window.location.href='contact-detail.html?id=${c.id}'">
+            <div class="contact-cell">
+              <div class="contact-avatar" style="background:${EMC.utils.avatarColor(c.identity.fullName)}">${EMC.utils.initials(c.identity.fullName)}</div>
+              <div>
+                <div class="contact-name">${c.identity.fullName || 'بدون اسم'}</div>
+                <div class="contact-meta">${c.identity.companyName || ''}</div>
+              </div>
+            </div>
+          </td>
+          <td onclick="window.location.href='contact-detail.html?id=${c.id}'" style="font-size: 13px; color: var(--emc-ink-2);">${c.channels?.primaryEmail || '—'}</td>
+          <td onclick="window.location.href='contact-detail.html?id=${c.id}'">
+            <span class="badge" style="background: ${srcColor}15; color: ${srcColor}; border-color: ${srcColor}40;">
+              ${EMC.SOURCES[src] || src}
+            </span>
+          </td>
+          <td onclick="window.location.href='contact-detail.html?id=${c.id}'">
+            ${lpSlug ? `<span class="badge">${lpTitle}</span>` : '<span style="color: var(--emc-faint); font-size: 12px;">يدوي</span>'}
+          </td>
+          <td onclick="window.location.href='contact-detail.html?id=${c.id}'" style="color: var(--emc-muted); font-size: 13px;">${EMC.utils.formatDate(c.createdAt || c.context?.firstTouchAt, { relative: true })}</td>
+          <td style="text-align: center;">
+            <button class="btn btn-outline btn-sm promote-btn" data-id="${c.id}" data-name="${c.identity.fullName || ''}">
+              ↑ نقل لـ Identified
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    document.querySelectorAll('.promote-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        const name = btn.dataset.name;
+        await openPromoteModal(id, name);
+      });
+    });
+  }
+
+  // ─── Promote modal ───
+  let currentLeadId = null;
+
+  function populateSelect(name, dict) {
+    const sel = document.querySelector(`#promote-form [name="${name}"]`);
+    if (!sel) return;
+    // clear except first
+    while (sel.options.length > 1) sel.remove(1);
+    Object.entries(dict).forEach(([k, v]) => {
+      const o = document.createElement('option');
+      o.value = k; o.textContent = v;
+      sel.appendChild(o);
+    });
+  }
+  populateSelect('industry', EMC.INDUSTRIES);
+  populateSelect('companySize', EMC.COMPANY_SIZES);
+  populateSelect('eosFamiliarity', EMC.EOS_FAMILIARITY);
+
+  async function openPromoteModal(id, name) {
+    currentLeadId = id;
+    const contact = await EMC.contacts.get(id);
+    if (!contact) return;
+
+    document.getElementById('promote-sub').textContent = `${name} · أكمل البيانات الناقصة قبل النقل`;
+    const form = document.getElementById('promote-form');
+    form.querySelector('[name="title"]').value = contact.identity?.title || '';
+    form.querySelector('[name="companyName"]').value = contact.identity?.companyName || '';
+    form.querySelector('[name="industry"]').value = contact.identity?.industry || '';
+    form.querySelector('[name="companySize"]').value = contact.identity?.companySize || '';
+    form.querySelector('[name="mobile"]').value = contact.channels?.mobile || '';
+    form.querySelector('[name="eosFamiliarity"]').value = contact.eosProfile?.eosFamiliarity || '';
+
+    document.getElementById('promote-modal').style.display = 'flex';
+  }
+
+  function closePromoteModal() {
+    document.getElementById('promote-modal').style.display = 'none';
+    currentLeadId = null;
+  }
+
+  document.getElementById('promote-close').addEventListener('click', closePromoteModal);
+  document.getElementById('promote-cancel').addEventListener('click', closePromoteModal);
+  document.getElementById('promote-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'promote-modal') closePromoteModal();
+  });
+
+  document.getElementById('promote-save').addEventListener('click', async () => {
+    if (!currentLeadId) return;
+    const form = document.getElementById('promote-form');
+    if (!form.reportValidity()) return;
+
+    const btn = document.getElementById('promote-save');
+    btn.disabled = true;
+    btn.textContent = 'جاري الحفظ…';
+
+    try {
+      const contact = await EMC.contacts.get(currentLeadId);
+      const mobile = form.querySelector('[name="mobile"]').value.trim();
+
+      await EMC.contacts.update(currentLeadId, {
+        identity: {
+          ...(contact.identity || {}),
+          title: form.querySelector('[name="title"]').value.trim(),
+          companyName: form.querySelector('[name="companyName"]').value.trim(),
+          industry: form.querySelector('[name="industry"]').value,
+          companySize: form.querySelector('[name="companySize"]').value
+        },
+        channels: {
+          ...(contact.channels || {}),
+          mobile,
+          whatsapp: contact.channels?.whatsapp || mobile,
+          preferredChannel: contact.channels?.preferredChannel || 'whatsapp'
+        },
+        eosProfile: {
+          ...(contact.eosProfile || {}),
+          eosFamiliarity: form.querySelector('[name="eosFamiliarity"]').value
+        }
+      });
+
+      await EMC.contacts.moveToStage(currentLeadId, 3, 'نقل يدوي بعد جمع البيانات');
+      if (EMC.utils?.refreshContactScore) await EMC.utils.refreshContactScore(currentLeadId);
+
+      EMC.utils.toast('تم نقل المتفاعل للمرحلة 3', 'success');
+      closePromoteModal();
+      setTimeout(renderAll, 600);
+    } catch (err) {
+      console.error(err);
+      EMC.utils.toast('خطأ: ' + (err.message || 'فشل الحفظ'), 'error');
+      btn.disabled = false;
+      btn.textContent = 'حفظ ونقل إلى Identified';
+    }
+  });
+})();
+</script>
+</body>
+</html>

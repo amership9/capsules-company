@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>التشخيص الكامل · Executive Mastery Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<link rel="stylesheet" href="lp-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="tracker.js"></script>
+</head>
+<body class="lp-shell" data-landing-page="diagnosis" data-screen-label="LP diagnosis">
+
+<nav class="lp-nav">
+  <div class="lp-nav-brand">
+    <div class="lp-nav-brand-mark">
+      <svg width="100%" height="100%" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="18" width="32" height="7" rx="1" fill="#0B2545"/>
+        <rect x="14" y="31" width="36" height="6" rx="1" fill="#D72638"/>
+        <line x1="18" y1="25" x2="14" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="46" y1="25" x2="50" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="46" y2="25" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
+      <div class="lp-nav-brand-sub">Diagnosis · المرحلة 2</div>
+    </div>
+  </div>
+  <span style="color: rgba(255,255,255,0.6); font-size: 12px;">3 دقائق · 7 أسئلة</span>
+</nav>
+
+<!-- Hero -->
+<section class="lp-hero" style="padding: 48px 32px 56px;">
+  <div style="max-width: 720px; margin: 0 auto; text-align: center; position: relative; z-index: 1;">
+    <div class="lp-hero-eyebrow">المرحلة 2 من 2 · التشخيص الكامل</div>
+    <h1 class="lp-hero-title" style="font-size: 38px;">شركتك في 7 أسئلة</h1>
+    <p class="lp-hero-subtitle" style="margin: 16px auto 0; max-width: 580px;">
+      جاوب على 7 أسئلة هتاخد منك 3 دقائق، وفي خلال 24 ساعة هتستلم تقرير شخصي عن نقاط القوة والضعف في شركتك، مع توصيات عملية للأسبوع الجاي.
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 28px; margin-top: 28px; color: rgba(255,255,255,0.7); font-size: 13px; flex-wrap: wrap;">
+      <span>📊 <strong style="color: #fff;">تقرير شخصي</strong></span>
+      <span>🔒 <strong style="color: #fff;">بيانات محمية</strong></span>
+      <span>📞 <strong style="color: #fff;">مكالمة متابعة مجانية</strong></span>
+    </div>
+  </div>
+</section>
+
+<!-- Form -->
+<section class="lp-section" style="background: #fff; padding: 56px 32px;">
+  <div class="lp-form-card" style="max-width: 640px; margin: 0 auto; padding: 36px 40px;">
+    <div id="form-wrap">
+      <h3 style="text-align: center;">7 أسئلة عشان نقدر نخدمك بدقة</h3>
+      <div class="sub" style="text-align: center; margin-bottom: 22px;">كل البيانات إلزامية ما عدا آخر سؤال</div>
+
+      <form id="lead-form">
+        <div class="lp-form-field">
+          <label for="fullName">الاسم الكامل <span style="color: var(--emc-red);">*</span></label>
+          <input type="text" id="fullName" name="fullName" required autocomplete="name" />
+        </div>
+        <div class="lp-form-field">
+          <label for="email">البريد الإلكتروني <span style="color: var(--emc-red);">*</span></label>
+          <input type="email" id="email" name="email" required autocomplete="email" />
+        </div>
+        <div class="lp-form-field">
+          <label for="mobile">رقم الموبايل (واتساب) <span style="color: var(--emc-red);">*</span></label>
+          <input type="tel" id="mobile" name="mobile" required placeholder="01xxxxxxxxx" autocomplete="tel" />
+        </div>
+
+        <div class="lp-form-field">
+          <label for="title">منصبك <span style="color: var(--emc-red);">*</span></label>
+          <input type="text" id="title" name="title" required placeholder="CEO / Founder / COO ..." />
+        </div>
+
+        <div class="lp-form-field">
+          <label for="companyName">اسم الشركة <span style="color: var(--emc-red);">*</span></label>
+          <input type="text" id="companyName" name="companyName" required />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="lp-form-field">
+            <label for="industry">المجال <span style="color: var(--emc-red);">*</span></label>
+            <select id="industry" name="industry" required style="width: 100%; height: 42px; border: 1px solid var(--emc-line); border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: inherit; background: #fff;">
+              <option value="">— اختر —</option>
+            </select>
+          </div>
+          <div class="lp-form-field">
+            <label for="companySize">حجم الفريق <span style="color: var(--emc-red);">*</span></label>
+            <select id="companySize" name="companySize" required style="width: 100%; height: 42px; border: 1px solid var(--emc-line); border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: inherit; background: #fff;">
+              <option value="">— اختر —</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="lp-form-field">
+          <label for="eosFamiliarity">علاقتك بـ EOS <span style="color: var(--emc-faint); font-weight: 400;">(اختياري)</span></label>
+          <select id="eosFamiliarity" name="eosFamiliarity" style="width: 100%; height: 42px; border: 1px solid var(--emc-line); border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: inherit; background: #fff;">
+            <option value="">— اختر —</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-cta" id="submit-btn" data-cta="diagnosis-submit">احصل على التقرير</button>
+        <div class="privacy">بياناتك محمية ومش بتتشارك مع أي طرف ثالث.</div>
+      </form>
+    </div>
+
+    <div id="form-success" style="display:none;">
+      <div class="lp-form-success">
+        <div class="check">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h4>تم استلام بياناتك ✓</h4>
+        <p id="success-msg">التقرير في طريقه لبريدك خلال 24 ساعة. فريق EMC هيتواصل معاك على الواتساب لتأكيد التشخيص.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="lp-footer">
+  <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
+</footer>
+
+<script>
+(function () {
+  // populate selects
+  function populate(id, dict) {
+    const sel = document.getElementById(id);
+    Object.entries(dict).forEach(([k, v]) => {
+      const opt = document.createElement('option');
+      opt.value = k; opt.textContent = v;
+      sel.appendChild(opt);
+    });
+  }
+  populate('industry', EMC.INDUSTRIES);
+  populate('companySize', EMC.COMPANY_SIZES);
+  populate('eosFamiliarity', EMC.EOS_FAMILIARITY);
+
+  // prefill email from URL ?email=...
+  const params = new URLSearchParams(window.location.search);
+  const prefillEmail = params.get('email');
+  if (prefillEmail) document.getElementById('email').value = prefillEmail;
+
+  document.getElementById('lead-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'جاري الإرسال…';
+
+    const data = {
+      fullName: document.getElementById('fullName').value.trim(),
+      email: document.getElementById('email').value.trim().toLowerCase(),
+      mobile: document.getElementById('mobile').value.trim(),
+      title: document.getElementById('title').value.trim(),
+      companyName: document.getElementById('companyName').value.trim(),
+      industry: document.getElementById('industry').value,
+      companySize: document.getElementById('companySize').value,
+      eosFamiliarity: document.getElementById('eosFamiliarity').value
+    };
+
+    if (!window.EMC_LP || !window.EMC_LP.submitIdentified) {
+      btn.disabled = false;
+      btn.textContent = 'احصل على التقرير';
+      alert('النظام لسه بيحمّل، حاول بعد ثانيتين');
+      return;
+    }
+
+    const result = await window.EMC_LP.submitIdentified(data);
+    if (result.success) {
+      const msg = result.upserted
+        ? 'تم تحديث ملفك بنجاح. هتستلم التقرير المخصص خلال 24 ساعة، وفريقنا هيتواصل معاك على واتساب.'
+        : 'التقرير في طريقه لبريدك خلال 24 ساعة. فريق EMC هيتواصل معاك على الواتساب لتأكيد التشخيص.';
+      document.getElementById('success-msg').textContent = msg;
+      document.getElementById('form-wrap').style.display = 'none';
+      document.getElementById('form-success').style.display = 'block';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'احصل على التقرير';
+      alert('حدث خطأ: ' + (result.error || 'حاول مرة أخرى'));
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

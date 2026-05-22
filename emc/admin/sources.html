@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>المصادر و Landing Pages · EMC CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-segments.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-layout.js"></script>
+<style>
+  .src-bar {
+    height: 10px;
+    background: var(--emc-line-soft);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .src-bar > div {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s;
+  }
+  .lp-perf-card {
+    background: #fff;
+    border: 1px solid var(--emc-line);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    transition: border-color 0.15s, transform 0.05s;
+  }
+  .lp-perf-card:hover { border-color: var(--emc-navy); }
+  .lp-mini-bars {
+    display: flex; align-items: flex-end; gap: 3px;
+    height: 32px; margin-top: 8px;
+  }
+  .lp-mini-bars > div {
+    flex: 1;
+    background: var(--emc-navy);
+    opacity: 0.7;
+    border-radius: 2px 2px 0 0;
+    min-height: 2px;
+  }
+</style>
+</head>
+<body data-screen-label="10 Sources">
+
+<div id="emc-shell-root"></div>
+
+<template id="sources-tpl">
+  <div class="emc-crumbs">
+    <a href="dashboard.html">لوحة التحكم</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>المصادر و Landing Pages</span>
+  </div>
+
+  <div class="emc-page-head">
+    <div>
+      <h1 class="emc-page-title">المصادر و Landing Pages</h1>
+      <div class="emc-page-sub" id="result-meta">جاري التحميل…</div>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="grid-4" style="margin-bottom: 22px;" id="stats-row"></div>
+
+  <!-- Source comparison -->
+  <div class="card card-pad" style="margin-bottom: 22px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+      <div>
+        <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">مقارنة المصادر</h3>
+        <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;">من فين بيجي الـ traffic — وأي مصدر بيحوّل أكتر</div>
+      </div>
+    </div>
+    <table class="emc-table">
+      <thead>
+        <tr>
+          <th>المصدر</th>
+          <th>زيارات</th>
+          <th>زوار فريدون</th>
+          <th>تعبئات نماذج</th>
+          <th>Leads</th>
+          <th>معدل التحويل</th>
+        </tr>
+      </thead>
+      <tbody id="sources-tbody"><tr><td colspan="6" class="empty">جاري التحميل…</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- Landing Pages performance -->
+  <div style="margin-bottom: 22px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+      <div>
+        <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">أداء Landing Pages</h3>
+        <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;">3 صفحات هبوط نشطة في النظام</div>
+      </div>
+    </div>
+    <div class="grid-3" id="lp-grid"></div>
+  </div>
+
+  <!-- Recent touchpoints -->
+  <div class="card" style="overflow: hidden;">
+    <div style="padding: 14px 20px; border-bottom: 1px solid var(--emc-line); display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div>
+        <h3 style="margin: 0; font-size: 15px; color: var(--emc-navy); font-weight: 700;">آخر الـ Touchpoints</h3>
+        <div style="font-size: 12px; color: var(--emc-muted); margin-top: 2px;">آخر 20 تفاعل من الـ landing pages</div>
+      </div>
+      <div style="display: flex; gap: 4px;">
+        <button class="filter-btn active" data-filter="all">الكل</button>
+        <button class="filter-btn" data-filter="page_view">زيارات</button>
+        <button class="filter-btn" data-filter="form_submit">نماذج</button>
+        <button class="filter-btn" data-filter="cta_click">نقرات</button>
+      </div>
+    </div>
+    <table class="emc-table">
+      <thead>
+        <tr>
+          <th>النوع</th>
+          <th>المصدر</th>
+          <th>Landing</th>
+          <th>Session</th>
+          <th>Contact</th>
+          <th>التوقيت</th>
+        </tr>
+      </thead>
+      <tbody id="tps-tbody"></tbody>
+    </table>
+  </div>
+</template>
+
+<script>
+(async function () {
+  const main = await EMC.layout.render({ page: 'sources' });
+  if (!main) return;
+  await EMC.seedIfEmpty();
+  main.innerHTML = document.getElementById('sources-tpl').innerHTML;
+
+  // Filter buttons style
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.style.cssText = 'padding: 5px 11px; background: transparent; border: 1px solid var(--emc-line); border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--emc-ink-2); cursor: pointer; transition: all 0.1s;';
+  });
+  document.querySelectorAll('.filter-btn.active').forEach(b => {
+    b.style.background = 'var(--emc-navy)';
+    b.style.color = '#fff';
+    b.style.borderColor = 'var(--emc-navy)';
+  });
+
+  const allTPs = await EMC.touchpoints.list();
+  const allContacts = await EMC.contacts.list();
+  const sourceStats = await EMC.touchpoints.statsBySource();
+  const lpStats = await EMC.touchpoints.statsByLandingPage();
+
+  // ─── Top stats ───
+  const totalVisits = allTPs.filter(t => t.type === 'page_view').length;
+  const uniqueSessions = new Set(allTPs.map(t => t.sessionId).filter(Boolean));
+  const totalLeads = allContacts.filter(c => c.currentStage >= 2 && c.createdBy === 'landing-page').length;
+  const overallConversion = uniqueSessions.size > 0
+    ? Math.round((totalLeads / uniqueSessions.size) * 100)
+    : 0;
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card accent-navy">
+      <div class="stat-label">إجمالي الزيارات</div>
+      <div class="stat-value">${EMC.utils.formatNumber(totalVisits)}</div>
+      <div class="stat-meta">على كل الـ landing pages</div>
+    </div>
+    <div class="stat-card accent-gold">
+      <div class="stat-label">زوار فريدون</div>
+      <div class="stat-value">${EMC.utils.formatNumber(uniqueSessions.size)}</div>
+      <div class="stat-meta">Sessions فريدة</div>
+    </div>
+    <div class="stat-card accent-red">
+      <div class="stat-label">Leads من الـ landing</div>
+      <div class="stat-value">${EMC.utils.formatNumber(totalLeads)}</div>
+      <div class="stat-meta">المرحلة 2</div>
+    </div>
+    <div class="stat-card accent-success">
+      <div class="stat-label">معدل التحويل العام</div>
+      <div class="stat-value">${overallConversion}%</div>
+      <div class="stat-meta">Leads / زوار فريدون</div>
+    </div>
+  `;
+
+  document.getElementById('result-meta').textContent =
+    `${sourceStats.length} مصدر · ${lpStats.length} landing page · ${EMC.utils.formatNumber(allTPs.length)} touchpoint مسجّل`;
+
+  // ─── Sources table ───
+  sourceStats.sort((a, b) => b.uniqueVisitors - a.uniqueVisitors);
+  const maxVisitors = Math.max(...sourceStats.map(s => s.uniqueVisitors), 1);
+
+  document.querySelector('#sources-tbody').innerHTML = sourceStats.map(s => {
+    const color = EMC.SOURCE_COLORS[s.source] || '#94A3B8';
+    const widthPct = (s.uniqueVisitors / maxVisitors) * 100;
+    return `
+      <tr>
+        <td>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: ${color}; flex-shrink: 0;"></span>
+            <strong>${EMC.SOURCES[s.source] || s.source}</strong>
+          </div>
+        </td>
+        <td><strong style="font-variant-numeric: tabular-nums;">${s.visits}</strong></td>
+        <td>
+          <div style="font-variant-numeric: tabular-nums; font-weight: 600;">${s.uniqueVisitors}</div>
+          <div class="src-bar"><div style="width: ${widthPct}%; background: ${color};"></div></div>
+        </td>
+        <td><strong style="font-variant-numeric: tabular-nums;">${s.formSubmits}</strong></td>
+        <td><strong style="font-variant-numeric: tabular-nums; color: var(--emc-red);">${s.leads}</strong></td>
+        <td>
+          <span class="badge ${s.conversionRate >= 10 ? 'badge-success' : s.conversionRate >= 3 ? 'badge-warn' : 'badge-danger'}" style="font-variant-numeric: tabular-nums;">${s.conversionRate}%</span>
+        </td>
+      </tr>
+    `;
+  }).join('') || `<tr><td colspan="6" class="empty">لا توجد بيانات بعد</td></tr>`;
+
+  // ─── Landing pages ───
+  document.getElementById('lp-grid').innerHTML = lpStats.map(lp => {
+    // sparkline: visits per day, last 7 days
+    const daily = Array(7).fill(0);
+    const now = Date.now();
+    const day = 86400000;
+    allTPs.forEach(tp => {
+      if (tp.landingPage !== lp.slug || tp.type !== 'page_view') return;
+      const t = new Date(tp.timestamp).getTime();
+      const dayIdx = Math.floor((now - t) / day);
+      if (dayIdx >= 0 && dayIdx < 7) daily[6 - dayIdx]++;
+    });
+    const maxBar = Math.max(...daily, 1);
+
+    return `
+      <div class="lp-perf-card">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <div style="font-weight: 800; color: var(--emc-navy); font-size: 15.5px; margin-bottom: 2px;">${lp.title}</div>
+            <div class="mono" style="font-size: 11px; color: var(--emc-faint);">/lp/${lp.slug}</div>
+          </div>
+          <a href="../lp/${lp.slug}.html" target="_blank" class="btn btn-ghost btn-sm" style="padding: 4px 10px; font-size: 11px;">فتح ↗</a>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12.5px;">
+          <div>
+            <div style="color: var(--emc-muted); margin-bottom: 2px;">زيارات</div>
+            <div style="font-size: 22px; font-weight: 800; color: var(--emc-navy); font-variant-numeric: tabular-nums;">${lp.visits}</div>
+          </div>
+          <div>
+            <div style="color: var(--emc-muted); margin-bottom: 2px;">Leads</div>
+            <div style="font-size: 22px; font-weight: 800; color: var(--emc-red); font-variant-numeric: tabular-nums;">${lp.leads}</div>
+          </div>
+          <div>
+            <div style="color: var(--emc-muted); margin-bottom: 2px;">معدل التحويل</div>
+            <div style="font-weight: 700; color: ${lp.conversionRate >= 10 ? 'var(--emc-success)' : 'var(--emc-ink-2)'}; font-variant-numeric: tabular-nums;">${lp.conversionRate}%</div>
+          </div>
+          <div>
+            <div style="color: var(--emc-muted); margin-bottom: 2px;">متوسط وقت</div>
+            <div style="font-weight: 700; color: var(--emc-ink-2); font-variant-numeric: tabular-nums;">${lp.avgTimeOnPage > 0 ? lp.avgTimeOnPage + ' ث' : '—'}</div>
+          </div>
+        </div>
+        <div style="margin-top: 12px;">
+          <div style="font-size: 10.5px; color: var(--emc-faint); margin-bottom: 4px; letter-spacing: 0.05em;">آخر 7 أيام</div>
+          <div class="lp-mini-bars">
+            ${daily.map(d => `<div style="height: ${(d / maxBar) * 100}%;" title="${d} زيارة"></div>`).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // ─── Touchpoints table with filter ───
+  const recentTPs = allTPs.slice(0, 30);
+
+  function renderTPs(filter = 'all') {
+    let docs = recentTPs;
+    if (filter !== 'all') docs = docs.filter(t => t.type === filter);
+    docs = docs.slice(0, 20);
+
+    const typeIcons = { page_view: '👁', form_submit: '✓', cta_click: '👆', scroll_depth: '↓', time_on_page: '⏱', exit_intent: '✕' };
+    const typeColors = { page_view: 'var(--emc-navy)', form_submit: 'var(--emc-success)', cta_click: 'var(--emc-red)', scroll_depth: 'var(--emc-gold)', time_on_page: 'var(--emc-ink-2)' };
+
+    document.getElementById('tps-tbody').innerHTML = docs.map(tp => {
+      const contact = tp.contactId ? allContacts.find(c => c.id === tp.contactId) : null;
+      return `
+        <tr>
+          <td>
+            <span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: ${typeColors[tp.type] || 'var(--emc-ink)'};">
+              <span>${typeIcons[tp.type] || '·'}</span>
+              <span style="font-size: 13px;">${EMC.TOUCHPOINT_TYPES[tp.type] || tp.type}</span>
+            </span>
+          </td>
+          <td>
+            <span class="badge" style="background: ${(EMC.SOURCE_COLORS[tp.source] || '#94A3B8')}15; color: ${EMC.SOURCE_COLORS[tp.source] || '#94A3B8'}; border-color: ${(EMC.SOURCE_COLORS[tp.source] || '#94A3B8')}40;">${EMC.SOURCES[tp.source] || tp.source || '—'}</span>
+          </td>
+          <td><span class="mono" style="font-size: 11.5px; color: var(--emc-ink-2);">${tp.landingPage || '—'}</span></td>
+          <td><span class="mono" style="font-size: 11px; color: var(--emc-faint);">${tp.sessionId ? tp.sessionId.substring(0, 14) : '—'}</span></td>
+          <td>${contact ? `<a href="contact-detail.html?id=${contact.id}" style="color: var(--emc-navy); font-weight: 600;">${contact.identity.fullName}</a>` : '<span style="color: var(--emc-faint); font-size: 12px;">مجهول</span>'}</td>
+          <td style="color: var(--emc-muted); font-size: 12.5px;">${EMC.utils.formatDate(tp.timestamp, { relative: true })}</td>
+        </tr>
+      `;
+    }).join('') || `<tr><td colspan="6" class="empty">لا توجد touchpoints بهذا الفلتر</td></tr>`;
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.background = 'transparent';
+        b.style.color = 'var(--emc-ink-2)';
+        b.style.borderColor = 'var(--emc-line)';
+      });
+      btn.classList.add('active');
+      btn.style.background = 'var(--emc-navy)';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'var(--emc-navy)';
+      renderTPs(btn.dataset.filter);
+    });
+  });
+
+  renderTPs('all');
+})();
+</script>
+</body>
+</html>

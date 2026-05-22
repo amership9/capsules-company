@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>قوالب الرسائل · EMC CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-segments.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-templates.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-layout.js"></script>
+<style>
+  .tpl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .tpl-card {
+    background: #fff;
+    border: 1px solid var(--emc-line);
+    border-radius: var(--radius);
+    padding: 18px 20px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.05s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
+    min-height: 180px;
+  }
+  .tpl-card:hover {
+    border-color: var(--emc-navy);
+    box-shadow: 0 4px 12px rgba(11, 37, 69, 0.08);
+  }
+  .tpl-card-name {
+    font-weight: 700;
+    font-size: 14.5px;
+    color: var(--emc-navy);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  .tpl-card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .tpl-card-body {
+    flex: 1;
+    font-size: 13px;
+    color: var(--emc-ink-2);
+    line-height: 1.65;
+    white-space: pre-wrap;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    margin-bottom: 12px;
+  }
+  .tpl-card-subject {
+    font-weight: 700;
+    color: var(--emc-navy);
+    font-size: 13.5px;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .tpl-card-footer {
+    padding-top: 10px;
+    border-top: 1px dashed var(--emc-line-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11.5px;
+    color: var(--emc-muted);
+  }
+  .tpl-chan-wa { background: rgba(37, 211, 102, 0.12); color: #128C46; border-color: rgba(37, 211, 102, 0.32); }
+  .tpl-chan-email { background: rgba(11, 37, 69, 0.06); color: var(--emc-navy); border-color: rgba(11, 37, 69, 0.18); }
+
+  /* Modal */
+  .emc-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 23, 48, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 80;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    transition: opacity 0.18s;
+  }
+  .emc-modal-overlay.show { display: flex; opacity: 1; }
+  .emc-modal {
+    background: #fff;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+  }
+  .emc-modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--emc-line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .emc-modal-header h3 { margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700; }
+  .emc-modal-close {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--emc-ink-2);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: grid; place-items: center;
+  }
+  .emc-modal-close:hover { background: var(--emc-cream); }
+  .emc-modal-body { padding: 22px 24px; overflow-y: auto; flex: 1; }
+  .emc-modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid var(--emc-line);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    background: var(--emc-cream);
+  }
+
+  .copy-block {
+    background: var(--emc-cream);
+    border: 1px solid var(--emc-line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .copy-block-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--emc-muted);
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .copy-block-content {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--emc-ink);
+    white-space: pre-wrap;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .copy-btn-sm {
+    background: var(--emc-navy);
+    color: #fff;
+    border: 0;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn-sm:hover { background: var(--emc-navy-deep); }
+  .copy-btn-sm.copied { background: var(--emc-success); }
+</style>
+</head>
+<body data-screen-label="11 Templates">
+
+<div id="emc-shell-root"></div>
+
+<template id="tpls-tpl">
+  <div class="emc-crumbs">
+    <a href="dashboard.html">لوحة التحكم</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>قوالب الرسائل</span>
+  </div>
+
+  <div class="emc-page-head">
+    <div>
+      <h1 class="emc-page-title">قوالب الرسائل</h1>
+      <div class="emc-page-sub" id="result-meta">اضغط على القالب لمعاينته ونسخه — يدعم تخصيصاً بمتغيرات جهة الاتصال</div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-primary" id="new-tpl-btn">+ قالب جديد</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid-4" style="margin-bottom: 22px;" id="stats-row"></div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="search-mini">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+      <input class="input" id="filter-search" placeholder="ابحث في الاسم أو المحتوى…" />
+    </div>
+    <select class="select" id="filter-channel">
+      <option value="">كل القنوات</option>
+      <option value="email">إيميل</option>
+      <option value="whatsapp">واتساب</option>
+    </select>
+    <select class="select" id="filter-sequence">
+      <option value="">كل السلاسل</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" id="clear-filters">مسح</button>
+  </div>
+
+  <!-- Grid -->
+  <div class="tpl-grid" id="tpls-grid"></div>
+</template>
+
+<!-- Modal markup (مخفي بشكل افتراضي) -->
+<div class="emc-modal-overlay" id="modal">
+  <div class="emc-modal">
+    <div class="emc-modal-header">
+      <h3 id="modal-title">معاينة القالب</h3>
+      <button class="emc-modal-close" id="modal-close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="emc-modal-body" id="modal-body"></div>
+    <div class="emc-modal-footer">
+      <button class="btn btn-ghost btn-sm" id="modal-cancel">إغلاق</button>
+      <a id="modal-wa-link" href="#" target="_blank" class="btn btn-sm" style="background: #25D366; color: #fff; display: none;">📱 افتح في واتساب</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(async function () {
+  const main = await EMC.layout.render({ page: 'templates' });
+  if (!main) return;
+  await EMC.seedIfEmpty();
+  main.innerHTML = document.getElementById('tpls-tpl').innerHTML;
+
+  // Fill sequence filter
+  const seqSel = document.getElementById('filter-sequence');
+  Object.entries(EMC.TEMPLATE_SEQUENCES).forEach(([k, v]) => {
+    const o = document.createElement('option');
+    o.value = k; o.textContent = v;
+    seqSel.appendChild(o);
+  });
+
+  let allContacts = [];
+  try { allContacts = await EMC.contacts.list(); } catch (e) {}
+
+  await renderAll();
+
+  // ─── Render ───
+  async function renderAll() {
+    const stats = await EMC.templates.stats();
+    const seqCount = Object.keys(stats.bySequence).length;
+
+    document.getElementById('stats-row').innerHTML = `
+      <div class="stat-card accent-navy">
+        <div class="stat-label">إجمالي القوالب</div>
+        <div class="stat-value">${stats.total}</div>
+        <div class="stat-meta">${stats.active} نشط</div>
+      </div>
+      <div class="stat-card accent-gold">
+        <div class="stat-label">قوالب الإيميل</div>
+        <div class="stat-value">${stats.byChannel.email || 0}</div>
+        <div class="stat-meta">قابلة للنسخ في Gmail</div>
+      </div>
+      <div class="stat-card accent-success">
+        <div class="stat-label">قوالب الواتساب</div>
+        <div class="stat-value">${stats.byChannel.whatsapp || 0}</div>
+        <div class="stat-meta">رابط wa.me مباشر</div>
+      </div>
+      <div class="stat-card accent-red">
+        <div class="stat-label">السلاسل النشطة</div>
+        <div class="stat-value">${seqCount}</div>
+        <div class="stat-meta">welcome / follow_up / إلخ</div>
+      </div>
+    `;
+
+    await applyFilters();
+  }
+
+  async function applyFilters() {
+    const filters = {};
+    const s = document.getElementById('filter-search').value.trim();
+    if (s) filters.search = s;
+    const ch = document.getElementById('filter-channel').value;
+    if (ch) filters.channel = ch;
+    const sq = document.getElementById('filter-sequence').value;
+    if (sq) filters.sequence = sq;
+
+    const docs = await EMC.templates.list(filters);
+    renderGrid(docs);
+    document.getElementById('result-meta').textContent =
+      `${docs.length} قالب · اضغط على أي واحد لمعاينته ونسخه`;
+  }
+
+  function renderGrid(docs) {
+    const grid = document.getElementById('tpls-grid');
+    if (!docs.length) {
+      grid.innerHTML = `
+        <div style="grid-column: 1/-1;" class="empty">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="color: var(--emc-faint); margin-bottom: 8px;">
+            <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 7 9-7"/>
+          </svg>
+          <h3>مفيش قوالب بعد</h3>
+          <div>القوالب النموذجية بتتعبا تلقائياً عند أول دخول.</div>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = docs.map(t => {
+      const isWA = t.channel === 'whatsapp';
+      const preview = (t.body || '').substring(0, isWA ? 240 : 180);
+      return `
+        <div class="tpl-card" data-id="${t.id}">
+          <div class="tpl-card-name">${t.name || 'بدون اسم'}</div>
+          <div class="tpl-card-badges">
+            <span class="badge ${isWA ? 'tpl-chan-wa' : 'tpl-chan-email'}">${isWA ? '💬' : '✉'} ${EMC.TEMPLATE_CHANNELS[t.channel] || t.channel}</span>
+            <span class="badge">${EMC.TEMPLATE_SEQUENCES[t.sequence] || t.sequence}</span>
+            ${t.dayOffset > 0 ? `<span class="badge" style="background: var(--emc-cream);">يوم +${t.dayOffset}</span>` : ''}
+          </div>
+          ${t.subject ? `<div class="tpl-card-subject">${t.subject}</div>` : ''}
+          <div class="tpl-card-body">${preview}${(t.body || '').length > preview.length ? '…' : ''}</div>
+          <div class="tpl-card-footer">
+            <span>${t.isActive ? '<span style="color: var(--emc-success);">●</span> نشط' : '<span style="color: var(--emc-faint);">○</span> غير نشط'}</span>
+            <span>${EMC.utils.formatDate(t.updatedAt || t.createdAt, { relative: true })}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    grid.querySelectorAll('.tpl-card').forEach(card => {
+      card.addEventListener('click', () => openModal(card.dataset.id));
+    });
+  }
+
+  // ─── Modal ───
+  let currentTpl = null;
+
+  async function openModal(id) {
+    currentTpl = await EMC.templates.get(id);
+    if (!currentTpl) return;
+
+    document.getElementById('modal-title').textContent = currentTpl.name;
+    renderModalBody(null);
+    document.getElementById('modal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('show');
+    currentTpl = null;
+  }
+
+  function renderModalBody(selectedContact) {
+    const t = currentTpl;
+    if (!t) return;
+    const isWA = t.channel === 'whatsapp';
+
+    const renderedSubject = selectedContact ? EMC.templates.render(t.subject, selectedContact) : t.subject;
+    const renderedBody = selectedContact ? EMC.templates.render(t.body, selectedContact) : t.body;
+
+    const contactOptions = allContacts
+      .filter(c => c.identity?.fullName)
+      .map(c => `<option value="${c.id}" ${selectedContact?.id === c.id ? 'selected' : ''}>${c.identity.fullName}${c.identity.companyName ? ' · ' + c.identity.companyName : ''}</option>`)
+      .join('');
+
+    document.getElementById('modal-body').innerHTML = `
+      <div style="margin-bottom: 18px;">
+        <label class="field-label" style="font-size: 12px;">تخصيص لجهة اتصال <span class="hint">— اختر contact للاستبدال التلقائي للمتغيرات</span></label>
+        <select class="select" id="modal-contact-sel" style="width: 100%;">
+          <option value="">— كما هو (مع المتغيرات الخام) —</option>
+          ${contactOptions}
+        </select>
+      </div>
+
+      ${isWA ? '' : `
+        <div class="copy-block">
+          <div class="copy-block-label">
+            <span>الموضوع</span>
+            <button class="copy-btn-sm" data-copy="subject">📋 نسخ</button>
+          </div>
+          <div class="copy-block-content" id="content-subject">${renderedSubject || '<span style="color: var(--emc-faint);">— بدون موضوع —</span>'}</div>
+        </div>
+      `}
+
+      <div class="copy-block">
+        <div class="copy-block-label">
+          <span>${isWA ? 'نص الرسالة' : 'النص'}</span>
+          <button class="copy-btn-sm" data-copy="body">📋 نسخ</button>
+        </div>
+        <div class="copy-block-content" id="content-body">${renderedBody}</div>
+      </div>
+
+      ${selectedContact && selectedContact.channels?.whatsapp ? `
+        <div style="margin-top: 14px; padding: 12px 14px; background: rgba(37, 211, 102, 0.08); border: 1px solid rgba(37, 211, 102, 0.3); border-radius: 8px; font-size: 13px; color: #128C46;">
+          📱 الـ contact ده عنده واتساب — اضغط الزر الأخضر تحت لفتح المحادثة جاهزة.
+        </div>
+      ` : ''}
+    `;
+
+    // copy buttons
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const which = btn.dataset.copy;
+        const text = which === 'subject' ? renderedSubject : renderedBody;
+        try {
+          await navigator.clipboard.writeText(text || '');
+          btn.classList.add('copied');
+          btn.textContent = '✓ تم النسخ';
+          EMC.utils.toast('تم نسخ ' + (which === 'subject' ? 'الموضوع' : 'النص'), 'success');
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.textContent = '📋 نسخ';
+          }, 1800);
+        } catch (e) {
+          EMC.utils.toast('فشل النسخ — انسخ يدوياً', 'error');
+        }
+      });
+    });
+
+    // contact selector
+    document.getElementById('modal-contact-sel').addEventListener('change', async (e) => {
+      const cId = e.target.value;
+      const ctc = cId ? await EMC.contacts.get(cId) : null;
+      renderModalBody(ctc);
+    });
+
+    // WhatsApp deep link
+    const waBtn = document.getElementById('modal-wa-link');
+    if (isWA && selectedContact?.channels?.whatsapp) {
+      const phone = selectedContact.channels.whatsapp.replace(/[^\d]/g, '');
+      waBtn.href = `https://wa.me/${phone}?text=${encodeURIComponent(renderedBody)}`;
+      waBtn.style.display = 'inline-flex';
+    } else {
+      waBtn.style.display = 'none';
+      waBtn.href = '#';
+    }
+  }
+
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target.id === 'modal') closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // ─── Filters ───
+  let t;
+  const debounce = (fn) => { clearTimeout(t); t = setTimeout(fn, 200); };
+  document.getElementById('filter-search').addEventListener('input', () => debounce(applyFilters));
+  document.getElementById('filter-channel').addEventListener('change', applyFilters);
+  document.getElementById('filter-sequence').addEventListener('change', applyFilters);
+  document.getElementById('clear-filters').addEventListener('click', () => {
+    document.getElementById('filter-search').value = '';
+    document.getElementById('filter-channel').value = '';
+    document.getElementById('filter-sequence').value = '';
+    applyFilters();
+  });
+
+  document.getElementById('new-tpl-btn').addEventListener('click', () => {
+    EMC.utils.toast('قريباً — إنشاء القوالب يدوياً متاح في الإصدار القادم', 'default');
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>إضافة شريحة · EMC CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-segments.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-layout.js"></script>
+</head>
+<body data-screen-label="07 Add segment">
+
+<div id="emc-shell-root"></div>
+
+<template id="add-tpl">
+  <div class="emc-crumbs">
+    <a href="dashboard.html">لوحة التحكم</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <a href="segments.html">الشرائح المستهدفة</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>إضافة جديدة</span>
+  </div>
+
+  <div class="emc-page-head">
+    <div>
+      <h1 class="emc-page-title">تعريف شريحة مستهدفة</h1>
+      <div class="emc-page-sub">عرّف الجمهور النظري الذي تخطط لاستهدافه — مين بالظبط، ليه، وإزاي.</div>
+    </div>
+  </div>
+
+  <form id="add-form" style="display:grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: flex-start;">
+    <div>
+
+      <!-- ──────── Section 1 — الهوية والوصف ──────── -->
+      <div class="form-section open" data-section="identity">
+        <div class="form-section-header">
+          <div class="form-section-num">1</div>
+          <div>
+            <div class="form-section-title">الهوية والوصف</div>
+            <div class="form-section-sub">مين الشريحة دي بإيجاز؟</div>
+          </div>
+          <span class="form-section-status">إلزامي</span>
+          <span class="form-section-chevron">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+        <div class="form-section-body">
+          <div class="field">
+            <label class="field-label">اسم الشريحة <span class="req">*</span></label>
+            <input class="input" name="name" required placeholder="مثال: صناعيين القاهرة المتوسطة" />
+          </div>
+          <div class="field">
+            <label class="field-label">وصف مختصر</label>
+            <textarea class="textarea" name="description" placeholder="مين بالظبط، وليه استهدافهم منطقي؟ — 3-4 سطور تختصر الشريحة."></textarea>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">الأولوية <span class="req">*</span></label>
+              <div class="checkbox-group" id="priority-group">
+                <label class="chip-check red"><input type="radio" name="priority" value="high" /> عالية</label>
+                <label class="chip-check checked"><input type="radio" name="priority" value="medium" checked /> متوسطة</label>
+                <label class="chip-check"><input type="radio" name="priority" value="low" /> منخفضة</label>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">الحالة الأولية</label>
+              <select class="select" name="status">
+                <option value="active" selected>نشطة</option>
+                <option value="paused">مؤجلة</option>
+                <option value="exhausted">مستنفدة</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── Section 2 — المعايير الديموجرافية ──────── -->
+      <div class="form-section open" data-section="demographic">
+        <div class="form-section-header">
+          <div class="form-section-num">2</div>
+          <div>
+            <div class="form-section-title">المعايير الديموجرافية والاقتصادية</div>
+            <div class="form-section-sub">شكل الشركة المستهدفة</div>
+          </div>
+          <span class="form-section-status">المهم</span>
+          <span class="form-section-chevron">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+        <div class="form-section-body">
+          <div class="field">
+            <label class="field-label">الصناعات <span class="hint">(اختر واحدة أو أكثر)</span></label>
+            <div class="checkbox-group" id="industries-group"></div>
+          </div>
+          <div class="field">
+            <label class="field-label">أحجام الشركات</label>
+            <div class="checkbox-group" id="sizes-group"></div>
+          </div>
+          <div class="field">
+            <label class="field-label">نطاقات الإيراد السنوي (جنيه)</label>
+            <div class="checkbox-group" id="revenue-group"></div>
+          </div>
+          <div class="field">
+            <label class="field-label">سنوات في السوق</label>
+            <div class="checkbox-group" id="years-group"></div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">الدول</label>
+              <div class="checkbox-group" id="countries-group"></div>
+            </div>
+            <div class="field">
+              <label class="field-label">المدن <span class="hint">(افصل بفاصلة)</span></label>
+              <input class="input" id="cities-input" placeholder="القاهرة, الجيزة, الإسكندرية" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── Section 3 — معايير EOS ──────── -->
+      <div class="form-section open" data-section="eos">
+        <div class="form-section-header">
+          <div class="form-section-num">3</div>
+          <div>
+            <div class="form-section-title">معايير EOS</div>
+            <div class="form-section-sub">السقوف والاستعداد — الفارق الحقيقي في الـ targeting</div>
+          </div>
+          <span class="form-section-status">المهم</span>
+          <span class="form-section-chevron">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+        <div class="form-section-body">
+          <div class="field">
+            <label class="field-label">مستويات الإلمام بـ EOS المستهدفة</label>
+            <div class="checkbox-group" id="familiarity-group"></div>
+          </div>
+          <div class="field">
+            <label class="field-label">السقوف المستهدفة <span class="hint">(اللي EOS بيقدم لها حل)</span></label>
+            <div class="checkbox-group" id="ceilings-group"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── Section 4 — استراتيجية الاقتناص ──────── -->
+      <div class="form-section open" data-section="strategy">
+        <div class="form-section-header">
+          <div class="form-section-num">4</div>
+          <div>
+            <div class="form-section-title">استراتيجية الاقتناص</div>
+            <div class="form-section-sub">إزاي نوصل لهم وكام يقدّر حجمهم؟</div>
+          </div>
+          <span class="form-section-status">اختياري</span>
+          <span class="form-section-chevron">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+        <div class="form-section-body">
+          <div class="field">
+            <label class="field-label">حجم الشريحة المُقدَّر <span class="hint">(تقدير لعدد الشركات في السوق)</span></label>
+            <input class="input" type="number" name="estimatedSize" min="0" placeholder="480" />
+          </div>
+          <div class="field">
+            <label class="field-label">قنوات الاقتناص</label>
+            <textarea class="textarea" name="acquisitionStrategy" placeholder="LinkedIn Sales Navigator + غرفة الصناعات + ندوة شهرية + إحالات…"></textarea>
+          </div>
+          <div class="field">
+            <label class="field-label">ملاحظات إضافية</label>
+            <textarea class="textarea" name="notes" placeholder="أي سياق مهم نتذكره — معدل التحويل المتوقع، الموسمية، التوقيت المناسب…"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────── Sidebar — Summary + Submit ──────── -->
+    <div style="position: sticky; top: 92px;">
+      <div class="card card-pad" style="margin-bottom: 16px;">
+        <h3 style="margin: 0 0 12px; font-size: 14px; font-weight: 700; color: var(--emc-navy); text-transform: uppercase; letter-spacing: 0.05em;">اختصار سريع</h3>
+        <div id="summary" style="font-size: 13px; color: var(--emc-ink-2); line-height: 1.7;">
+          <div style="color: var(--emc-faint); font-style: italic;">ابدأ التعبئة وهتلاقي ملخص الشريحة هنا</div>
+        </div>
+        <div style="height: 1px; background: var(--emc-line-soft); margin: 16px 0;"></div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="submit-btn">حفظ الشريحة</button>
+        <a href="segments.html" class="btn btn-ghost" style="width: 100%; margin-top: 8px;">إلغاء</a>
+      </div>
+
+      <div class="card card-pad" style="background: var(--emc-cream); border-color: var(--emc-line);">
+        <h4 style="margin: 0 0 8px; font-size: 13px; color: var(--emc-navy); font-weight: 700;">💡 ملحوظة</h4>
+        <div style="font-size: 12.5px; color: var(--emc-ink-2); line-height: 1.7;">
+          الشريحة دي مش لتسجيل أشخاص — هي لتعريف الجمهور النظري اللي تخطط لاستهدافه.
+          الأشخاص الفعليون اللي يظهروا منها يبدأوا من <strong>المرحلة 2</strong> كـ Lead.
+        </div>
+      </div>
+    </div>
+  </form>
+</template>
+
+<script>
+(async function () {
+  const main = await EMC.layout.render({ page: 'segments' });
+  if (!main) return;
+  main.innerHTML = document.getElementById('add-tpl').innerHTML;
+
+  // ─── populate chip groups ───
+  const fillChips = (containerId, dict, type = 'checkbox', fieldKey = null) => {
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    c.innerHTML = Object.entries(dict).map(([k, v]) => `
+      <label class="chip-check">
+        <input type="${type}" name="criteria.${fieldKey || containerId.replace('-group', '')}" value="${k}" />
+        ${v}
+      </label>
+    `).join('');
+  };
+  fillChips('industries-group', EMC.INDUSTRIES, 'checkbox', 'industries');
+  fillChips('sizes-group', EMC.COMPANY_SIZES, 'checkbox', 'companySizes');
+  fillChips('revenue-group', EMC.REVENUE_RANGES, 'checkbox', 'revenueRanges');
+  fillChips('years-group', EMC.YEARS_IN_BUSINESS, 'checkbox', 'yearsInBusiness');
+  fillChips('countries-group', EMC.COUNTRIES, 'checkbox', 'countries');
+  fillChips('familiarity-group', EMC.EOS_FAMILIARITY, 'checkbox', 'eosFamiliarity');
+  fillChips('ceilings-group', EMC.CEILINGS, 'checkbox', 'ceilings');
+
+  // EG default
+  const egInp = document.querySelector('#countries-group input[value="EG"]');
+  if (egInp) {
+    egInp.checked = true;
+    egInp.closest('.chip-check').classList.add('checked');
+  }
+
+  // ─── chip interactions ───
+  document.querySelectorAll('.chip-check').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      const inp = chip.querySelector('input');
+      if (e.target !== inp) {
+        if (inp.type === 'radio') {
+          inp.checked = true;
+        } else {
+          inp.checked = !inp.checked;
+        }
+      }
+      if (inp.type === 'radio') {
+        chip.closest('.checkbox-group').querySelectorAll('.chip-check').forEach(c => c.classList.remove('checked'));
+        chip.classList.add('checked');
+      } else {
+        chip.classList.toggle('checked', inp.checked);
+      }
+      updateSummary();
+    });
+    const inp = chip.querySelector('input');
+    if (inp.checked) chip.classList.add('checked');
+  });
+
+  // ─── collapsibles ───
+  document.querySelectorAll('.form-section-header').forEach(h => {
+    h.addEventListener('click', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
+      h.closest('.form-section').classList.toggle('open');
+    });
+  });
+
+  // ─── Summary live update ───
+  const form = document.getElementById('add-form');
+  function updateSummary() {
+    const data = collectFormData();
+    const lines = [];
+    if (data.name) lines.push(`<strong style="color: var(--emc-navy);">${data.name}</strong>`);
+    if (data.priority) {
+      const colors = EMC.SEGMENT_PRIORITY_COLORS[data.priority];
+      lines.push(`<span class="badge" style="background:${colors.bg}; color:${colors.text}; border-color:${colors.border};">أولوية ${EMC.SEGMENT_PRIORITY[data.priority]}</span>`);
+    }
+    if (data.criteria?.industries?.length) {
+      lines.push(`<div><span style="color: var(--emc-muted); font-size: 11.5px;">الصناعات:</span> ${data.criteria.industries.map(i => EMC.INDUSTRIES[i]).join(' · ')}</div>`);
+    }
+    if (data.criteria?.companySizes?.length) {
+      lines.push(`<div><span style="color: var(--emc-muted); font-size: 11.5px;">الحجم:</span> ${data.criteria.companySizes.map(s => EMC.COMPANY_SIZES[s]).join(' · ')}</div>`);
+    }
+    if (data.criteria?.ceilings?.length) {
+      lines.push(`<div><span style="color: var(--emc-muted); font-size: 11.5px;">السقوف:</span> ${data.criteria.ceilings.map(c => EMC.CEILINGS[c]).join(' · ')}</div>`);
+    }
+    if (data.estimatedSize) {
+      lines.push(`<div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--emc-line-soft);"><strong style="color: var(--emc-navy); font-size: 16px;">${EMC.utils.formatNumber(data.estimatedSize)}</strong> <span style="color: var(--emc-muted); font-size: 12px;">شركة مُقدَّرة</span></div>`);
+    }
+    document.getElementById('summary').innerHTML = lines.length
+      ? lines.join('<div style="height: 6px;"></div>')
+      : `<div style="color: var(--emc-faint); font-style: italic;">ابدأ التعبئة وهتلاقي ملخص الشريحة هنا</div>`;
+  }
+
+  function collectFormData() {
+    const data = {
+      name: form.querySelector('[name="name"]').value.trim(),
+      description: form.querySelector('[name="description"]').value.trim(),
+      priority: form.querySelector('[name="priority"]:checked')?.value || 'medium',
+      status: form.querySelector('[name="status"]').value,
+      estimatedSize: parseInt(form.querySelector('[name="estimatedSize"]').value) || 0,
+      acquisitionStrategy: form.querySelector('[name="acquisitionStrategy"]').value.trim(),
+      notes: form.querySelector('[name="notes"]').value.trim(),
+      criteria: {
+        industries: [],
+        companySizes: [],
+        revenueRanges: [],
+        yearsInBusiness: [],
+        countries: [],
+        cities: [],
+        eosFamiliarity: [],
+        ceilings: []
+      }
+    };
+    form.querySelectorAll('input[type="checkbox"][name^="criteria."]:checked').forEach(inp => {
+      const key = inp.name.replace('criteria.', '');
+      if (data.criteria[key]) data.criteria[key].push(inp.value);
+    });
+    const cities = document.getElementById('cities-input').value.split(',').map(s => s.trim()).filter(Boolean);
+    data.criteria.cities = cities;
+    return data;
+  }
+
+  // live update on any input
+  form.addEventListener('input', updateSummary);
+
+  // ─── submit ───
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'جاري الحفظ…';
+
+    try {
+      const data = collectFormData();
+      if (!data.name) throw new Error('اسم الشريحة مطلوب');
+      const id = await EMC.segments.create(data);
+      EMC.utils.toast('تم إنشاء الشريحة بنجاح', 'success');
+      setTimeout(() => window.location.href = `segment-detail.html?id=${id}`, 700);
+    } catch (err) {
+      console.error(err);
+      EMC.utils.toast(err.message || 'خطأ في الحفظ', 'error');
+      btn.disabled = false;
+      btn.textContent = 'حفظ الشريحة';
+    }
+  });
+})();
+</script>
+</body>
+</html>

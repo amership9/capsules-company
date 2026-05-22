@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>الشرائح المستهدفة · EMC CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-segments.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-layout.js"></script>
+</head>
+<body data-screen-label="06 Segments list">
+
+<div id="emc-shell-root"></div>
+
+<template id="segments-tpl">
+  <div class="emc-crumbs">
+    <a href="dashboard.html">لوحة التحكم</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>الشرائح المستهدفة</span>
+  </div>
+
+  <div class="emc-page-head">
+    <div>
+      <h1 class="emc-page-title">الشرائح المستهدفة</h1>
+      <div class="emc-page-sub" id="result-meta">جاري التحميل…</div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-outline" id="export-btn">⤓ تصدير</button>
+      <a href="add-segment.html" class="btn btn-primary">+ شريحة جديدة</a>
+    </div>
+  </div>
+
+  <!-- ─── Stats ─── -->
+  <div class="grid-4" style="margin-bottom: 22px;" id="stats-row"></div>
+
+  <!-- ─── Filter bar ─── -->
+  <div class="filter-bar">
+    <div class="search-mini">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+      <input class="input" id="filter-search" placeholder="ابحث في اسم أو وصف الشريحة…" />
+    </div>
+    <select class="select" id="filter-status">
+      <option value="">كل الحالات</option>
+      <option value="active">نشطة</option>
+      <option value="paused">مؤجلة</option>
+      <option value="exhausted">مستنفدة</option>
+    </select>
+    <select class="select" id="filter-priority">
+      <option value="">كل الأولويات</option>
+      <option value="high">عالية</option>
+      <option value="medium">متوسطة</option>
+      <option value="low">منخفضة</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" id="clear-filters">مسح الفلاتر</button>
+  </div>
+
+  <!-- ─── Table ─── -->
+  <div class="card" style="overflow: hidden;" id="table-wrap">
+    <table class="emc-table">
+      <thead>
+        <tr>
+          <th>الشريحة</th>
+          <th>المعايير الرئيسية</th>
+          <th>الأولوية</th>
+          <th>الحالة</th>
+          <th>الحجم المُقدَّر</th>
+          <th>الأنشطة <span style="font-weight: 500; color: var(--emc-faint); font-size: 10px;">(استهداف · تفاعل · تحويل)</span></th>
+          <th>آخر تحديث</th>
+        </tr>
+      </thead>
+      <tbody id="segments-tbody"><tr><td colspan="7" class="empty">جاري التحميل…</td></tr></tbody>
+    </table>
+  </div>
+</template>
+
+<script>
+(async function () {
+  const main = await EMC.layout.render({ page: 'segments' });
+  if (!main) return;
+  await EMC.seedIfEmpty();
+  main.innerHTML = document.getElementById('segments-tpl').innerHTML;
+
+  const stats = await EMC.segments.stats();
+
+  // ─── Stats row ───
+  const conversionRate = stats.totalTargeted > 0
+    ? Math.round((stats.totalEngaged / stats.totalTargeted) * 100)
+    : 0;
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card accent-navy">
+      <div class="stat-label">الشرائح النشطة</div>
+      <div class="stat-value">${stats.byStatus.active}</div>
+      <div class="stat-meta">من ${stats.total} شريحة معرّفة</div>
+    </div>
+    <div class="stat-card accent-gold">
+      <div class="stat-label">إجمالي الجمهور المُقدَّر</div>
+      <div class="stat-value">${EMC.utils.formatNumber(stats.totalEstimated)}</div>
+      <div class="stat-meta">شركة في كل الشرائح</div>
+    </div>
+    <div class="stat-card accent-red">
+      <div class="stat-label">تم استهدافه</div>
+      <div class="stat-value">${EMC.utils.formatNumber(stats.totalTargeted)}</div>
+      <div class="stat-meta">${EMC.utils.formatNumber(stats.totalEngaged)} تفاعل · ${EMC.utils.formatNumber(stats.totalConverted)} تحوّل</div>
+    </div>
+    <div class="stat-card accent-success">
+      <div class="stat-label">معدل التفاعل</div>
+      <div class="stat-value">${conversionRate}%</div>
+      <div class="stat-meta">من المُستهدفين تفاعلوا</div>
+    </div>
+  `;
+
+  // ─── Apply filters ───
+  const search = document.getElementById('filter-search');
+  const statusF = document.getElementById('filter-status');
+  const priorityF = document.getElementById('filter-priority');
+
+  const applyFilters = async () => {
+    const filters = {};
+    if (search.value.trim()) filters.search = search.value.trim();
+    if (statusF.value) filters.status = statusF.value;
+    if (priorityF.value) filters.priority = priorityF.value;
+
+    const docs = await EMC.segments.list(filters);
+    renderTable(docs);
+    document.getElementById('result-meta').textContent =
+      `${docs.length} شريحة · ${EMC.utils.formatNumber(stats.totalEstimated)} عميل محتمل في الجمهور`;
+  };
+
+  function renderTable(docs) {
+    const tbody = document.getElementById('segments-tbody');
+    if (!docs.length) {
+      tbody.innerHTML = `<tr><td colspan="7">
+        <div class="empty">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="color: var(--emc-faint); margin-bottom: 8px;">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+          </svg>
+          <h3>لسه ما عرّفت شرائح مستهدفة</h3>
+          <div style="margin-bottom: 16px;">ابدأ بتعريف أول شريحة عشان تخطط لاصطيادها استراتيجياً</div>
+          <a href="add-segment.html" class="btn btn-primary">أنشئ أول شريحة</a>
+        </div>
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = docs.map(s => {
+      const criteriaChips = buildCriteriaChips(s.criteria);
+      const priorityColors = EMC.SEGMENT_PRIORITY_COLORS[s.priority] || EMC.SEGMENT_PRIORITY_COLORS.medium;
+
+      return `
+        <tr onclick="window.location.href='segment-detail.html?id=${s.id}'">
+          <td style="max-width: 280px;">
+            <div style="font-weight: 700; color: var(--emc-ink); margin-bottom: 3px;">${s.name}</div>
+            <div style="font-size: 12.5px; color: var(--emc-muted); line-height: 1.45;">${(s.description || '').slice(0, 90)}${(s.description || '').length > 90 ? '…' : ''}</div>
+          </td>
+          <td>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+              ${criteriaChips}
+            </div>
+          </td>
+          <td>
+            <span class="badge" style="background:${priorityColors.bg}; color:${priorityColors.text}; border-color:${priorityColors.border};">
+              ${EMC.SEGMENT_PRIORITY[s.priority] || '—'}
+            </span>
+          </td>
+          <td>
+            <span class="badge ${s.status === 'paused' ? 'badge-warn' : s.status === 'exhausted' ? 'badge-danger' : 'badge-success'}">
+              ${EMC.SEGMENT_STATUS[s.status] || '—'}
+            </span>
+          </td>
+          <td><strong style="font-variant-numeric: tabular-nums; font-size: 15px;">${EMC.utils.formatNumber(s.estimatedSize || 0)}</strong></td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; font-size: 13px;">
+              <span style="color: var(--emc-ink-2); font-weight: 600;">${s.counters?.targeted || 0}</span>
+              <span style="color: var(--emc-faint);">·</span>
+              <span style="color: var(--emc-gold); font-weight: 600;">${s.counters?.engaged || 0}</span>
+              <span style="color: var(--emc-faint);">·</span>
+              <span style="color: var(--emc-success); font-weight: 600;">${s.counters?.converted || 0}</span>
+            </div>
+          </td>
+          <td style="color: var(--emc-muted); font-size: 13px;">${EMC.utils.formatDate(s.updatedAt || s.createdAt, { relative: true })}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function buildCriteriaChips(criteria) {
+    const chips = [];
+    if (criteria?.industries?.length) {
+      const labels = criteria.industries.slice(0, 2).map(i => EMC.INDUSTRIES[i]).filter(Boolean);
+      if (labels.length) chips.push(`<span class="badge" style="font-size: 11px;">${labels.join(' · ')}</span>`);
+    }
+    if (criteria?.companySizes?.length) {
+      const sz = criteria.companySizes.slice(0, 1).map(s => EMC.COMPANY_SIZES[s]).filter(Boolean);
+      if (sz.length) chips.push(`<span class="badge" style="font-size: 11px;">${sz.join(' · ')}</span>`);
+    }
+    if (criteria?.ceilings?.length) {
+      const c = criteria.ceilings.slice(0, 1).map(x => EMC.CEILINGS[x]).filter(Boolean);
+      if (c.length) chips.push(`<span class="badge" style="font-size: 11px; background: rgba(11,37,69,0.06); color: var(--emc-navy);">⚠ ${c.join(' · ')}</span>`);
+    }
+    return chips.join('') || '<span style="font-size: 11.5px; color: var(--emc-faint);">معايير غير محددة</span>';
+  }
+
+  let t;
+  const debounce = (fn) => { clearTimeout(t); t = setTimeout(fn, 200); };
+  search.addEventListener('input', () => debounce(applyFilters));
+  statusF.addEventListener('change', applyFilters);
+  priorityF.addEventListener('change', applyFilters);
+  document.getElementById('clear-filters').addEventListener('click', () => {
+    search.value = ''; statusF.value = ''; priorityF.value = '';
+    applyFilters();
+  });
+  document.getElementById('export-btn').addEventListener('click', () => {
+    EMC.utils.toast('قريباً — تصدير الشرائح', 'default');
+  });
+
+  applyFilters();
+})();
+</script>
+</body>
+</html>
