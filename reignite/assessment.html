@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الاستبيان — Reignite</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="mark">R</div>
+    <div><div class="name">Reignite</div><div class="sub" id="axisName">منحني الاحتراق</div></div>
+  </div>
+  <span class="tiny" id="counter">—</span>
+</div>
+
+<div class="wrap">
+  <div class="progress"><i id="bar" style="width:0%"></i></div>
+
+  <div class="card" id="qcard" style="min-height:340px">
+    <div class="spinner" id="boot"></div>
+  </div>
+
+  <div class="btn-row" style="margin-top:18px; justify-content:space-between">
+    <button class="btn btn-ghost" id="prevBtn">← السابق</button>
+    <button class="btn btn-gold" id="nextBtn" disabled>التالي ←</button>
+  </div>
+
+  <footer class="disclaimer">إجاباتك مجهّلة. خد وقتك — الصدق هو اللي بيخلّي المرآة تشتغل.</footer>
+</div>
+
+<script type="module" src="js/assessment.js"></script>
+</body>
+</html>
