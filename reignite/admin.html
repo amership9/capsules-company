@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة الأدمن — Reignite</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="mark">R</div>
+    <div><div class="name">Reignite</div><div class="sub">لوحة الأدمن — مرآة الشركة</div></div>
+  </div>
+  <a class="tiny" href="index.html">← الاستبيان</a>
+</div>
+
+<div class="wrap wrap-wide">
+
+  <!-- بوابة الدخول -->
+  <div class="card fade" id="gate">
+    <div class="eyebrow">دخول الأدمن</div>
+    <h1 style="font-size:26px">لوحة التحليل</h1>
+    <p class="muted" style="margin-top:8px">اكتب كود الأدمن عشان تشوف نتائج الدفعة المجمّعة.</p>
+    <div class="field">
+      <label>كود الأدمن</label>
+      <input type="text" id="passInput" placeholder="••••••••" autocomplete="off">
+    </div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-gold" id="gateBtn">دخول ←</button>
+      <span class="tiny" id="gateMsg"></span>
+    </div>
+  </div>
+
+  <!-- التطبيق -->
+  <div id="app" class="hidden">
+    <div class="card">
+      <div class="btn-row" style="justify-content:space-between">
+        <div class="field" style="margin:0;flex:1;min-width:220px">
+          <label>كود الدفعة / الشركة</label>
+          <input type="text" id="cohortInput" value="english-capsules">
+        </div>
+        <div class="btn-row" style="align-items:flex-end">
+          <button class="btn btn-gold" id="loadBtn">تحميل ↻</button>
+          <button class="btn btn-ghost" id="mirrorBtn">المرآة الجماعية ⛶</button>
+          <button class="btn btn-ghost" id="csvBtn">تصدير CSV</button>
+        </div>
+      </div>
+      <div class="tiny" id="loadMsg" style="margin-top:10px">—</div>
+    </div>
+
+    <div id="content"></div>
+  </div>
+
+  <footer class="disclaimer">
+    التحليل مجهّل — نسب وفئات لا أسماء. حيوية الشركة تُقرأ كخاصية ناشئة من تفاعل ناسها وأنظمتها وثقافتها.
+  </footer>
+</div>
+
+<!-- شاشة المرآة (Overlay) -->
+<div id="mirrorOverlay" class="hidden" style="position:fixed;inset:0;z-index:50;background:var(--navy-900);overflow:auto;padding:30px">
+  <div style="max-width:1000px;margin:0 auto">
+    <div class="btn-row" style="justify-content:flex-end">
+      <button class="btn btn-ghost" id="mirrorClose">إغلاق ✕</button>
+    </div>
+    <div id="mirrorBody"></div>
+  </div>
+</div>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>
