@@ -1,0 +1,217 @@
+/* ============================================================================
+   Reignite — منحني الاحتراق
+   styles.css — نظام التصميم (كحلي عميق + ذهبي + سماوي + أحمر برتقالي)
+============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&family=Tajawal:wght@300;400;500;700;800&display=swap');
+
+:root {
+  --navy-900: #060f24;
+  --navy-800: #0b1b3b;
+  --navy-700: #0f2347;
+  --navy-600: #16305c;
+  --navy-500: #1c2c4a;
+  --line:     #1c3056;
+
+  --gold:     #D4AF37;
+  --gold-soft:#e7c766;
+  --sky:      #7FB3D5;
+  --sky-soft: #a5d8ff;
+  --ember:    #E8623D;
+  --ember-soft:#ff8a63;
+
+  --white:    #f4f7fb;
+  --mute:     #9fb2cf;
+  --mute-2:   #6f86a8;
+
+  --radius:   16px;
+  --radius-s: 10px;
+  --maxw:     880px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background:
+    radial-gradient(1200px 700px at 80% -10%, #142a55 0%, transparent 55%),
+    radial-gradient(900px 600px at -10% 110%, #10204a 0%, transparent 50%),
+    var(--navy-900);
+  color: var(--white);
+  font-family: 'Tajawal', system-ui, sans-serif;
+  direction: rtl;
+  line-height: 1.7;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* حُبيبات خفيفة فوق الخلفية */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.wrap { position: relative; z-index: 1; max-width: var(--maxw); margin: 0 auto; padding: 28px 20px 80px; }
+.wrap-wide { max-width: 1180px; }
+
+h1, h2, h3, .display { font-family: 'Reem Kufi', 'Tajawal', sans-serif; font-weight: 600; line-height: 1.35; }
+
+a { color: var(--sky); }
+
+/* ---------- شريط علوي ---------- */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; max-width: 1180px; margin: 0 auto; position: relative; z-index: 2;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand .mark {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--gold), var(--ember));
+  display: grid; place-items: center; color: var(--navy-900); font-weight: 800; font-family: 'Reem Kufi';
+}
+.brand .name { font-family: 'Reem Kufi'; font-size: 18px; letter-spacing: .3px; }
+.brand .sub { color: var(--mute-2); font-size: 12px; }
+
+/* ---------- بطاقات ---------- */
+.card {
+  background: linear-gradient(180deg, rgba(22,48,92,.55), rgba(11,27,59,.55));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px;
+  backdrop-filter: blur(6px);
+}
+.card + .card { margin-top: 18px; }
+.card-flush { padding: 0; overflow: hidden; }
+
+.eyebrow {
+  color: var(--gold); font-size: 13px; letter-spacing: 2px; font-weight: 700;
+  text-transform: none; margin-bottom: 10px; display: inline-flex; gap: 8px; align-items: center;
+}
+.eyebrow::before { content: ''; width: 22px; height: 2px; background: var(--gold); display: inline-block; }
+
+.lead { color: var(--mute); font-size: 17px; }
+.muted { color: var(--mute); }
+.tiny { font-size: 12.5px; color: var(--mute-2); }
+
+/* ---------- أزرار ---------- */
+.btn {
+  appearance: none; border: none; cursor: pointer; font-family: 'Tajawal'; font-weight: 700;
+  font-size: 16px; padding: 14px 26px; border-radius: 12px; transition: .18s ease;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-soft)); color: var(--navy-900); }
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -10px rgba(212,175,55,.5); }
+.btn-ghost { background: transparent; color: var(--white); border: 1px solid var(--line); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+.btn-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+/* ---------- حقول الإدخال ---------- */
+.field { margin-top: 16px; }
+.field label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--white); }
+input[type=text], textarea, select {
+  width: 100%; background: var(--navy-900); border: 1px solid var(--line); color: var(--white);
+  border-radius: var(--radius-s); padding: 13px 14px; font-family: 'Tajawal'; font-size: 15px; outline: none;
+}
+input[type=text]:focus, textarea:focus, select:focus { border-color: var(--gold); }
+textarea { min-height: 96px; resize: vertical; }
+
+/* ---------- شريط تقدّم ---------- */
+.progress { height: 6px; background: var(--navy-700); border-radius: 99px; overflow: hidden; margin: 10px 0 4px; }
+.progress > i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--ember)); transition: width .35s ease; }
+
+/* ---------- خيارات الأسئلة ---------- */
+.qnum { color: var(--gold); font-weight: 800; font-size: 13px; letter-spacing: 1px; }
+.qtext { font-family: 'Reem Kufi'; font-size: 22px; margin: 8px 0 6px; line-height: 1.45; }
+.qhint { color: var(--mute); font-size: 14px; margin-bottom: 18px; }
+
+.opts { display: grid; gap: 12px; margin-top: 8px; }
+.opt {
+  border: 1px solid var(--line); border-radius: 12px; padding: 15px 16px; cursor: pointer;
+  background: rgba(6,15,36,.4); transition: .15s ease; display: flex; gap: 12px; align-items: flex-start;
+}
+.opt:hover { border-color: var(--sky); }
+.opt.sel { border-color: var(--gold); background: rgba(212,175,55,.08); }
+.opt .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--mute-2); margin-top: 3px; flex: 0 0 auto; }
+.opt.sel .dot { border-color: var(--gold); background: radial-gradient(circle, var(--gold) 45%, transparent 50%); }
+
+/* مقياس scale */
+.scale { margin-top: 14px; }
+.scale-row { display: flex; gap: 6px; justify-content: space-between; }
+.scale-row button {
+  flex: 1; aspect-ratio: 1; border: 1px solid var(--line); background: rgba(6,15,36,.4); color: var(--mute);
+  border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 15px; transition: .12s;
+}
+.scale-row button:hover { border-color: var(--sky); color: var(--white); }
+.scale-row button.sel { background: linear-gradient(135deg, var(--gold), var(--ember)); color: var(--navy-900); border-color: transparent; }
+.scale-labels { display: flex; justify-content: space-between; color: var(--mute-2); font-size: 12.5px; margin-top: 8px; }
+
+/* ---------- شارات ---------- */
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 99px; font-size: 13px; font-weight: 700; }
+.badge-gold { background: rgba(212,175,55,.14); color: var(--gold); border: 1px solid rgba(212,175,55,.35); }
+.badge-sky { background: rgba(127,179,213,.14); color: var(--sky); border: 1px solid rgba(127,179,213,.35); }
+.badge-ember { background: rgba(232,98,61,.14); color: var(--ember-soft); border: 1px solid rgba(232,98,61,.4); }
+
+/* ---------- شبكة نتائج ---------- */
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 760px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+.stat { background: rgba(6,15,36,.45); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.stat .k { color: var(--mute-2); font-size: 13px; }
+.stat .v { font-family: 'Reem Kufi'; font-size: 24px; margin-top: 4px; }
+.stat .v.gold { color: var(--gold); } .stat .v.sky { color: var(--sky); } .stat .v.ember { color: var(--ember-soft); }
+
+/* أعمدة المستويات */
+.bars { display: grid; gap: 12px; margin-top: 6px; }
+.bar-row { display: grid; grid-template-columns: 70px 1fr 44px; align-items: center; gap: 10px; }
+.bar-track { height: 12px; background: var(--navy-700); border-radius: 99px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; }
+
+/* رادار/فلاتر */
+.filters { display: grid; gap: 10px; }
+.frow { display: grid; grid-template-columns: 110px 1fr 60px; align-items: center; gap: 10px; }
+
+/* اقتباسات */
+.quote { border-right: 3px solid var(--gold); padding: 10px 16px; background: rgba(6,15,36,.4); border-radius: 0 10px 10px 0; margin-top: 10px; color: var(--white); font-size: 15px; }
+.quote .who { color: var(--mute-2); font-size: 12px; margin-top: 6px; }
+
+/* تنبيهات */
+.note { border-radius: 12px; padding: 14px 16px; font-size: 14.5px; margin-top: 12px; }
+.note-amber { background: rgba(232,98,61,.10); border: 1px solid rgba(232,98,61,.3); color: var(--ember-soft); }
+.note-info { background: rgba(127,179,213,.08); border: 1px solid rgba(127,179,213,.25); color: var(--sky); }
+
+/* جدول الأدمن */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { color: var(--gold); font-weight: 700; }
+tr:hover td { background: rgba(127,179,213,.05); }
+
+/* تبويبات */
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.tab { padding: 10px 18px; border-radius: 10px; border: 1px solid var(--line); cursor: pointer; color: var(--mute); font-weight: 700; }
+.tab.active { background: rgba(212,175,55,.1); border-color: var(--gold); color: var(--gold); }
+
+.section-title { font-family: 'Reem Kufi'; font-size: 20px; margin: 4px 0 14px; display: flex; align-items: center; gap: 10px; }
+.section-title::before { content: ''; width: 6px; height: 22px; background: var(--gold); border-radius: 4px; display: inline-block; }
+
+.divider { height: 1px; background: var(--line); margin: 22px 0; }
+
+.center { text-align: center; }
+.spinner { width: 34px; height: 34px; border: 3px solid var(--line); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; margin: 30px auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.fade { animation: fade .45s ease both; }
+@keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.hidden { display: none !important; }
+
+/* بطاقة المرآة الجماعية (شاشة العرض) */
+.mirror { background: linear-gradient(180deg, #0c1d40, #060f24); border: 1px solid var(--gold); border-radius: 20px; padding: 32px; }
+.mirror .big { font-family: 'Reem Kufi'; font-size: 30px; line-height: 1.5; }
+.mirror .type-q { color: var(--ember-soft); font-size: 18px; margin-top: 10px; }
+
+footer.disclaimer { color: var(--mute-2); font-size: 12.5px; border-top: 1px solid var(--line); margin-top: 30px; padding-top: 16px; }
