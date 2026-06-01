@@ -1,1 +1,107 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reignite — منحني الاحتراق</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
 
+<div class="topbar">
+  <div class="brand">
+    <div class="mark">R</div>
+    <div>
+      <div class="name">Reignite</div>
+      <div class="sub">منحني الاحتراق — مرآة الشركة</div>
+    </div>
+  </div>
+  <a class="tiny" href="admin.html">دخول الأدمن ←</a>
+</div>
+
+<div class="wrap">
+  <div class="card fade">
+    <div class="eyebrow">تشخيص جماعي</div>
+    <h1 style="font-size:34px">إحنا فين على منحني الاحتراق؟</h1>
+    <p class="lead" style="margin-top:14px">
+      كل شركة ناجحة عندها خطين: خط النجاح الظاهر — وخط الحيوية الداخلية. والاحتراق مش نقطة،
+      هو <b style="color:var(--gold)">الفجوة</b> بين الخطين. الاستبيان ده بيرفع واقع الشركة على المنحني بدقة،
+      وبيكشف نوع الاحتراق ومصدره — مش كبيزنس، كـحيوية.
+    </p>
+
+    <div class="note note-info" style="margin-top:18px">
+      ده تشخيص <b>مرآة لا حُكم</b>. إجاباتك مجهّلة — بنشوف النسب المجمّعة بس، مش الأسماء. الصدق هو اللي بيخلّي المرآة تشتغل.
+    </div>
+
+    <div class="field">
+      <label>اكتب اسم وهمي يخصك (للسرية)</label>
+      <input type="text" id="alias" placeholder="مثال: نسر، قمر، رقم 7..." maxlength="40">
+    </div>
+
+    <div class="field">
+      <label>كود الدفعة / الشركة</label>
+      <input type="text" id="cohort" placeholder="مثال: english-capsules" value="english-capsules">
+      <div class="tiny" style="margin-top:6px">الكود ده بيجمّع كل إجابات نفس الجلسة مع بعض في شاشة الأدمن.</div>
+    </div>
+
+    <div class="field">
+      <label id="q0label">إنت موقعك في الشركة أقرب لإيه؟</label>
+      <div class="opts" id="roleOpts"></div>
+      <div class="tiny" style="margin-top:8px">ده بيساعدنا نقارن رؤية القيادة برؤية الفريق — مش بيظهر باسمك.</div>
+    </div>
+
+    <div class="btn-row" style="margin-top:26px">
+      <button class="btn btn-gold" id="startBtn" disabled>ابدأ الرحلة ←</button>
+      <span class="tiny" id="hint">اختار موقعك عشان تبدأ</span>
+    </div>
+  </div>
+
+  <footer class="disclaimer">
+    الإطار مبني على «منظور الفؤاد». حيوية الشركة تُقرأ كخاصية ناشئة من تفاعل ناسها وأنظمتها وثقافتها — لا كادّعاء إن الشركة «نفس».
+  </footer>
+</div>
+
+<script type="module">
+  import { Q0 } from './js/questions.js';
+
+  const roleOpts = document.getElementById('roleOpts');
+  const startBtn = document.getElementById('startBtn');
+  const aliasEl = document.getElementById('alias');
+  const cohortEl = document.getElementById('cohort');
+  const hint = document.getElementById('hint');
+  let roleIdx = null;
+
+  Q0.options.forEach((o, i) => {
+    const el = document.createElement('div');
+    el.className = 'opt';
+    el.innerHTML = `<span class="dot"></span><span>${o.label}</span>`;
+    el.onclick = () => {
+      roleIdx = i;
+      [...roleOpts.children].forEach(c => c.classList.remove('sel'));
+      el.classList.add('sel');
+      validate();
+    };
+    roleOpts.appendChild(el);
+  });
+
+  function validate() {
+    const ok = roleIdx != null && cohortEl.value.trim().length > 0;
+    startBtn.disabled = !ok;
+    hint.textContent = ok ? 'جاهز — يلا نبدأ' : 'اختار موقعك واكتب كود الدفعة';
+  }
+  cohortEl.addEventListener('input', validate);
+
+  startBtn.onclick = () => {
+    const session = {
+      alias: aliasEl.value.trim() || 'مجهول',
+      cohort: cohortEl.value.trim(),
+      category: Q0.options[roleIdx].tag,   // A / B / C
+      categoryLabel: Q0.options[roleIdx].label,
+      answers: { Q0: roleIdx }
+    };
+    sessionStorage.setItem('reignite_session', JSON.stringify(session));
+    location.href = 'assessment.html';
+  };
+</script>
+</body>
+</html>
