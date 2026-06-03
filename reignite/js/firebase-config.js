@@ -8,7 +8,7 @@
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
-  getFirestore, collection, addDoc, getDocs, doc, getDoc,
+  getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc,
   query, where, orderBy, serverTimestamp, deleteDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
@@ -25,13 +25,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* اسم الكولكشن الخاص بالمقياس داخل نفس مشروع EMC */
+/* الكولكشن الخاص بالإجابات النهائية (اللي الأدمن بيحلّلها) */
 export const COLLECTION = 'reignite_responses';
+
+/* الكولكشن الخاص بالمسودات أثناء الإجابة (مؤقت — بيتمسح بعد الإنهاء) */
+export const COLLECTION_DRAFTS = 'reignite_drafts';
 
 /* بوابة الأدمن — مرحلة الاختبار (LocalAuth). غيّر الكود من هنا. */
 export const ADMIN_PASSCODE = 'reignite-2025';
 
 export {
-  db, collection, addDoc, getDocs, doc, getDoc,
+  db, collection, addDoc, getDocs, doc, getDoc, setDoc,
   query, where, orderBy, serverTimestamp, deleteDoc
 };
