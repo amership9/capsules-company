@@ -1,11 +1,11 @@
 /* ============================================================================
    Reignite — منحني الاحتراق
-   assessment.js — تحكّم تدفّق الأسئلة (يبني كل سؤال، يخزّن الإجابة بالعقد الصحيح,
-   يحسب النتيجة، يحفظها في Firestore، ثم ينقل لصفحة النتيجة)
+   assessment.js — تحكّم تدفّق الأسئلة + الحفظ التدريجي في فايرستور
 
-   تحديث: حفظ تدريجي محلّي (مسودة على نفس الجهاز) — لو المستخدم قفل التاب
-   أو قطع النت قبل آخر زرار، يقدر يكمّل من حيث وقف. المسودة محلّية تماماً
-   ومش بتتكتب في Firestore، وبتتمسح أول ما الإجابة تُحفظ بنجاح.
+   التحديث: كل إجابة بتتحفظ أول بأول في كولكشن المسودات (reignite_drafts)
+   تحت "كود الاستكمال" الفريد بتاع المستجيب. لو عمل ريفريش أو فتح من جهاز
+   تاني وكتب كوده، بيرجع يلاقي كل إجاباته. ولما يخلّص، النتيجة النهائية
+   بتتكتب في reignite_responses (اللي الأدمن بيحلّلها)، والمسودة بتتمسح.
 
    عقد تخزين الإجابات (لازم يطابق scoring.js):
      choice    → فهرس الخيار (رقم)
@@ -16,26 +16,21 @@
 
 import { QUESTIONS } from './questions.js';
 import { computeResults } from './scoring.js';
-import { db, collection, addDoc, serverTimestamp, COLLECTION } from './firebase-config.js';
+import {
+  db, collection, addDoc, doc, setDoc, deleteDoc,
+  serverTimestamp, COLLECTION, COLLECTION_DRAFTS
+} from './firebase-config.js';
 
 const TOTAL = QUESTIONS.length;
 const $ = (id) => document.getElementById(id);
 
-const DRAFT_PREFIX = 'reignite_draft_v1_';
-const draftKey = (cohort) => DRAFT_PREFIX + cohort;
-
 /* ---------- الجلسة ---------- */
 let session;
 try { session = JSON.parse(sessionStorage.getItem('reignite_session')); } catch { session = null; }
-
-/* لو مفيش جلسة في sessionStorage (المستخدم قفل التاب ورجع)، نسترجع آخر مسودة محفوظة */
-if (!session || !session.cohort) {
-  session = loadLatestDraftSession();
-}
-if (!session || !session.cohort) { location.replace('index.html'); }
+if (!session || !session.cohort || !session.resumeCode) { location.replace('index.html'); }
 
 const answers = (session && session.answers) ? session.answers : {};
-let idx = (session && Number.isInteger(session._idx)) ? session._idx : 0;
+let idx = (session && Number.isInteger(session.idx)) ? session.idx : 0;
 if (idx < 0 || idx >= TOTAL) idx = 0;
 
 const card    = $('qcard');
@@ -47,30 +42,43 @@ const nextBtn = $('nextBtn');
 
 const curQ = () => QUESTIONS[idx];
 
-/* ---------- المسودة المحلّية ---------- */
-function saveDraft() {
-  try {
-    session._idx = idx;
-    session.answers = answers;
-    session._savedAt = Date.now();
-    localStorage.setItem(draftKey(session.cohort), JSON.stringify(session));
-  } catch (e) { /* تجاهل لو الذاكرة ممتلئة */ }
+/* ---------- شريط كود الاستكمال ---------- */
+$('codeVal').textContent = session.resumeCode;
+$('copyCodeBtn').onclick = async () => {
+  try { await navigator.clipboard.writeText(session.resumeCode); $('copyCodeBtn').textContent = 'تم النسخ ✓'; }
+  catch { $('copyCodeBtn').textContent = 'انسخه يدوياً'; }
+  setTimeout(() => { $('copyCodeBtn').textContent = 'نسخ الكود'; }, 1800);
+};
+
+/* ---------- الحفظ التدريجي في فايرستور ---------- */
+let saveTimer = null;
+function persistSoon() {
+  // نجمّع التغييرات ونحفظ بعد ثانية، عشان مانكترش الكتابات
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(persistNow, 800);
 }
-function clearDraft() {
-  try { localStorage.removeItem(draftKey(session.cohort)); } catch (e) {}
-}
-function loadLatestDraftSession() {
-  let best = null;
+async function persistNow() {
   try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith(DRAFT_PREFIX)) {
-        const s = JSON.parse(localStorage.getItem(k));
-        if (s && s.cohort && (!best || (s._savedAt || 0) > (best._savedAt || 0))) best = s;
-      }
-    }
+    await setDoc(doc(db, COLLECTION_DRAFTS, session.resumeCode), {
+      resumeCode: session.resumeCode,
+      alias: session.alias || 'مجهول',
+      cohort: session.cohort,
+      category: session.category,
+      categoryLabel: session.categoryLabel,
+      answers,
+      idx,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  } catch (e) {
+    console.error('Reignite: تعذّر حفظ المسودة', e);
+  }
+}
+// نحفظ كمان في sessionStorage كنسخة سريعة محلية (احتياط لحظي)
+function cacheLocal() {
+  try {
+    session.answers = answers; session.idx = idx;
+    sessionStorage.setItem('reignite_session', JSON.stringify(session));
   } catch (e) {}
-  return best;
 }
 
 /* ---------- التحقّق ---------- */
@@ -79,8 +87,8 @@ function isValid() {
   const a = answers[q.id];
   if (q.type === 'choice')   return a != null;
   if (q.type === 'scale')    return a != null;
-  if (q.type === 'textarea') return true;                 // النصّ المنفرد اختياري
-  if (q.type === 'compound') return a && a.value != null; // جزء الاختيار إجباري
+  if (q.type === 'textarea') return true;
+  if (q.type === 'compound') return a && a.value != null;
   return false;
 }
 
@@ -92,7 +100,8 @@ function updateNav() {
   axisName.textContent = `المحور ${curQ().axis} — ${curQ().axisName}`;
   nextBtn.textContent  = idx === TOTAL - 1 ? 'اعرض النتيجة ✦' : 'التالي ←';
   prevBtn.textContent  = idx === 0 ? '→ رجوع للبداية' : '← السابق';
-  saveDraft();   // حفظ تدريجي على الجهاز بعد أي تغيير
+  cacheLocal();
+  persistSoon();
 }
 
 /* ---------- لبنات العناصر ---------- */
@@ -179,18 +188,16 @@ function render() {
     answers[q.id] = cur;
     const mainIsChoice = !!q.options;
 
-    /* الجزء الرئيسي */
     if (mainIsChoice) {
       card.appendChild(choiceBlock(q.options, cur.value, (i) => {
         cur.value = i;
-        if (q.id === 'Q6' && i === 0) cur.text = '';   // لا متابعة عند "الناس باقية"
-        render();                                       // لإظهار/إخفاء المتابعة
+        if (q.id === 'Q6' && i === 0) cur.text = '';
+        render();
       }));
     } else {
       card.appendChild(textareaBlock(q.textPlaceholder, cur.text, (v) => { cur.text = v; updateNav(); }));
     }
 
-    /* جزء المتابعة */
     const fu = q.followUp;
     const show = fu.showWhen === 'always'
       || (fu.showWhen === 'index!=0' && cur.value != null && cur.value !== 0);
@@ -225,16 +232,18 @@ nextBtn.onclick = async () => {
   await finish();
 };
 
-/* ---------- الإنهاء والحفظ ---------- */
+/* ---------- الإنهاء والحفظ النهائي ---------- */
 async function finish() {
   nextBtn.disabled = true;
   nextBtn.textContent = 'بنحفظ إجابتك...';
+
+  await persistNow(); // نضمن آخر إجابة اتحفظت في المسودة
 
   const results = computeResults(answers);
   const payload = {
     alias: session.alias || 'مجهول',
     cohort: session.cohort,
-    category: session.category,            // A / B / C
+    category: session.category,
     categoryLabel: session.categoryLabel,
     answers,
     results,
@@ -244,11 +253,12 @@ async function finish() {
   try {
     await addDoc(collection(db, COLLECTION), payload);
     sessionStorage.removeItem('reignite_save_error');
-    clearDraft();                          // نمسح المسودة بعد الحفظ الناجح فقط
+    // نمسح المسودة بعد الحفظ النهائي الناجح فقط
+    try { await deleteDoc(doc(db, COLLECTION_DRAFTS, session.resumeCode)); } catch (e) {}
   } catch (e) {
-    console.error('Reignite: فشل حفظ الإجابة في Firestore', e);
-    sessionStorage.setItem('reignite_save_error', '1');  // نكمل للنتيجة مع تنبيه
-    saveDraft();                           // نبقّي المسودة عشان يقدر يعيد المحاولة
+    console.error('Reignite: فشل حفظ الإجابة النهائية في Firestore', e);
+    sessionStorage.setItem('reignite_save_error', '1');
+    // نسيب المسودة موجودة عشان يقدر يعيد المحاولة بالكود
   }
 
   sessionStorage.setItem('reignite_result', JSON.stringify({ session, answers, results }));
