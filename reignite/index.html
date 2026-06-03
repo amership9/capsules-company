@@ -20,7 +20,14 @@
 </div>
 
 <div class="wrap">
-  <div class="card fade">
+
+  <!-- لودر بيظهر لو بنفتح رحلة من رابط فيه كود -->
+  <div class="card fade hidden" id="resumeLoader" style="text-align:center">
+    <div class="spinner"></div>
+    <p class="muted">بنفتح رحلتك...</p>
+  </div>
+
+  <div class="card fade" id="mainCard">
     <div class="eyebrow">تشخيص جماعي</div>
     <h1 style="font-size:34px">إحنا فين على منحني الاحتراق؟</h1>
     <p class="lead" style="margin-top:14px">
@@ -54,20 +61,23 @@
       <button class="btn btn-gold" id="startBtn" disabled>ابدأ الرحلة ←</button>
       <span class="tiny" id="hint">اختار موقعك عشان تبدأ</span>
     </div>
-  </div>
 
-  <!-- بطاقة العودة لمسودة سابقة بكود الاستكمال -->
-  <div class="card" id="resumeCard" style="margin-top:18px">
-    <div class="eyebrow">عندك كود استكمال؟</div>
-    <p class="muted" style="margin-top:6px">لو بدأت الاستبيان قبل كده وعايز تكمّل (حتى من جهاز تاني)، الصق كود الاستكمال بتاعك هنا.</p>
-    <div class="field">
-      <label>كود الاستكمال</label>
-      <input type="text" id="resumeCode" placeholder="مثال: R-7K2M-9X4P" autocomplete="off">
-    </div>
-    <div class="btn-row" style="margin-top:14px">
-      <button class="btn btn-ghost" id="resumeBtn">كمّل من حيث وقفت ←</button>
-      <span class="tiny" id="resumeMsg"></span>
-    </div>
+    <div class="divider"></div>
+
+    <!-- استرجاع يدوي بالكود (احتياطي) -->
+    <details>
+      <summary style="cursor:pointer;color:var(--mute-2);font-size:13px">بدأت قبل كده وعندك كود؟ افتح رحلتك بالكود</summary>
+      <div style="margin-top:14px">
+        <div class="field" style="margin-top:0">
+          <label>كود الاستكمال</label>
+          <input type="text" id="resumeCode" placeholder="مثال: R-7K2M-9X4P" autocomplete="off">
+        </div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-ghost" id="resumeBtn">افتح رحلتي ←</button>
+          <span class="tiny" id="resumeMsg"></span>
+        </div>
+      </div>
+    </details>
   </div>
 
   <footer class="disclaimer">
@@ -87,7 +97,8 @@
   let roleIdx = null;
 
   /* ملء كود الدفعة من الرابط لو موجود (?cohort=...) وتثبيته */
-  const urlCohort = new URLSearchParams(location.search).get('cohort');
+  const params = new URLSearchParams(location.search);
+  const urlCohort = params.get('cohort');
   if (urlCohort) {
     cohortEl.value = urlCohort;
     cohortEl.setAttribute('readonly', 'readonly');
@@ -121,10 +132,11 @@
     return `R-${block()}-${block()}`;
   }
 
-  /* بدء جلسة جديدة */
+  /* بدء جلسة جديدة — بنحط الكود في الرابط على طول */
   startBtn.onclick = () => {
+    const code = genResumeCode();
     const session = {
-      resumeCode: genResumeCode(),
+      resumeCode: code,
       alias: aliasEl.value.trim() || 'مجهول',
       cohort: cohortEl.value.trim(),
       category: Q0.options[roleIdx].tag,
@@ -133,23 +145,18 @@
       idx: 0
     };
     sessionStorage.setItem('reignite_session', JSON.stringify(session));
-    location.href = 'assessment.html';
+    location.href = 'assessment.html?c=' + encodeURIComponent(code);
   };
 
-  /* العودة بكود استكمال: نجيب المسودة من فايرستور */
-  const resumeBtn = document.getElementById('resumeBtn');
-  const resumeCodeEl = document.getElementById('resumeCode');
-  const resumeMsg = document.getElementById('resumeMsg');
-
-  resumeBtn.onclick = async () => {
-    const code = resumeCodeEl.value.trim().toUpperCase();
-    if (!code) { resumeMsg.textContent = 'الصق الكود الأول'; return; }
-    resumeMsg.textContent = 'بندوّر...';
+  /* فتح رحلة من كود (سواء من الرابط أوتوماتيك أو إدخال يدوي) */
+  async function openByCode(rawCode, { silent = false } = {}) {
+    const code = (rawCode || '').trim().toUpperCase();
+    if (!code) { if (!silent) document.getElementById('resumeMsg').textContent = 'الصق الكود الأول'; return false; }
     try {
       const snap = await getDoc(doc(db, COLLECTION_DRAFTS, code));
       if (!snap.exists()) {
-        resumeMsg.textContent = 'مفيش استبيان بالكود ده — اتأكد من الحروف.';
-        return;
+        if (!silent) document.getElementById('resumeMsg').textContent = 'مفيش رحلة بالكود ده — اتأكد من الحروف.';
+        return false;
       }
       const data = snap.data();
       const session = {
@@ -162,12 +169,31 @@
         idx: Number.isInteger(data.idx) ? data.idx : 0
       };
       sessionStorage.setItem('reignite_session', JSON.stringify(session));
-      location.href = 'assessment.html';
+      location.href = 'assessment.html?c=' + encodeURIComponent(code);
+      return true;
     } catch (e) {
       console.error(e);
-      resumeMsg.textContent = 'تعذّر الاتصال — جرّب تاني.';
+      if (!silent) document.getElementById('resumeMsg').textContent = 'تعذّر الاتصال — جرّب تاني.';
+      return false;
     }
-  };
+  }
+
+  /* زرار الاسترجاع اليدوي */
+  document.getElementById('resumeBtn').onclick = () => openByCode(document.getElementById('resumeCode').value);
+
+  /* لو الرابط فيه كود (?c=...) نفتح الرحلة تلقائياً من غير أي خطوة */
+  (async function autoResumeFromUrl() {
+    const urlCode = params.get('c') || params.get('code');
+    if (!urlCode) return;
+    document.getElementById('mainCard').classList.add('hidden');
+    document.getElementById('resumeLoader').classList.remove('hidden');
+    const ok = await openByCode(urlCode, { silent: true });
+    if (!ok) {
+      // الكود غلط — نرجّع شاشة التسجيل عادي
+      document.getElementById('resumeLoader').classList.add('hidden');
+      document.getElementById('mainCard').classList.remove('hidden');
+    }
+  })();
 </script>
 </body>
 </html>
