@@ -1,15 +1,17 @@
 /* ============================================================================
    Reignite — منحني الاحتراق
-   assessment.js — تحكّم تدفّق الأسئلة (يبني كل سؤال، يخزّن الإجابة بالعقد الصحيح،
+   assessment.js — تحكّم تدفّق الأسئلة (يبني كل سؤال، يخزّن الإجابة بالعقد الصحيح,
    يحسب النتيجة، يحفظها في Firestore، ثم ينقل لصفحة النتيجة)
+
+   تحديث: حفظ تدريجي محلّي (مسودة على نفس الجهاز) — لو المستخدم قفل التاب
+   أو قطع النت قبل آخر زرار، يقدر يكمّل من حيث وقف. المسودة محلّية تماماً
+   ومش بتتكتب في Firestore، وبتتمسح أول ما الإجابة تُحفظ بنجاح.
 
    عقد تخزين الإجابات (لازم يطابق scoring.js):
      choice    → فهرس الخيار (رقم)
      scale     → رقم 1..10
      textarea  → نصّ
      compound  → { value, text }
-                 value = فهرس الجزء الذي هو "choice" (سواء كان main أو followUp)
-                 text  = نصّ الجزء الذي هو "textarea"
 ============================================================================ */
 
 import { QUESTIONS } from './questions.js';
@@ -19,13 +21,22 @@ import { db, collection, addDoc, serverTimestamp, COLLECTION } from './firebase-
 const TOTAL = QUESTIONS.length;
 const $ = (id) => document.getElementById(id);
 
+const DRAFT_PREFIX = 'reignite_draft_v1_';
+const draftKey = (cohort) => DRAFT_PREFIX + cohort;
+
 /* ---------- الجلسة ---------- */
 let session;
 try { session = JSON.parse(sessionStorage.getItem('reignite_session')); } catch { session = null; }
+
+/* لو مفيش جلسة في sessionStorage (المستخدم قفل التاب ورجع)، نسترجع آخر مسودة محفوظة */
+if (!session || !session.cohort) {
+  session = loadLatestDraftSession();
+}
 if (!session || !session.cohort) { location.replace('index.html'); }
 
 const answers = (session && session.answers) ? session.answers : {};
-let idx = 0;
+let idx = (session && Number.isInteger(session._idx)) ? session._idx : 0;
+if (idx < 0 || idx >= TOTAL) idx = 0;
 
 const card    = $('qcard');
 const bar     = $('bar');
@@ -35,6 +46,32 @@ const prevBtn = $('prevBtn');
 const nextBtn = $('nextBtn');
 
 const curQ = () => QUESTIONS[idx];
+
+/* ---------- المسودة المحلّية ---------- */
+function saveDraft() {
+  try {
+    session._idx = idx;
+    session.answers = answers;
+    session._savedAt = Date.now();
+    localStorage.setItem(draftKey(session.cohort), JSON.stringify(session));
+  } catch (e) { /* تجاهل لو الذاكرة ممتلئة */ }
+}
+function clearDraft() {
+  try { localStorage.removeItem(draftKey(session.cohort)); } catch (e) {}
+}
+function loadLatestDraftSession() {
+  let best = null;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(DRAFT_PREFIX)) {
+        const s = JSON.parse(localStorage.getItem(k));
+        if (s && s.cohort && (!best || (s._savedAt || 0) > (best._savedAt || 0))) best = s;
+      }
+    }
+  } catch (e) {}
+  return best;
+}
 
 /* ---------- التحقّق ---------- */
 function isValid() {
@@ -55,6 +92,7 @@ function updateNav() {
   axisName.textContent = `المحور ${curQ().axis} — ${curQ().axisName}`;
   nextBtn.textContent  = idx === TOTAL - 1 ? 'اعرض النتيجة ✦' : 'التالي ←';
   prevBtn.textContent  = idx === 0 ? '→ رجوع للبداية' : '← السابق';
+  saveDraft();   // حفظ تدريجي على الجهاز بعد أي تغيير
 }
 
 /* ---------- لبنات العناصر ---------- */
@@ -206,9 +244,11 @@ async function finish() {
   try {
     await addDoc(collection(db, COLLECTION), payload);
     sessionStorage.removeItem('reignite_save_error');
+    clearDraft();                          // نمسح المسودة بعد الحفظ الناجح فقط
   } catch (e) {
     console.error('Reignite: فشل حفظ الإجابة في Firestore', e);
     sessionStorage.setItem('reignite_save_error', '1');  // نكمل للنتيجة مع تنبيه
+    saveDraft();                           // نبقّي المسودة عشان يقدر يعيد المحاولة
   }
 
   sessionStorage.setItem('reignite_result', JSON.stringify({ session, answers, results }));
