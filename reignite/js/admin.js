@@ -311,3 +311,20 @@ $('csvBtn').onclick = () => {
   a.download = `reignite-${$('cohortInput').value.trim()}.csv`;
   a.click();
 };
+
+/* ---------- مولّد رابط الدفعة ---------- */
+$('genLinkBtn').onclick = () => {
+  const cohort = $('cohortInput').value.trim();
+  if (!cohort) { $('linkMsg').textContent = 'اكتب كود الدفعة الأول'; return; }
+  const base = location.href.split('#')[0].replace(/admin\.html(\?.*)?$/, 'index.html');
+  const link = `${base}?cohort=${encodeURIComponent(cohort)}`;
+  $('linkText').textContent = link;
+  $('linkBox').classList.remove('hidden');
+  window._reigniteLink = link;
+  $('linkMsg').textContent = '';
+};
+$('copyLinkBtn').onclick = async () => {
+  if (!window._reigniteLink) return;
+  try { await navigator.clipboard.writeText(window._reigniteLink); $('linkMsg').textContent = 'تم النسخ ✓'; }
+  catch { $('linkMsg').textContent = 'انسخ يدوياً من الصندوق فوق'; }
+};
