@@ -1,17 +1,11 @@
 /* ============================================================================
    Reignite — منحني الاحتراق
-   assessment.js — تحكّم تدفّق الأسئلة + الحفظ التدريجي في فايرستور
+   assessment.js — تدفّق الأسئلة + الحفظ التدريجي في فايرستور + رابط استكمال
 
-   التحديث: كل إجابة بتتحفظ أول بأول في كولكشن المسودات (reignite_drafts)
-   تحت "كود الاستكمال" الفريد بتاع المستجيب. لو عمل ريفريش أو فتح من جهاز
-   تاني وكتب كوده، بيرجع يلاقي كل إجاباته. ولما يخلّص، النتيجة النهائية
-   بتتكتب في reignite_responses (اللي الأدمن بيحلّلها)، والمسودة بتتمسح.
-
-   عقد تخزين الإجابات (لازم يطابق scoring.js):
-     choice    → فهرس الخيار (رقم)
-     scale     → رقم 1..10
-     textarea  → نصّ
-     compound  → { value, text }
+   الفكرة: كل مستجيب رحلته ليها كود فريد، والكود بيتحط في رابط الصفحة
+   (?c=...). فالرابط نفسه = حفظ الرحلة. يحفظه/يعمله bookmark، ولو رجع من
+   أي جهاز ولصق نفس الرابط، رحلته بتتفتح لوحدها. الإجابات بتتخزّن أول بأول
+   في كولكشن المسودات، والنتيجة النهائية بتتكتب في reignite_responses.
 ============================================================================ */
 
 import { QUESTIONS } from './questions.js';
@@ -33,6 +27,17 @@ const answers = (session && session.answers) ? session.answers : {};
 let idx = (session && Number.isInteger(session.idx)) ? session.idx : 0;
 if (idx < 0 || idx >= TOTAL) idx = 0;
 
+/* ---------- نتأكد إن الكود موجود في رابط الصفحة دايماً ---------- */
+(function ensureCodeInUrl() {
+  try {
+    const url = new URL(location.href);
+    if (url.searchParams.get('c') !== session.resumeCode) {
+      url.searchParams.set('c', session.resumeCode);
+      history.replaceState(null, '', url.toString());
+    }
+  } catch (e) {}
+})();
+
 const card    = $('qcard');
 const bar     = $('bar');
 const counter = $('counter');
@@ -42,18 +47,17 @@ const nextBtn = $('nextBtn');
 
 const curQ = () => QUESTIONS[idx];
 
-/* ---------- شريط كود الاستكمال ---------- */
+/* ---------- شريط رابط الاستكمال ---------- */
 $('codeVal').textContent = session.resumeCode;
 $('copyCodeBtn').onclick = async () => {
-  try { await navigator.clipboard.writeText(session.resumeCode); $('copyCodeBtn').textContent = 'تم النسخ ✓'; }
-  catch { $('copyCodeBtn').textContent = 'انسخه يدوياً'; }
-  setTimeout(() => { $('copyCodeBtn').textContent = 'نسخ الكود'; }, 1800);
+  try { await navigator.clipboard.writeText(location.href); $('copyCodeBtn').textContent = 'اتنسخ ✓'; }
+  catch { $('copyCodeBtn').textContent = 'اضغط مطوّل على الرابط'; }
+  setTimeout(() => { $('copyCodeBtn').textContent = 'انسخ رابط رحلتك'; }, 1800);
 };
 
 /* ---------- الحفظ التدريجي في فايرستور ---------- */
 let saveTimer = null;
 function persistSoon() {
-  // نجمّع التغييرات ونحفظ بعد ثانية، عشان مانكترش الكتابات
   clearTimeout(saveTimer);
   saveTimer = setTimeout(persistNow, 800);
 }
@@ -73,7 +77,6 @@ async function persistNow() {
     console.error('Reignite: تعذّر حفظ المسودة', e);
   }
 }
-// نحفظ كمان في sessionStorage كنسخة سريعة محلية (احتياط لحظي)
 function cacheLocal() {
   try {
     session.answers = answers; session.idx = idx;
@@ -237,7 +240,7 @@ async function finish() {
   nextBtn.disabled = true;
   nextBtn.textContent = 'بنحفظ إجابتك...';
 
-  await persistNow(); // نضمن آخر إجابة اتحفظت في المسودة
+  await persistNow();
 
   const results = computeResults(answers);
   const payload = {
@@ -253,12 +256,10 @@ async function finish() {
   try {
     await addDoc(collection(db, COLLECTION), payload);
     sessionStorage.removeItem('reignite_save_error');
-    // نمسح المسودة بعد الحفظ النهائي الناجح فقط
     try { await deleteDoc(doc(db, COLLECTION_DRAFTS, session.resumeCode)); } catch (e) {}
   } catch (e) {
     console.error('Reignite: فشل حفظ الإجابة النهائية في Firestore', e);
     sessionStorage.setItem('reignite_save_error', '1');
-    // نسيب المسودة موجودة عشان يقدر يعيد المحاولة بالكود
   }
 
   sessionStorage.setItem('reignite_result', JSON.stringify({ session, answers, results }));
