@@ -24,8 +24,8 @@
     <div class="eyebrow">تشخيص جماعي</div>
     <h1 style="font-size:34px">إحنا فين على منحني الاحتراق؟</h1>
     <p class="lead" style="margin-top:14px">
-      كل شركة ناجحة عندها خطين: خط النجاح الظاهر — وخط الحيوية الداخلية. والاحتراق مش نقطة،
-      هو <b style="color:var(--gold)">الفجوة</b> بين الخطين. الاستبيان ده بيرفع واقع الشركة على المنحني بدقة،
+      كل شركة ناجحة عندها خطين: خط النجاح الظاهر — وخط الحيوية الداخلية. والاحتراق مش نقطة,
+      هو <b style="color:var(--gold)">الفجوة</b> بين الخطين. الاستبيان ده بيرفع واقع الشركة على المنحني بدقة,
       وبيكشف نوع الاحتراق ومصدره — مش كبيزنس، كـحيوية.
     </p>
 
@@ -64,12 +64,22 @@
 <script type="module">
   import { Q0 } from './js/questions.js';
 
+  const DRAFT_PREFIX = 'reignite_draft_v1_';
+
   const roleOpts = document.getElementById('roleOpts');
   const startBtn = document.getElementById('startBtn');
   const aliasEl = document.getElementById('alias');
   const cohortEl = document.getElementById('cohort');
   const hint = document.getElementById('hint');
   let roleIdx = null;
+
+  /* ── ملء كود الدفعة من الرابط لو موجود (?cohort=...) وتثبيته ── */
+  const urlCohort = new URLSearchParams(location.search).get('cohort');
+  if (urlCohort) {
+    cohortEl.value = urlCohort;
+    cohortEl.setAttribute('readonly', 'readonly');
+    cohortEl.style.opacity = '0.85';
+  }
 
   Q0.options.forEach((o, i) => {
     const el = document.createElement('div');
@@ -102,6 +112,28 @@
     sessionStorage.setItem('reignite_session', JSON.stringify(session));
     location.href = 'assessment.html';
   };
+
+  /* ── لو فيه استبيان لسه مكمّلش على الجهاز ده، نعرض زر إكمال ── */
+  (function offerResume() {
+    try {
+      let draft = null;
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(DRAFT_PREFIX)) {
+          const s = JSON.parse(localStorage.getItem(k));
+          if (s && s.cohort && (!draft || (s._savedAt || 0) > (draft._savedAt || 0))) draft = s;
+        }
+      }
+      if (draft) {
+        const note = document.createElement('div');
+        note.className = 'note note-amber';
+        note.style.marginTop = '14px';
+        note.innerHTML = `عندك استبيان لسه مكمّلتوش على الجهاز ده (دفعة «${draft.cohort}»). ` +
+          `<a href="assessment.html" style="text-decoration:underline;font-weight:700">كمّل من حيث وقفت ←</a>`;
+        document.querySelector('.card.fade').appendChild(note);
+      }
+    } catch (e) { /* تجاهل */ }
+  })();
 </script>
 </body>
 </html>
