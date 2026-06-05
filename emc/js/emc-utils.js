@@ -242,6 +242,75 @@ window.EMC.APPLY_READINESS = {
   no:        'مهتم بالمعرفة بس مش في وضع التزام دلوقتي'
 };
 
+// ═══════════════════════════════════════════════════════
+// [المرحلة 6] قواميس مكالمة الاستكشاف (Discovery)
+// ═══════════════════════════════════════════════════════
+
+// حالة جدولة المكالمة
+window.EMC.DISCOVERY_SCHEDULE_STATUS = {
+  not_scheduled: { label: 'لم تُجدوَل بعد', color: '#6B7689', bg: '#EDF2F8', border: '#D5DFEC' },
+  scheduled:     { label: 'محجوزة',         color: '#1B3A66', bg: '#E0EBF7', border: '#B5CFE8' },
+  completed:     { label: 'تمت المكالمة',    color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD' },
+  no_show:       { label: 'لم يحضر',         color: '#A2202D', bg: '#FBE0E2', border: '#F1B6BB' }
+};
+
+// طريقة الحجز
+window.EMC.DISCOVERY_BOOKING_METHOD = {
+  calendly: 'عبر Calendly (حجز ذاتي)',
+  manual:   'حجز يدوي (واتساب/هاتف)'
+};
+
+// نتيجة المكالمة (Fit assessment)
+window.EMC.DISCOVERY_VERDICTS = {
+  fit:         { label: '✅ مناسب — للعرض الرسمي',  color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD', nextStage: 7 },
+  needs_nurture:{ label: '🟡 يحتاج رعاية',          color: '#8C5915', bg: '#FAEEDB', border: '#ECD3A6', nextStage: null },
+  no_fit:      { label: '🔴 غير مناسب',             color: '#A2202D', bg: '#FBE0E2', border: '#F1B6BB', nextStage: null }
+};
+
+// محاور الـ Pain Funnel (سكريبت EOS للمكالمة)
+window.EMC.DISCOVERY_SCRIPT = [
+  {
+    phase: 'افتتاح (5 دقائق)',
+    color: '#0B2545',
+    points: [
+      'رحّب واشكره على وقته — وأكّد إن دي مكالمة تشخيص مش بيع.',
+      'اطلب إذن: "ممكن أسألك شوية أسئلة عن وضع الشركة عشان أفهم أكتر؟"',
+      'اسأل: "إيه اللي خلّاك مهتم بالموضوع ده دلوقتي بالذات؟"'
+    ]
+  },
+  {
+    phase: 'Identify — تحديد الألم (15 دقيقة)',
+    color: '#D72638',
+    points: [
+      'إيه أكبر 3 تحديات بتواجهك في إدارة الشركة دلوقتي؟',
+      'من المكونات الستة (رؤية/ناس/بيانات/قضايا/عمليات/إنجاز) — أنهي واحد أضعف؟',
+      'السقف اللي حاسس بيه — فوضى تشغيلية؟ تفكك قيادة؟ غموض استراتيجي؟',
+      'بتشتغل كام ساعة في الأسبوع؟ والقرارات بترجعلك إنت في الآخر؟'
+    ]
+  },
+  {
+    phase: 'Discuss — تعميق الألم (15 دقيقة)',
+    color: '#B87333',
+    points: [
+      'التحدي ده مأثّر إزاي على نموك/أرباحك بالأرقام؟',
+      'جرّبت تحلّه قبل كده إزاي؟ وإيه اللي حصل؟',
+      'لو فضل الوضع زي ما هو سنة كمان — هتكون فين؟',
+      'مين تاني في الشركة بيتأثر بالمشكلة دي؟'
+    ]
+  },
+  {
+    phase: 'Solve — توجيه الحل (15 دقيقة)',
+    color: '#2E7D5B',
+    points: [
+      'اربط ألمه بمكوّن EOS المحدد اللي هيحلّه.',
+      'احكِ قصة عميل مشابه (نفس الحجم/الصناعة) وكيف تحوّل.',
+      'وضّح المسار: تشخيص → تطبيق → نتيجة خلال X شهور.',
+      'اسأل: "ده بيكلّم وضعك؟ تحب نتكلم في الخطوة الجاية؟"',
+      'حدّد الميزانية والتوقيت وصاحب القرار لو لسه مش واضحين.'
+    ]
+  }
+];
+
 // ─── Helpers ───
 window.EMC.utils = {
   getStage(id) {
@@ -300,6 +369,32 @@ window.EMC.utils = {
 
   temperatureLabel(t) {
     return { cold: 'بارد', warm: 'دافئ', hot: 'حار', burning: 'مشتعل' }[t] || '—';
+  },
+
+  // ─── [المرحلة 6] إعدادات النظام (لينك Calendly وغيره) ───
+  // بتتخزّن في collection اسمه emc_settings، document واحد ثابت id='global'
+  async getSettings() {
+    try {
+      const s = await EMC.store.get('emc_settings', 'global');
+      return s || {};
+    } catch (e) {
+      return {};
+    }
+  },
+
+  async saveSetting(key, value) {
+    try {
+      const existing = await EMC.store.get('emc_settings', 'global');
+      if (existing) {
+        await EMC.store.update('emc_settings', 'global', { [key]: value });
+      } else {
+        await EMC.store.create('emc_settings', { [key]: value }, 'global');
+      }
+      return true;
+    } catch (e) {
+      console.warn('saveSetting failed:', e?.message);
+      return false;
+    }
   },
 
   // ─── حساب الـ Engagement Score ───
