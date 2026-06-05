@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>الإعدادات · EMC CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-segments.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-layout.js"></script>
+</head>
+<body data-screen-label="13 Settings">
+
+<div id="emc-shell-root"></div>
+
+<template id="settings-tpl">
+  <div class="emc-crumbs">
+    <a href="dashboard.html">لوحة التحكم</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>الإعدادات</span>
+  </div>
+
+  <div class="emc-page-head">
+    <div>
+      <h1 class="emc-page-title">الإعدادات</h1>
+      <div class="emc-page-sub">إعدادات النظام والتكاملات</div>
+    </div>
+  </div>
+
+  <div style="max-width: 680px;">
+
+    <!-- Calendly -->
+    <div class="card card-pad" style="margin-bottom: 18px;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom: 6px;">
+        <div style="width:38px; height:38px; border-radius:10px; background:var(--emc-cream); display:grid; place-items:center; flex-shrink:0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emc-navy)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
+        </div>
+        <div>
+          <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">رابط Calendly</h3>
+          <div style="font-size:12.5px; color:var(--emc-muted);">لحجز مكالمات الاستكشاف ذاتياً (المرحلة 6)</div>
+        </div>
+      </div>
+
+      <div style="background:var(--emc-cream); border-radius:8px; padding:12px 14px; font-size:12.5px; color:var(--emc-ink-2); line-height:1.7; margin:14px 0;">
+        <strong>إزاي تجهّزه (مرة واحدة):</strong><br/>
+        1. اعمل حساب مجاني على <a href="https://calendly.com" target="_blank" style="color:var(--emc-navy); font-weight:600;">calendly.com</a><br/>
+        2. اعمل نوع موعد واحد اسمه "مكالمة استكشاف" (45 دقيقة)<br/>
+        3. انسخ اللينك بتاعه (شكله: <span class="mono" style="font-size:11px;">calendly.com/your-name/discovery</span>)<br/>
+        4. الصقه تحت واحفظ — هيظهر زر الحجز الذاتي في ملفات العملاء
+      </div>
+
+      <div class="field" style="margin-bottom: 14px;">
+        <label class="field-label">رابط Calendly</label>
+        <input class="input" type="url" id="calendly-url" placeholder="https://calendly.com/your-name/discovery" />
+        <div class="hint" style="font-size:11.5px; color:var(--emc-faint); margin-top:6px;">سيبه فاضي لو لسه ما جهّزتوش — النظام هيشتغل بالحجز اليدوي عادي.</div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="save-calendly">حفظ الرابط</button>
+      <span id="calendly-saved" style="display:none; margin-inline-start:10px; color:var(--emc-success); font-size:13px; font-weight:600;">✓ تم الحفظ</span>
+    </div>
+
+    <!-- Info card -->
+    <div class="card card-pad" style="background:var(--emc-cream); border-color:var(--emc-line);">
+      <h4 style="margin:0 0 8px; font-size:13.5px; color:var(--emc-navy); font-weight:700;">💡 ملاحظة عن Calendly المجاني</h4>
+      <div style="font-size:12.5px; color:var(--emc-ink-2); line-height:1.7;">
+        الباقة المجانية كافية تماماً (نوع موعد واحد). بعد ما العميل يحجز، Calendly بيبعتلك تأكيد بالإيميل — وقتها بتفتح ملف العميل في النظام وتسجّل الموعد بضغطة. التأكيد التلقائي الكامل بيحتاج باقة مدفوعة، وده مش ضروري دلوقتي.
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script>
+(async function () {
+  const main = await EMC.layout.render({ page: 'settings' });
+  if (!main) return;
+  main.innerHTML = document.getElementById('settings-tpl').innerHTML;
+
+  // حمّل اللينك الحالي
+  const settings = await EMC.utils.getSettings();
+  const input = document.getElementById('calendly-url');
+  input.value = settings.calendlyUrl || '';
+
+  document.getElementById('save-calendly').addEventListener('click', async () => {
+    const btn = document.getElementById('save-calendly');
+    const url = input.value.trim();
+    // تحقق بسيط
+    if (url && !/^https?:\/\/(www\.)?calendly\.com\//i.test(url)) {
+      EMC.utils.toast('الرابط لازم يكون من calendly.com', 'error');
+      return;
+    }
+    btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+    try {
+      await EMC.utils.saveSetting('calendlyUrl', url);
+      const saved = document.getElementById('calendly-saved');
+      saved.style.display = 'inline';
+      setTimeout(() => saved.style.display = 'none', 2500);
+      EMC.utils.toast('تم حفظ رابط Calendly', 'success');
+      btn.disabled = false; btn.textContent = 'حفظ الرابط';
+    } catch (e) {
+      EMC.utils.toast('خطأ: ' + (e.message || 'فشل الحفظ'), 'error');
+      btn.disabled = false; btn.textContent = 'حفظ الرابط';
+    }
+  });
+})();
+</script>
+</body>
+</html>
