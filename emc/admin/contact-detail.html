@@ -116,6 +116,52 @@
 
 <div id="emc-shell-root"></div>
 
+<!-- [5C] Opportunity edit modal -->
+<div class="emc-modal-overlay" id="opp-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 560px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.3);">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--emc-line);">
+      <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">تعديل بيانات الفرصة</h3>
+      <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;">السلطة · الميزانية · التوقيت · القيمة المتوقعة</div>
+    </div>
+    <div style="padding: 22px 24px; overflow-y: auto; flex: 1;" id="opp-form">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">دور صانع القرار</label>
+          <select class="select" name="decisionRole"><option value="">— غير محدد —</option></select>
+        </div>
+        <div class="field">
+          <label class="field-label">تأكيد الميزانية</label>
+          <select class="select" name="budgetConfirmed"><option value="">— غير محدد —</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">إلحاحية التوقيت</label>
+          <select class="select" name="timelineUrgency"><option value="">— غير محدد —</option></select>
+        </div>
+        <div class="field">
+          <label class="field-label">القيمة المتوقعة (جم)</label>
+          <input class="input" type="number" name="expectedValue" min="0" placeholder="0" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">احتمالية الإغلاق (%)</label>
+          <input class="input" type="number" name="closeProbability" min="0" max="100" placeholder="0" />
+        </div>
+        <div class="field">
+          <label class="field-label">التاريخ المتوقع للإغلاق</label>
+          <input class="input" type="date" name="expectedCloseDate" />
+        </div>
+      </div>
+    </div>
+    <div style="padding: 14px 24px; border-top: 1px solid var(--emc-line); display: flex; justify-content: flex-end; gap: 8px; background: var(--emc-cream);">
+      <button class="btn btn-ghost btn-sm" id="opp-cancel">إلغاء</button>
+      <button class="btn btn-primary btn-sm" id="opp-save">حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
+
 <template id="detail-tpl">
   <div class="emc-crumbs">
     <a href="dashboard.html">لوحة التحكم</a>
@@ -400,6 +446,66 @@
     }
   });
 
+  // ─── [5C] محرر بيانات الفرصة ───
+  (function setupOppEditor() {
+    const modal = document.getElementById('opp-modal');
+    if (!modal) return;
+    const oppForm = document.getElementById('opp-form');
+
+    const fillSel = (name, dict) => {
+      const sel = oppForm.querySelector(`[name="${name}"]`);
+      if (!sel) return;
+      Object.entries(dict).forEach(([k, v]) => {
+        const o = document.createElement('option');
+        o.value = k; o.textContent = v;
+        sel.appendChild(o);
+      });
+    };
+    fillSel('decisionRole', EMC.DECISION_ROLES);
+    fillSel('budgetConfirmed', EMC.BUDGET_CONFIRMED);
+    fillSel('timelineUrgency', EMC.TIMELINE_URGENCY);
+
+    function openModal() {
+      const opp = c.opportunity || {};
+      oppForm.querySelector('[name="decisionRole"]').value = opp.decisionRole || '';
+      oppForm.querySelector('[name="budgetConfirmed"]').value = opp.budgetConfirmed || '';
+      oppForm.querySelector('[name="timelineUrgency"]').value = opp.timelineUrgency || '';
+      oppForm.querySelector('[name="expectedValue"]').value = opp.expectedValue || '';
+      oppForm.querySelector('[name="closeProbability"]').value = opp.closeProbability || '';
+      oppForm.querySelector('[name="expectedCloseDate"]').value = (opp.expectedCloseDate || '').slice(0, 10);
+      modal.style.display = 'flex';
+    }
+    function closeModal() { modal.style.display = 'none'; }
+
+    panelsEl.addEventListener('click', (e) => {
+      if (e.target.closest('#edit-opp-btn')) openModal();
+    });
+    document.getElementById('opp-cancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    document.getElementById('opp-save').addEventListener('click', async () => {
+      const btn = document.getElementById('opp-save');
+      btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+      try {
+        const updated = {
+          ...(c.opportunity || {}),
+          decisionRole: oppForm.querySelector('[name="decisionRole"]').value,
+          budgetConfirmed: oppForm.querySelector('[name="budgetConfirmed"]').value,
+          timelineUrgency: oppForm.querySelector('[name="timelineUrgency"]').value,
+          expectedValue: parseInt(oppForm.querySelector('[name="expectedValue"]').value) || 0,
+          closeProbability: parseInt(oppForm.querySelector('[name="closeProbability"]').value) || 0,
+          expectedCloseDate: oppForm.querySelector('[name="expectedCloseDate"]').value || null
+        };
+        await EMC.contacts.update(id, { opportunity: updated });
+        EMC.utils.toast('تم تحديث بيانات الفرصة', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (err) {
+        EMC.utils.toast('خطأ: ' + (err.message || 'فشل الحفظ'), 'error');
+        btn.disabled = false; btn.textContent = 'حفظ التعديلات';
+      }
+    });
+  })();
+
   // ─── Layer render functions ───
   function fieldDisplay(key, value, options = {}) {
     const isEmpty = value === '' || value == null;
@@ -554,6 +660,9 @@
           </div>
         `}`;
       case 'opportunity': return `
+        <div style="display:flex; justify-content:flex-end; margin: -6px 0 14px;">
+          <button class="btn btn-outline btn-sm" id="edit-opp-btn">✎ تعديل بيانات الفرصة</button>
+        </div>
         <div class="grid-2">
           ${fieldDisplay('القيمة المتوقعة', EMC.utils.formatCurrency(c.opportunity.expectedValue))}
           ${fieldDisplay('احتمالية الإغلاق', c.opportunity.closeProbability ? c.opportunity.closeProbability + '%' : null)}
