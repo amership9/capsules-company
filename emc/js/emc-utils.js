@@ -195,6 +195,39 @@ window.EMC.MQL_PROMOTION_REASONS = {
   repeat_visitor: '🔁 زائر متكرر — رجع 3+ مرات للموقع بعد التشخيص'
 };
 
+// ═══════════════════════════════════════════════════════
+// [المرحلة 5] قواميس تأهيل المبيعات (SQL)
+// ═══════════════════════════════════════════════════════
+window.EMC.SQL_VERDICTS = {
+  qualified: { label: 'مؤهل — جاهز للاستكشاف', color: '#2E7D5B', bg: '#E1F1E8', border: '#BFE0CD' },
+  review:    { label: 'يحتاج مراجعتك',          color: '#8C5915', bg: '#FAEEDB', border: '#ECD3A6' },
+  not_ready: { label: 'لسه مش جاهز — رعاية',     color: '#41648C', bg: '#EDF2F8', border: '#D5DFEC' }
+};
+
+window.EMC.SQL_BANT_LABELS = {
+  authority: 'السلطة (Authority)',
+  budget:    'الميزانية (Budget)',
+  need:      'الحاجة (Need)',
+  timeline:  'التوقيت (Timeline)'
+};
+
+window.EMC.SQL_FLAGS = {
+  authority_unknown: 'سلطة القرار غير معروفة',
+  no_budget:         'لا توجد ميزانية',
+  ceiling_unknown:   'السقف غير محدد',
+  size_stretch:      'حجم الشركة أكبر من المنطقة المثالية لـ EOS'
+};
+
+window.EMC.DISQUALIFY_REASONS = {
+  no_budget:          'لا توجد ميزانية كافية',
+  not_decision_maker: 'ليس صاحب قرار ولا مؤثر',
+  size_mismatch:      'حجم الشركة لا يناسب EOS',
+  no_real_need:       'لا يوجد سقف/ألم حقيقي',
+  bad_timing:         'التوقيت غير مناسب (مؤجل بعيد)',
+  chose_competitor:   'اختار حلاً آخر',
+  other:              'سبب آخر'
+};
+
 // ─── Helpers ───
 window.EMC.utils = {
   getStage(id) {
@@ -312,6 +345,68 @@ window.EMC.utils = {
     const temperature = window.EMC.utils.temperatureFromScore(score);
 
     return { score, temperature, breakdown };
+  },
+
+  // ═══════════════════════════════════════════════════════
+  // [المرحلة 5] حساب درجة التأهيل للمبيعات (SQL) — BANT + EOS Fit
+  // دالة نقية بدون أي side-effects: بتاخد contact وترجّع تقييم.
+  // الحكم النهائي قرار عبدالله — دي بترتّب وتقترح بس.
+  // ═══════════════════════════════════════════════════════
+  calculateQualificationScore(contact) {
+    if (!contact) return { score: 0, verdict: 'not_ready', breakdown: {}, flags: [], sizeFit: 'unknown' };
+
+    const opp = contact.opportunity || {};
+    const eos = contact.eosProfile || {};
+    const identity = contact.identity || {};
+    const breakdown = {};
+    const flags = [];
+    let score = 0;
+
+    // (A) Authority — صاحب القرار (max 30)
+    const authorityMap = { sole_decision_maker: 30, strong_influencer: 18, needs_buy_in: 8 };
+    breakdown.authority = authorityMap[opp.decisionRole] || 0;
+    score += breakdown.authority;
+    if (!opp.decisionRole) flags.push('authority_unknown');
+
+    // (B) Budget — الميزانية (max 25)
+    const budgetMap = { yes: 25, exploring: 12, no: 0 };
+    breakdown.budget = budgetMap[opp.budgetConfirmed] || 0;
+    score += breakdown.budget;
+    if (opp.budgetConfirmed === 'no') flags.push('no_budget');
+
+    // (C) Need — الحاجة (max 25): سقف + نقاط ألم + أهداف
+    let needPts = 0;
+    if (eos.ceiling) needPts += 15;
+    if ((eos.pains || []).length > 0) needPts += 5;
+    if (eos.goals12Months) needPts += 5;
+    breakdown.need = needPts;
+    score += needPts;
+    if (!eos.ceiling) flags.push('ceiling_unknown');
+
+    // (D) Timeline — التوقيت (max 20)
+    const timelineMap = { immediate: 20, '1_3_months': 15, '3_6_months': 8, '6_plus_months': 3 };
+    breakdown.timeline = timelineMap[opp.timelineUrgency] || 0;
+    score += breakdown.timeline;
+
+    score = Math.min(score, 100);
+
+    // ─── ملاءمة حجم الشركة لـ EOS (10-250 = المنطقة المثالية) ───
+    let sizeFit = 'unknown';
+    const sz = identity.companySize;
+    if (sz === '11_50' || sz === '51_250') sizeFit = 'ideal';
+    else if (sz === '1_10' || sz === '251_1000') sizeFit = 'acceptable';
+    else if (sz === '1000_plus') sizeFit = 'stretch';
+    if (sizeFit === 'stretch') flags.push('size_stretch');
+
+    // ─── الحكم ───
+    let verdict;
+    const hardBlocker = (opp.budgetConfirmed === 'no');
+    if (hardBlocker) verdict = 'not_ready';
+    else if (score >= 70) verdict = 'qualified';
+    else if (score >= 45) verdict = 'review';
+    else verdict = 'not_ready';
+
+    return { score, verdict, breakdown, flags, sizeFit };
   },
 
   // ═══════════════════════════════════════════════════════
