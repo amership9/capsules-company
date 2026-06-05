@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>تحضير مكالمتك · Executive Mastery Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<link rel="stylesheet" href="lp-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="tracker.js"></script>
+<style>
+  .pr-shell { max-width: 680px; margin: 0 auto; padding: 0 24px 64px; }
+
+  .pr-hero {
+    text-align: center; padding: 52px 24px 36px;
+    background: linear-gradient(180deg, var(--emc-navy-deep, var(--emc-navy)) 0%, var(--emc-navy) 100%);
+    color: #fff; position: relative; overflow: hidden;
+  }
+  .pr-hero::before {
+    content: ""; position: absolute; top: -60px; left: -80px; width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(201, 169, 97, 0.16), transparent 60%); filter: blur(20px);
+  }
+  .pr-hero-eyebrow {
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--emc-gold); font-weight: 700; margin-bottom: 10px; position: relative; z-index: 1;
+  }
+  .pr-hero h1 { font-size: 29px; font-weight: 800; margin: 0 0 14px; position: relative; z-index: 1; line-height: 1.3; }
+  .pr-hero p { font-size: 14.5px; color: rgba(255,255,255,0.8); max-width: 500px; margin: 0 auto; line-height: 1.7; position: relative; z-index: 1; }
+
+  /* بطاقة الموعد المحجوز */
+  .pr-appointment {
+    position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 12px;
+    margin-top: 20px; padding: 12px 20px; background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18); border-radius: 12px;
+  }
+  .pr-appointment svg { color: var(--emc-gold); flex-shrink: 0; }
+  .pr-appointment .label { font-size: 11px; color: rgba(255,255,255,0.6); letter-spacing: 0.06em; }
+  .pr-appointment .val { font-size: 15px; font-weight: 700; color: #fff; }
+
+  .pr-card {
+    background: #fff; border: 1px solid var(--emc-line); border-radius: 16px;
+    margin-top: 28px; overflow: hidden; box-shadow: 0 8px 24px rgba(11, 37, 69, 0.06);
+    padding: 32px 28px;
+  }
+
+  .pr-intro {
+    text-align: center; padding-bottom: 22px; margin-bottom: 24px; border-bottom: 1px solid var(--emc-line);
+    color: var(--emc-muted); font-size: 13.5px; line-height: 1.7;
+  }
+
+  .pr-q { margin-bottom: 26px; }
+  .pr-q-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 8px; background: var(--emc-navy);
+    color: #fff; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 12px;
+    margin-inline-end: 10px;
+  }
+  .pr-q-label { font-size: 15.5px; font-weight: 700; color: var(--emc-navy); line-height: 1.5; }
+  .pr-q-hint { font-size: 12.5px; color: var(--emc-muted); margin: 6px 0 12px 36px; line-height: 1.6; }
+  .pr-q textarea, .pr-q input {
+    width: 100%; border: 1px solid var(--emc-line); border-radius: 10px; padding: 12px 14px;
+    font-size: 14.5px; font-family: inherit; background: #fff; color: var(--emc-ink);
+    transition: border-color 0.15s, box-shadow 0.15s; line-height: 1.6;
+  }
+  .pr-q textarea { min-height: 84px; resize: vertical; }
+  .pr-q input { height: 46px; }
+  .pr-q textarea:focus, .pr-q input:focus, .pr-q select:focus {
+    outline: none; border-color: var(--emc-navy); box-shadow: 0 0 0 3px rgba(11, 37, 69, 0.08);
+  }
+  .pr-q select {
+    width: 100%; height: 46px; border: 1px solid var(--emc-line); border-radius: 10px;
+    padding: 0 14px; font-size: 14.5px; font-family: inherit; background: #fff;
+  }
+  .pr-q .err { color: var(--emc-red); font-size: 11.5px; margin-top: 6px; display: none; }
+  .pr-q .err.show { display: block; }
+
+  .pr-submit {
+    width: 100%; height: 52px; background: var(--emc-gold); color: var(--emc-navy);
+    border: 0; border-radius: 10px; font-size: 15.5px; font-weight: 800; cursor: pointer;
+    transition: background 0.15s; font-family: inherit; margin-top: 8px;
+  }
+  .pr-submit:hover:not(:disabled) { background: #B89538; }
+  .pr-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .pr-privacy { text-align: center; margin-top: 16px; font-size: 11.5px; color: var(--emc-faint); }
+
+  /* Success */
+  .pr-success { display: none; text-align: center; padding: 20px 0; }
+  .pr-success.active { display: block; }
+  .pr-success-check {
+    width: 72px; height: 72px; margin: 0 auto 18px; background: #E1F1E8; color: var(--emc-success, #2E7D5B);
+    border-radius: 50%; display: grid; place-items: center; animation: prPop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes prPop { 0% { transform: scale(0); } 60% { transform: scale(1.1); } 100% { transform: scale(1); } }
+  .pr-success h3 { color: var(--emc-navy); font-size: 23px; font-weight: 800; margin: 0 0 10px; }
+  .pr-success p { color: var(--emc-ink-2); font-size: 15px; line-height: 1.7; max-width: 440px; margin: 0 auto; }
+
+  /* Error state (no id) */
+  .pr-error-state { display: none; text-align: center; padding: 40px 24px; }
+  .pr-error-state.active { display: block; }
+  .pr-error-state .icon { width: 56px; height: 56px; margin: 0 auto 16px; color: var(--emc-faint); }
+  .pr-error-state h3 { color: var(--emc-navy); font-size: 20px; font-weight: 800; margin: 0 0 8px; }
+  .pr-error-state p { color: var(--emc-muted); font-size: 14px; line-height: 1.7; max-width: 400px; margin: 0 auto; }
+</style>
+</head>
+<body class="lp-shell" data-landing-page="prep" data-screen-label="LP prep">
+
+<nav class="lp-nav">
+  <div class="lp-nav-brand">
+    <div class="lp-nav-brand-mark">
+      <svg width="100%" height="100%" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="18" width="32" height="7" rx="1" fill="#0B2545"/>
+        <rect x="14" y="31" width="36" height="6" rx="1" fill="#D72638"/>
+        <line x1="18" y1="25" x2="14" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="46" y1="25" x2="50" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="46" y2="25" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
+      <div class="lp-nav-brand-sub">تحضير المكالمة</div>
+    </div>
+  </div>
+  <span style="color: rgba(255,255,255,0.6); font-size: 12px;">دقيقتين · 4 أسئلة</span>
+</nav>
+
+<section class="pr-hero">
+  <div class="pr-hero-eyebrow">تحضير مكالمتك مع عبدالله</div>
+  <h1 id="pr-title">خلّي مكالمتك تطلع بأقصى قيمة</h1>
+  <p>الأسئلة دي مش لجمع معلومات — هي عشان تدخل المكالمة وإنت نفسك أوضح عن اللي محتاجه. عبدالله هيقراها قبل ما يكلّمك، فالمكالمة تبدأ من نقطة متقدمة بدل ما تبدأ من الصفر.</p>
+  <div class="pr-appointment" id="pr-appointment" style="display:none;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
+    <div>
+      <div class="label">موعد مكالمتك</div>
+      <div class="val" id="pr-appt-date">—</div>
+    </div>
+  </div>
+</section>
+
+<div class="pr-shell">
+
+  <!-- Error state: no valid id -->
+  <div class="pr-card pr-error-state" id="pr-error">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <h3>اللينك ده مش مكتمل</h3>
+    <p>يبدو إن الرابط ناقص أو قديم. تواصل مع عبدالله على واتساب وهيبعتلك اللينك الصح لتحضير مكالمتك.</p>
+  </div>
+
+  <!-- Form -->
+  <form id="pr-form" class="pr-card" novalidate style="display:none;">
+    <div class="pr-intro">
+      4 أسئلة سريعة · كل واحد بيخلّي المكالمة أعمق. مفيش إجابات صح أو غلط — اكتب براحتك.
+    </div>
+
+    <!-- Q1 — Identify -->
+    <div class="pr-q">
+      <div><span class="pr-q-num">1</span><span class="pr-q-label">إيه الموضوع الأساسي اللي عايز تطلع من المكالمة بحل ليه؟</span></div>
+      <div class="pr-q-hint">حدّد التحدي الواحد اللي لو اتحل هيفرق معاك أكتر من أي حاجة تانية.</div>
+      <textarea id="q-topic" placeholder="مثلاً: فريق القيادة مش متفق على الأولويات، وكل اجتماع بيتحول لجدال..."></textarea>
+      <div class="err" id="err-topic">من فضلك اكتب إجابتك</div>
+    </div>
+
+    <!-- Q2 — Discuss -->
+    <div class="pr-q">
+      <div><span class="pr-q-num">2</span><span class="pr-q-label">جرّبت تعالج الموضوع ده قبل كده إزاي؟ وإيه اللي حصل؟</span></div>
+      <div class="pr-q-hint">المحاولات اللي ما نجحتش بتقول لعبدالله أكتر من اللي نجحت — فكن صريح.</div>
+      <textarea id="q-tried" placeholder="مثلاً: عيّنا مدير عمليات بس المشكلة استمرت / حاولنا نطبق نظام بس مكملناش..."></textarea>
+    </div>
+
+    <!-- Q3 — Solve -->
+    <div class="pr-q">
+      <div><span class="pr-q-num">3</span><span class="pr-q-label">لو حلّينا ده فعلاً، إيه أول حاجة هتتغير في شركتك؟</span></div>
+      <div class="pr-q-hint">ده بيوضّح ليه الموضوع ده مهم بالنسبالك دلوقتي بالذات.</div>
+      <textarea id="q-change" placeholder="مثلاً: هقدر آخد إجازة أسبوع من غير ما الشركة تقف / هركّز على التوسع بدل المشاكل اليومية..."></textarea>
+    </div>
+
+    <!-- Q4 — Stakeholders -->
+    <div class="pr-q">
+      <div><span class="pr-q-num">4</span><span class="pr-q-label">فيه حد تاني في فريقك المفروض يكون في المكالمة؟</span></div>
+      <div class="pr-q-hint">لو القرار أو التطبيق بيشارك فيه شريك أو مدير، يهمنا نعرف من البداية.</div>
+      <input type="text" id="q-stakeholders" placeholder="مثلاً: شريكي المؤسس / مدير العمليات — أو اكتب: أنا بس" />
+    </div>
+
+    <button type="submit" class="pr-submit" id="pr-submit-btn">جاهز للمكالمة ✓</button>
+    <div class="pr-privacy">🔒 إجاباتك بتروح لعبدالله مباشرة، ومحمية تماماً.</div>
+  </form>
+
+  <!-- Success -->
+  <div class="pr-card pr-success" id="pr-success">
+    <div class="pr-success-check">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3>تمام، إنت جاهز للمكالمة ✓</h3>
+    <p id="pr-success-msg">عبدالله هيدخل المكالمة وهو فاهم وضعك بالظبط، فهتبدأوا من نقطة متقدمة. شكراً لوقتك — شوفك قريب.</p>
+  </div>
+
+</div>
+
+<footer class="lp-footer">
+  <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  let contactId = null;
+  let loadedContact = null;
+
+  const errEl = document.getElementById('pr-error');
+  const formEl = document.getElementById('pr-form');
+  const successEl = document.getElementById('pr-success');
+
+  (async function init() {
+    const params = new URLSearchParams(window.location.search);
+    contactId = params.get('id');
+
+    // لا يوجد id → حالة خطأ محترمة
+    if (!contactId) { showError(); return; }
+
+    try {
+      loadedContact = await EMC.contacts.get(contactId);
+    } catch (e) { loadedContact = null; }
+
+    if (!loadedContact) { showError(); return; }
+
+    // اسم العميل في العنوان
+    const fn = loadedContact.identity?.firstName || (loadedContact.identity?.fullName || '').split(/\s+/)[0] || '';
+    if (fn) document.getElementById('pr-title').textContent = `${fn}، خلّي مكالمتك تطلع بأقصى قيمة`;
+
+    // تاريخ المكالمة المحجوز
+    const callDate = loadedContact.discovery?.callDate;
+    if (callDate) {
+      const dateStr = EMC.utils.formatDate(callDate);
+      const timeStr = loadedContact.discovery?.callTime ? ` · ${loadedContact.discovery.callTime}` : '';
+      document.getElementById('pr-appt-date').textContent = dateStr + timeStr;
+      document.getElementById('pr-appointment').style.display = 'inline-flex';
+    }
+
+    // لو ملأ التحضير قبل كده، اعرض إجاباته
+    const prep = loadedContact.discovery?.prep;
+    if (prep && prep.topic) {
+      document.getElementById('q-topic').value = prep.topic || '';
+      document.getElementById('q-tried').value = prep.tried || '';
+      document.getElementById('q-change').value = prep.change || '';
+      document.getElementById('q-stakeholders').value = prep.stakeholders || '';
+    }
+
+    formEl.style.display = 'block';
+  })();
+
+  function showError() {
+    errEl.classList.add('active');
+    formEl.style.display = 'none';
+  }
+
+  formEl.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const topic = document.getElementById('q-topic').value.trim();
+    if (!topic) {
+      document.getElementById('err-topic').classList.add('show');
+      document.getElementById('q-topic').focus();
+      return;
+    }
+
+    const btn = document.getElementById('pr-submit-btn');
+    btn.disabled = true; btn.textContent = 'جاري الإرسال…';
+
+    if (!window.EMC_LP || !window.EMC_LP.submitPrep) {
+      btn.disabled = false; btn.textContent = 'جاهز للمكالمة ✓';
+      alert('النظام لسه بيحمّل، حاول بعد ثانيتين');
+      return;
+    }
+
+    const result = await window.EMC_LP.submitPrep({
+      contactId,
+      topic,
+      tried: document.getElementById('q-tried').value.trim(),
+      change: document.getElementById('q-change').value.trim(),
+      stakeholders: document.getElementById('q-stakeholders').value.trim()
+    });
+
+    if (result.success) {
+      formEl.style.display = 'none';
+      successEl.classList.add('active');
+      // لو فيه موعد، أكّده في رسالة النجاح
+      const callDate = loadedContact.discovery?.callDate;
+      if (callDate) {
+        document.getElementById('pr-success-msg').textContent =
+          `عبدالله هيدخل المكالمة وهو فاهم وضعك بالظبط. شوفك يوم ${EMC.utils.formatDate(callDate)}.`;
+      }
+    } else {
+      btn.disabled = false; btn.textContent = 'جاهز للمكالمة ✓';
+      alert('حدث خطأ: ' + (result.error || 'حاول مرة أخرى'));
+    }
+  });
+
+  // شيل رسالة الخطأ وقت الكتابة
+  document.getElementById('q-topic').addEventListener('input', () => {
+    document.getElementById('err-topic').classList.remove('show');
+  });
+})();
+</script>
+
+</body>
+</html>
