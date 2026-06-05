@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>العافية · Inner Wellbeing</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <div class="stars-background" id="starsBackground"></div>
+
+  <div class="landing layer">
+    <div class="badge">Executive Master Camp</div>
+    <h1 class="gold-text mt-2">العافية</h1>
+    <div class="en" style="font-size:1.4rem;">Inner Wellbeing</div>
+    <p class="muted mt-2">ورشة الاحتراق للقادة — نظام القاعة الحيّ</p>
+
+    <div class="role-grid">
+      <a class="role-card" href="participant.html">
+        <div class="ico">📱</div>
+        <h3>المشارك</h3>
+        <p class="muted">انضمّ بهاتفك</p>
+        <span class="en-label">Participant</span>
+      </a>
+      <a class="role-card" href="display.html">
+        <div class="ico">🖥️</div>
+        <h3>شاشة العرض</h3>
+        <p class="muted">على البروجكتور</p>
+        <span class="en-label">Display</span>
+      </a>
+      <a class="role-card" href="admin.html">
+        <div class="ico">🎛️</div>
+        <h3>المقدّم</h3>
+        <p class="muted">لوحة التحكّم</p>
+        <span class="en-label">Facilitator</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var c = document.getElementById('starsBackground');
+      for (var i = 0; i < 90; i++) {
+        var s = document.createElement('div');
+        var r = Math.random();
+        s.className = 'star ' + (r < 0.6 ? 'star-small' : r < 0.9 ? 'star-medium' : 'star-large');
+        s.style.left = Math.random() * 100 + '%';
+        s.style.top = Math.random() * 100 + '%';
+        s.style.animationDelay = Math.random() * 4 + 's';
+        c.appendChild(s);
+      }
+    })();
+  </script>
+</body>
+</html>
