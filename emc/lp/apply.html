@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>تجهيز مكالمتك · Executive Mastery Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<link rel="stylesheet" href="lp-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="tracker.js"></script>
+<style>
+  /* يستعير نفس design system بتاع diagnosis.html */
+  .ap-shell { max-width: 720px; margin: 0 auto; padding: 0 24px 64px; }
+
+  .ap-progress {
+    background: #fff; border-bottom: 1px solid var(--emc-line); padding: 22px 24px;
+    position: sticky; top: 0; z-index: 20; box-shadow: 0 1px 0 rgba(11, 37, 69, 0.04);
+  }
+  .ap-progress-inner { max-width: 720px; margin: 0 auto; }
+  .ap-progress-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .ap-progress-step-label { font-size: 13px; color: var(--emc-muted); font-weight: 600; }
+  .ap-progress-step-label strong { color: var(--emc-navy); font-weight: 800; }
+  .ap-progress-percent { font-size: 12px; color: var(--emc-faint); font-family: "JetBrains Mono", monospace; }
+  .ap-progress-track { height: 6px; background: var(--emc-cream); border-radius: 99px; overflow: hidden; }
+  .ap-progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--emc-navy), var(--emc-navy-soft));
+    border-radius: 99px; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .ap-steps-badges { display: flex; justify-content: space-between; margin-top: 14px; gap: 6px; }
+  .ap-step-badge {
+    flex: 1; text-align: center; padding: 8px 4px; border-radius: 8px;
+    font-size: 11.5px; font-weight: 700; color: var(--emc-faint); transition: all 0.2s;
+  }
+  .ap-step-badge.active { color: var(--emc-navy); background: var(--emc-cream); }
+  .ap-step-badge.done { color: var(--emc-success, #2E7D5B); }
+  .ap-step-badge.done::before { content: "✓ "; }
+
+  .ap-hero {
+    text-align: center; padding: 48px 24px 32px;
+    background: linear-gradient(180deg, var(--emc-navy-deep, var(--emc-navy)) 0%, var(--emc-navy) 100%);
+    color: #fff; position: relative; overflow: hidden;
+  }
+  .ap-hero::before {
+    content: ""; position: absolute; top: -60px; left: -80px; width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(201, 169, 97, 0.16), transparent 60%); filter: blur(20px);
+  }
+  .ap-hero-eyebrow {
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--emc-gold); font-weight: 700; margin-bottom: 10px; position: relative; z-index: 1;
+  }
+  .ap-hero h1 { font-size: 30px; font-weight: 800; margin: 0 0 12px; position: relative; z-index: 1; }
+  .ap-hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 520px; margin: 0 auto; line-height: 1.7; position: relative; z-index: 1; }
+  .ap-hero .who { margin-top: 14px; font-size: 13px; color: var(--emc-gold); font-weight: 700; position: relative; z-index: 1; }
+
+  .ap-card {
+    background: #fff; border: 1px solid var(--emc-line); border-radius: 16px;
+    margin-top: 28px; overflow: hidden; box-shadow: 0 8px 24px rgba(11, 37, 69, 0.06);
+  }
+  .ap-step { padding: 32px 28px; display: none; animation: apFade 0.3s ease-out; }
+  .ap-step.active { display: block; }
+  @keyframes apFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .ap-step-head { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--emc-line); }
+  .ap-step-head h2 { font-size: 21px; color: var(--emc-navy); font-weight: 800; margin: 0 0 6px; }
+  .ap-step-head p { color: var(--emc-muted); font-size: 13.5px; margin: 0; }
+
+  .ap-field { margin-bottom: 22px; }
+  .ap-field > label {
+    display: block; font-size: 15px; font-weight: 700; color: var(--emc-navy);
+    margin-bottom: 4px; line-height: 1.5;
+  }
+  .ap-field .sublabel { font-size: 12.5px; color: var(--emc-muted); margin-bottom: 12px; line-height: 1.5; }
+  .ap-field .req { color: var(--emc-red); }
+  .ap-field .opt { color: var(--emc-faint); font-weight: 400; font-size: 11.5px; }
+
+  /* Single-select option cards (chips كبيرة) */
+  .ap-options { display: flex; flex-direction: column; gap: 8px; }
+  .ap-option {
+    display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+    border: 1px solid var(--emc-line); border-radius: 12px; background: #fff;
+    cursor: pointer; transition: all 0.15s; font-size: 14.5px; color: var(--emc-ink); font-weight: 600;
+  }
+  .ap-option:hover { border-color: var(--emc-navy); background: var(--emc-cream); }
+  .ap-option.selected { border-color: var(--emc-navy); background: var(--emc-navy); color: #fff; }
+  .ap-option-radio {
+    width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--emc-line);
+    flex-shrink: 0; display: grid; place-items: center; transition: all 0.15s;
+  }
+  .ap-option.selected .ap-option-radio { border-color: #fff; }
+  .ap-option.selected .ap-option-radio::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #fff; }
+
+  .ap-field input, .ap-field textarea {
+    width: 100%; border: 1px solid var(--emc-line); border-radius: 10px; padding: 0 14px;
+    font-size: 14.5px; font-family: inherit; background: #fff; color: var(--emc-ink);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .ap-field input { height: 46px; }
+  .ap-field textarea { padding: 12px 14px; min-height: 88px; resize: vertical; line-height: 1.6; }
+  .ap-field input:focus, .ap-field textarea:focus {
+    outline: none; border-color: var(--emc-navy); box-shadow: 0 0 0 3px rgba(11, 37, 69, 0.08);
+  }
+  .ap-err { color: var(--emc-red); font-size: 11.5px; margin-top: 8px; display: none; }
+  .ap-err.show { display: block; }
+
+  .ap-nav {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--emc-line);
+  }
+  .ap-btn {
+    padding: 12px 24px; border-radius: 10px; font-size: 14.5px; font-weight: 700;
+    font-family: inherit; cursor: pointer; border: 0; transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .ap-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ap-btn-next { background: var(--emc-navy); color: #fff; flex: 1; justify-content: center; height: 50px; }
+  .ap-btn-next:hover:not(:disabled) { background: var(--emc-navy-deep, #08172F); }
+  .ap-btn-back { background: transparent; color: var(--emc-ink-2); border: 1px solid var(--emc-line); }
+  .ap-btn-back:hover { border-color: var(--emc-navy); color: var(--emc-navy); }
+  .ap-btn-submit { background: var(--emc-gold); color: var(--emc-navy); flex: 1; justify-content: center; height: 50px; }
+  .ap-btn-submit:hover:not(:disabled) { background: #B89538; }
+
+  .ap-success { text-align: center; padding: 60px 28px; display: none; }
+  .ap-success.active { display: block; }
+  .ap-success-check {
+    width: 72px; height: 72px; margin: 0 auto 18px; background: #E1F1E8; color: var(--emc-success, #2E7D5B);
+    border-radius: 50%; display: grid; place-items: center; animation: apPop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes apPop { 0% { transform: scale(0); } 60% { transform: scale(1.1); } 100% { transform: scale(1); } }
+  .ap-success h3 { color: var(--emc-navy); font-size: 24px; font-weight: 800; margin: 0 0 10px; }
+  .ap-success p { color: var(--emc-ink-2); font-size: 15px; line-height: 1.7; max-width: 460px; margin: 0 auto; }
+
+  .ap-privacy { text-align: center; margin-top: 16px; font-size: 11.5px; color: var(--emc-faint); }
+</style>
+</head>
+<body class="lp-shell" data-landing-page="apply" data-screen-label="LP apply">
+
+<nav class="lp-nav">
+  <div class="lp-nav-brand">
+    <div class="lp-nav-brand-mark">
+      <svg width="100%" height="100%" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="18" width="32" height="7" rx="1" fill="#0B2545"/>
+        <rect x="14" y="31" width="36" height="6" rx="1" fill="#D72638"/>
+        <line x1="18" y1="25" x2="14" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="46" y1="25" x2="50" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="46" y2="25" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
+      <div class="lp-nav-brand-sub">تجهيز مكالمتك</div>
+    </div>
+  </div>
+  <span style="color: rgba(255,255,255,0.6); font-size: 12px;">دقيقتين · 3 خطوات</span>
+</nav>
+
+<section class="ap-hero">
+  <div class="ap-hero-eyebrow">خطوة أخيرة قبل مكالمتك</div>
+  <h1 id="ap-hero-title">خلّينا نجهّز مكالمتك صح</h1>
+  <p>3 أسئلة سريعة بتساعد عبدالله يجهّز مكالمتكم على وضع شركتك بالظبط — بدل ما تضيّعوا وقت المكالمة في الأساسيات.</p>
+  <div class="who" id="ap-hero-who"></div>
+</section>
+
+<div class="ap-progress">
+  <div class="ap-progress-inner">
+    <div class="ap-progress-meta">
+      <div class="ap-progress-step-label">الخطوة <strong id="ap-cur-step">1</strong> من <strong>3</strong></div>
+      <div class="ap-progress-percent" id="ap-pct">33%</div>
+    </div>
+    <div class="ap-progress-track"><div class="ap-progress-fill" id="ap-fill" style="width: 33%"></div></div>
+    <div class="ap-steps-badges">
+      <div class="ap-step-badge active" data-step="1">القرار</div>
+      <div class="ap-step-badge" data-step="2">الجاهزية</div>
+      <div class="ap-step-badge" data-step="3">الأولوية</div>
+    </div>
+  </div>
+</div>
+
+<div class="ap-shell">
+  <form id="ap-form" novalidate>
+    <div class="ap-card">
+
+      <!-- STEP 1: Authority -->
+      <div class="ap-step active" data-step="1">
+        <div class="ap-step-head">
+          <h2>مين المفروض يكون في المكالمة؟</h2>
+          <p>عشان نطلع منها بقرار، مش بس كلام</p>
+        </div>
+        <div class="ap-field">
+          <label>لما يجي وقت قرار البدء في برنامج زي ده، مين بيقرر؟ <span class="req">*</span></label>
+          <div class="sublabel">ده بيساعدنا نعرف نضم مين للمكالمة من البداية.</div>
+          <div class="ap-options" id="opts-authority" data-name="authority"></div>
+          <div class="ap-err" id="err-authority">اختار إجابة من فضلك</div>
+        </div>
+        <div class="ap-nav">
+          <span></span>
+          <button type="button" class="ap-btn ap-btn-next" data-cta="ap-step1" data-action="next">
+            التالي
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform: scaleX(-1);"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Readiness (budget proxy) -->
+      <div class="ap-step" data-step="2">
+        <div class="ap-step-head">
+          <h2>إنت في أي وضع دلوقتي؟</h2>
+          <p>عشان نعرف نوع المكالمة اللي تخدمك أكتر</p>
+        </div>
+        <div class="ap-field">
+          <label>لو طلع إن البرنامج هو الحل الصح لشركتك، إنت في وضع تقدر تبدأ خلال الفترة الجاية؟ <span class="req">*</span></label>
+          <div class="sublabel">مفيش إجابة صح أو غلط — ده بيساعدنا نوجّه المكالمة بالشكل المناسب ليك.</div>
+          <div class="ap-options" id="opts-readiness" data-name="readiness"></div>
+          <div class="ap-err" id="err-readiness">اختار إجابة من فضلك</div>
+        </div>
+        <div class="ap-nav">
+          <button type="button" class="ap-btn ap-btn-back" data-action="back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            السابق
+          </button>
+          <button type="button" class="ap-btn ap-btn-next" data-cta="ap-step2" data-action="next">
+            التالي
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform: scaleX(-1);"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Timeline + pressure -->
+      <div class="ap-step" data-step="3">
+        <div class="ap-step-head">
+          <h2>إيه اللي بيضغط عليك دلوقتي؟</h2>
+          <p>آخر سؤالين — وتخلص</p>
+        </div>
+        <div class="ap-field">
+          <label>إمتى محتاج تبدأ تشوف فرق حقيقي في شركتك؟ <span class="req">*</span></label>
+          <div class="ap-options" id="opts-timeline" data-name="timeline"></div>
+          <div class="ap-err" id="err-timeline">اختار إجابة من فضلك</div>
+        </div>
+        <div class="ap-field">
+          <label>إيه أكتر حاجة بتضغط عليك في إدارة الشركة دلوقتي؟ <span class="opt">(اختياري)</span></label>
+          <div class="sublabel">جملة أو اتنين تكفي — ده بيخلّي المكالمة مركّزة على وجعك الحقيقي.</div>
+          <textarea id="ap-pressure" name="pressure" placeholder="مثلاً: فريق القيادة مش متفق على الأولويات، وأنا متشتت بين التشغيل والاستراتيجية..."></textarea>
+        </div>
+        <div class="ap-nav">
+          <button type="button" class="ap-btn ap-btn-back" data-action="back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            السابق
+          </button>
+          <button type="button" class="ap-btn ap-btn-submit" data-cta="ap-submit" data-action="submit" id="ap-submit-btn">إرسال وتجهيز المكالمة</button>
+        </div>
+        <div class="ap-privacy">🔒 بياناتك محمية ولن تُشارك مع أي طرف ثالث.</div>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="ap-success" id="ap-success">
+        <div class="ap-success-check">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>تمام، وصلنا ردودك ✓</h3>
+        <p>عبدالله هيراجع وضع شركتك شخصياً، ولو فيه ملاءمة هيتواصل معاك خلال 48 ساعة لتحديد موعد مكالمة الاستكشاف. شكراً لوقتك.</p>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<footer class="lp-footer">
+  <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  let currentStep = 1;
+  const totalSteps = 3;
+  const selected = { authority: '', readiness: '', timeline: '' };
+  let contactId = null;
+  let loadedContact = null;
+
+  const stepsEls = document.querySelectorAll('.ap-step');
+  const badges = document.querySelectorAll('.ap-step-badge');
+  const fill = document.getElementById('ap-fill');
+  const pct = document.getElementById('ap-pct');
+  const curLabel = document.getElementById('ap-cur-step');
+  const form = document.getElementById('ap-form');
+  const successEl = document.getElementById('ap-success');
+  const cardEl = document.querySelector('.ap-card');
+
+  // ─── timeline options (مغلّفة) ───
+  const TIMELINE_OPTS = {
+    immediate:      'دلوقتي — الوضع مش مستني',
+    '1_3_months':   'خلال 1-3 شهور',
+    '3_6_months':   'خلال 3-6 شهور',
+    '6_plus_months':'لسه بدري — بخطط للمستقبل'
+  };
+
+  // ─── build option cards ───
+  function buildOptions(containerId, dict, group) {
+    const c = document.getElementById(containerId);
+    Object.entries(dict).forEach(([k, v]) => {
+      const div = document.createElement('div');
+      div.className = 'ap-option';
+      div.dataset.value = k;
+      div.innerHTML = `<span class="ap-option-radio"></span><span>${v}</span>`;
+      div.addEventListener('click', () => {
+        c.querySelectorAll('.ap-option').forEach(o => o.classList.remove('selected'));
+        div.classList.add('selected');
+        selected[group] = k;
+        document.getElementById('err-' + group)?.classList.remove('show');
+      });
+      c.appendChild(div);
+    });
+  }
+  buildOptions('opts-authority', EMC.APPLY_AUTHORITY, 'authority');
+  buildOptions('opts-readiness', EMC.APPLY_READINESS, 'readiness');
+  buildOptions('opts-timeline', TIMELINE_OPTS, 'timeline');
+
+  // ─── load contact by ?id= ───
+  (async function loadContact() {
+    const params = new URLSearchParams(window.location.search);
+    contactId = params.get('id');
+    if (!contactId) return;
+    try {
+      loadedContact = await EMC.contacts.get(contactId);
+      if (loadedContact) {
+        const fn = loadedContact.identity?.firstName || (loadedContact.identity?.fullName || '').split(/\s+/)[0] || '';
+        if (fn) {
+          document.getElementById('ap-hero-title').textContent = `أهلاً ${fn} — خطوة أخيرة`;
+          document.getElementById('ap-hero-who').textContent =
+            loadedContact.identity?.companyName ? `لـ ${loadedContact.identity.companyName}` : '';
+        }
+      }
+    } catch (e) { console.warn('Could not load contact:', e?.message); }
+  })();
+
+  function showStep(n) {
+    stepsEls.forEach(el => el.classList.toggle('active', parseInt(el.dataset.step) === n));
+    badges.forEach(b => {
+      const s = parseInt(b.dataset.step);
+      b.classList.remove('active', 'done');
+      if (s < n) b.classList.add('done');
+      else if (s === n) b.classList.add('active');
+    });
+    const p = Math.round((n / totalSteps) * 100);
+    fill.style.width = p + '%'; pct.textContent = p + '%'; curLabel.textContent = n;
+    currentStep = n;
+    cardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function validateStep(n) {
+    if (n === 1 && !selected.authority) { document.getElementById('err-authority').classList.add('show'); return false; }
+    if (n === 2 && !selected.readiness) { document.getElementById('err-readiness').classList.add('show'); return false; }
+    if (n === 3 && !selected.timeline) { document.getElementById('err-timeline').classList.add('show'); return false; }
+    return true;
+  }
+
+  form.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+
+    if (action === 'next') {
+      if (!validateStep(currentStep)) return;
+      if (currentStep < totalSteps) showStep(currentStep + 1);
+    }
+    else if (action === 'back') {
+      if (currentStep > 1) showStep(currentStep - 1);
+    }
+    else if (action === 'submit') {
+      if (!validateStep(currentStep)) return;
+      btn.disabled = true; btn.textContent = 'جاري الإرسال…';
+
+      if (!window.EMC_LP || !window.EMC_LP.submitApplication) {
+        btn.disabled = false; btn.textContent = 'إرسال وتجهيز المكالمة';
+        alert('النظام لسه بيحمّل، حاول بعد ثانيتين');
+        return;
+      }
+
+      const payload = {
+        contactId: contactId,
+        decisionRole: selected.authority,
+        budgetConfirmed: selected.readiness,   // yes | exploring | no
+        timelineUrgency: selected.timeline,
+        pressure: document.getElementById('ap-pressure').value.trim()
+      };
+
+      const result = await window.EMC_LP.submitApplication(payload);
+      if (result.success) {
+        document.querySelectorAll('.ap-step').forEach(s => s.classList.remove('active'));
+        successEl.classList.add('active');
+        fill.style.width = '100%'; pct.textContent = '100%';
+        badges.forEach(b => { b.classList.remove('active'); b.classList.add('done'); });
+      } else {
+        btn.disabled = false; btn.textContent = 'إرسال وتجهيز المكالمة';
+        alert('حدث خطأ: ' + (result.error || 'حاول مرة أخرى'));
+      }
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
