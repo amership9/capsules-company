@@ -5,6 +5,12 @@
    • طبقة الحفظ بالكود (إجبارية): كود دائم يُكتب في الرابط + localStorage +
      مستند المشارك، فالمشارك يرجع لنفس مكانه من أي جهاز.
    • بيتبع المقدّم لحظيًا: كل مرحلة يا تفاعل يا «وجّه انتباهك للشاشة».
+
+   تحديثات الترابط (مهمة):
+     - في «مرآة غرفة القادة» (p3_results) المشارك بيفضل شايف بطاقته الشخصية
+       على موبايله — مش شاشة «بصّ للشاشة» — عشان النص بيقوله «دي بطاقتك».
+     - تقدّم التشخيص (الإجابات + رقم السؤال) بيتحفظ محليًا أول بأول، فلو قفل
+       الموبايل أو اتحدّثت الصفحة وسط الـ12 سؤال، بيرجع لنفس مكانه مش من الصفر.
    ========================================================================== */
 (function () {
   'use strict';
@@ -53,7 +59,12 @@
   function saveLocal() {
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify({
-        pid: state.pid, name: state.name, code: state.code, savedAt: Date.now()
+        pid: state.pid,
+        name: state.name,
+        code: state.code,
+        diagnosticAnswers: state.diagnosticAnswers,
+        diagnosticIndex: state.diagnosticIndex,
+        savedAt: Date.now()
       }));
     } catch (e) {}
   }
@@ -70,6 +81,17 @@
     } catch (e) { return null; }
   }
 
+  // استرجاع تقدّم التشخيص من نفس الجهاز (لو نفس المشارك) — قبل أي حفظ جديد يمسحه
+  function restoreLocalDiagnostic() {
+    var d = loadLocal();
+    if (d && d.pid === state.pid) {
+      state.diagnosticAnswers = d.diagnosticAnswers || {};
+      var max = SessionData.diagnostic.length - 1;
+      var idx = d.diagnosticIndex || 0;
+      state.diagnosticIndex = Math.min(Math.max(0, idx), max);
+    }
+  }
+
   async function tryResume() {
     var params = new URLSearchParams(location.search);
     var urlCode = params.get('c') || params.get('code');
@@ -83,6 +105,7 @@
         if (p) {
           state.pid = p.id; state.name = p.name; state.code = code;
           await loadAllResponses();
+          restoreLocalDiagnostic();   // لو نفس الجهاز، نرجّع تقدّم التشخيص قبل ما نحفظ فوقه
           saveLocal();
           return { resumed: true, codeFailed: false };
         }
@@ -97,6 +120,10 @@
         var still = await SessionManager.getParticipant(local.pid);
         if (still) {
           state.pid = local.pid; state.name = local.name; state.code = local.code;
+          // نرجّع تقدّم التشخيص المحفوظ محليًا
+          state.diagnosticAnswers = local.diagnosticAnswers || {};
+          var maxQ = SessionData.diagnostic.length - 1;
+          state.diagnosticIndex = Math.min(Math.max(0, local.diagnosticIndex || 0), maxQ);
           if (state.code) putCodeInUrl(state.code);
           await loadAllResponses();
           return { resumed: true, codeFailed: false };
@@ -159,6 +186,7 @@
       var code = window.ResultCodes ? window.ResultCodes.randomCode() : null;
       var pid = await SessionManager.registerParticipant(name, code);
       state.pid = pid; state.name = name; state.code = code; state.responses = {};
+      state.diagnosticAnswers = {}; state.diagnosticIndex = 0;
       putCodeInUrl(code);
       saveLocal();
       enterSession();
@@ -217,6 +245,11 @@
 
     var ix = phase.interaction;
     if (!ix) {
+      // «مرآة غرفة القادة»: المشارك يفضل شايف بطاقته الشخصية على موبايله
+      if (phaseId === 'p3_results') {
+        var diagR = state.responses['diagnostic'];
+        if (diagR && diagR.result) { renderResultCard(mount, diagR.result); return; }
+      }
       mount.innerHTML = followScreen('👁️', phase.title, phase.participantPrompt || 'وجّه انتباهك للشاشة.');
       // في الإغلاق النهائي نعرض الملخّص الشخصي بدل الإشارة
       if (phaseId === 'close_ayah') renderFinalTakeaway(mount);
@@ -349,6 +382,7 @@
         state.diagnosticAnswers[q.id] = parseInt(d.getAttribute('data-val'), 10);
         mount.querySelectorAll('.scale-dot').forEach(function (x) { x.classList.remove('active'); });
         d.classList.add('active');
+        saveLocal();   // حفظ التقدّم محليًا أول بأول
       });
     });
     mount.querySelectorAll('.choice').forEach(function (b) {
@@ -356,11 +390,21 @@
         state.diagnosticAnswers[q.id] = b.getAttribute('data-id');
         mount.querySelectorAll('.choice').forEach(function (x) { x.classList.remove('active'); });
         b.classList.add('active');
+        saveLocal();   // حفظ التقدّم محليًا أول بأول
       });
     });
+    var openEl = document.getElementById('openAns');
+    if (openEl) {
+      openEl.addEventListener('input', function () {
+        state.diagnosticAnswers[q.id] = openEl.value;
+        saveLocal();
+      });
+    }
 
     var prev = document.getElementById('prevQ');
-    if (prev) prev.addEventListener('click', function () { state.diagnosticIndex--; renderDiagnostic(phase, mount); });
+    if (prev) prev.addEventListener('click', function () {
+      state.diagnosticIndex--; saveLocal(); renderDiagnostic(phase, mount);
+    });
 
     document.getElementById('nextQ').addEventListener('click', function () {
       if (q.kind === 'open') {
@@ -370,7 +414,7 @@
         showToast('اختار إجابة الأول', 'error'); return;
       }
       if (lastQ) finishDiagnostic(ix, mount);
-      else { state.diagnosticIndex++; renderDiagnostic(phase, mount); }
+      else { state.diagnosticIndex++; saveLocal(); renderDiagnostic(phase, mount); }
     });
   }
 
@@ -385,6 +429,7 @@
       }
     };
     state.responses[ix.saveKey] = payload;
+    saveLocal();
     try {
       await SessionManager.saveResponse(state.pid, ix.saveKey, payload);
       await SessionManager.updateParticipantStatus(state.pid, { answeredDiagnostic: true });
@@ -441,7 +486,6 @@
   /* ---------------- الملخّص النهائي (close_ayah) ---------------- */
   function renderFinalTakeaway(mount) {
     var diag = state.responses['diagnostic'];
-    var charter = state.responses['charter'];
     var html = '<div class="p-card fade-in text-center">';
     html += '<h2 class="gold-text" style="font-size:1.5rem">شكرًا لصدقك مع نفسك</h2>';
 
