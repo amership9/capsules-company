@@ -403,6 +403,89 @@
           console.error('Identified submission failed:', e);
           return { success: false, error: e?.message || 'حدث خطأ، حاول مرة أخرى' };
         }
+      },
+
+      // ═══════════════════════════════════════════════════
+      // Form B — استمارة التأهيل (المرحلة 5 / SQL prep)
+      // بتعبّي طبقة الفرصة (BANT) وبترفع درجة الجاهزية.
+      // مش بتنقل المرحلة — بتجهّز بس لقرار عبدالله في الكوكبيت.
+      // ═══════════════════════════════════════════════════
+      async submitApplication(payload) {
+        try {
+          if (typeof EMC === 'undefined' || !EMC.contacts) {
+            throw new Error('EMC not loaded yet');
+          }
+          if (!payload.contactId) {
+            throw new Error('رابط غير صالح — مفيش معرّف للعميل');
+          }
+
+          const existing = await EMC.contacts.get(payload.contactId);
+          if (!existing) throw new Error('العميل غير موجود');
+
+          // حدّث طبقة الفرصة بالـ BANT
+          const oppUpdate = {
+            ...(existing.opportunity || {}),
+            decisionRole: payload.decisionRole || existing.opportunity?.decisionRole || '',
+            budgetConfirmed: payload.budgetConfirmed || existing.opportunity?.budgetConfirmed || '',
+            timelineUrgency: payload.timelineUrgency || existing.opportunity?.timelineUrgency || ''
+          };
+
+          // الضغط/الوجع يدخل في الأهداف لو مفيش، أو في الملاحظات
+          const eosUpdate = { ...(existing.eosProfile || {}) };
+          if (payload.pressure && !eosUpdate.goals12Months) {
+            eosUpdate.goals12Months = payload.pressure;
+          }
+
+          const tags = [...new Set([...(existing.context?.tags || []), 'application_submitted'])];
+          const noteStamp = payload.pressure
+            ? `[استمارة التأهيل — الضغط الحالي: ${payload.pressure}]`
+            : '[استمارة التأهيل — تم تعبئتها]';
+          const newNotes = (existing.context?.notes || '') + ((existing.context?.notes) ? '\n' : '') + noteStamp;
+
+          await EMC.contacts.update(payload.contactId, {
+            opportunity: oppUpdate,
+            eosProfile: eosUpdate,
+            context: {
+              ...(existing.context || {}),
+              tags,
+              notes: newNotes,
+              lastInteractionAt: new Date().toISOString()
+            }
+          });
+
+          // سجّل event
+          if (EMC.events?.log) {
+            EMC.events.log({
+              contactId: payload.contactId,
+              type: 'manual_note',
+              stage: existing.currentStage || 4,
+              channel: 'website',
+              data: {
+                action: 'application_submitted',
+                decisionRole: payload.decisionRole,
+                budgetConfirmed: payload.budgetConfirmed,
+                timelineUrgency: payload.timelineUrgency,
+                hasPressure: !!payload.pressure
+              }
+            }).catch(() => {});
+          }
+
+          await safeCreate({
+            ...baseData,
+            type: 'form_submit',
+            contactId: payload.contactId,
+            data: { formType: 'application' }
+          });
+
+          if (EMC.utils?.refreshContactScore) {
+            EMC.utils.refreshContactScore(payload.contactId).catch(() => {});
+          }
+
+          return { success: true, contactId: payload.contactId };
+        } catch (e) {
+          console.error('Application submission failed:', e);
+          return { success: false, error: e?.message || 'حدث خطأ، حاول مرة أخرى' };
+        }
       }
     };
   }
