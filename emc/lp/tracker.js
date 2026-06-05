@@ -486,6 +486,70 @@
           console.error('Application submission failed:', e);
           return { success: false, error: e?.message || 'حدث خطأ، حاول مرة أخرى' };
         }
+      },
+
+      // ═══════════════════════════════════════════════════
+      // نموذج ما قبل المكالمة (المرحلة 6 / Discovery prep)
+      // بيكتب في discovery.prep — عبدالله بيقراه قبل المكالمة.
+      // ═══════════════════════════════════════════════════
+      async submitPrep(payload) {
+        try {
+          if (typeof EMC === 'undefined' || !EMC.contacts) {
+            throw new Error('EMC not loaded yet');
+          }
+          if (!payload.contactId) {
+            throw new Error('رابط غير صالح — مفيش معرّف للعميل');
+          }
+
+          const existing = await EMC.contacts.get(payload.contactId);
+          if (!existing) throw new Error('العميل غير موجود');
+
+          const prep = {
+            topic: payload.topic || '',
+            tried: payload.tried || '',
+            change: payload.change || '',
+            stakeholders: payload.stakeholders || '',
+            submittedAt: new Date().toISOString()
+          };
+
+          const newDiscovery = {
+            ...(existing.discovery || {}),
+            prep
+          };
+
+          const tags = [...new Set([...(existing.context?.tags || []), 'prep_submitted'])];
+
+          await EMC.contacts.update(payload.contactId, {
+            discovery: newDiscovery,
+            context: {
+              ...(existing.context || {}),
+              tags,
+              lastInteractionAt: new Date().toISOString()
+            }
+          });
+
+          if (EMC.events?.log) {
+            EMC.events.log({
+              contactId: payload.contactId,
+              type: 'manual_note',
+              stage: existing.currentStage || 6,
+              channel: 'website',
+              data: { action: 'prep_submitted' }
+            }).catch(() => {});
+          }
+
+          await safeCreate({
+            ...baseData,
+            type: 'form_submit',
+            contactId: payload.contactId,
+            data: { formType: 'prep' }
+          });
+
+          return { success: true, contactId: payload.contactId };
+        } catch (e) {
+          console.error('Prep submission failed:', e);
+          return { success: false, error: e?.message || 'حدث خطأ، حاول مرة أخرى' };
+        }
       }
     };
   }
