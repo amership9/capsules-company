@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة المقدّم · العافية</title>
+  <link rel="stylesheet" href="main.css">
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="stars-background" id="starsBackground"></div>
+
+  <div class="admin-wrap">
+    <!-- الشريط الجانبي: مراحل الورشة -->
+    <aside class="admin-side">
+      <h2>مراحل الورشة</h2>
+      <div id="phaseList"></div>
+      <div class="divider"></div>
+      <button class="btn btn-danger btn-block btn-sm" id="resetBtn">إعادة ضبط الجلسة</button>
+      <p class="muted" style="font-size:.72rem;margin-top:10px;line-height:1.6;">
+        إعادة الضبط بتمسح كل المشاركين وإجاباتهم وتبدأ من جديد. استخدمها قبل دفعة جديدة بس.
+      </p>
+    </aside>
+
+    <!-- المنطقة الرئيسية -->
+    <main class="admin-main layer">
+      <div class="admin-bar">
+        <button class="btn btn-ghost btn-sm" id="prevBtn">◀ السابق</button>
+        <div style="flex:1;min-width:200px;">
+          <span class="badge" id="nowBlock"></span>
+          <div class="now-phase gold-text" id="nowPhase">—</div>
+        </div>
+        <button class="btn btn-gold btn-sm" id="nextBtn">التالي ▶</button>
+      </div>
+
+      <!-- المؤقّت -->
+      <div class="card ctrl-card">
+        <h3>المؤقّت</h3>
+        <div class="flex items-center gap-2 mb-2" style="flex-wrap:wrap;">
+          <span class="timer" id="timerDisplay" style="font-size:2.6rem;">00:00</span>
+          <button class="btn btn-gold btn-sm" id="startPauseBtn">تشغيل</button>
+          <button class="btn btn-ghost btn-sm" id="resetTimerBtn">صفر</button>
+        </div>
+        <div class="timer-buttons" id="timerPresets">
+          <button class="btn btn-outline btn-sm" data-min="1">١ د</button>
+          <button class="btn btn-outline btn-sm" data-min="2">٢ د</button>
+          <button class="btn btn-outline btn-sm" data-min="3">٣ د</button>
+          <button class="btn btn-outline btn-sm" data-min="5">٥ د</button>
+          <button class="btn btn-outline btn-sm" data-min="10">١٠ د</button>
+          <button class="btn btn-outline btn-sm" data-min="15">١٥ د</button>
+        </div>
+      </div>
+
+      <!-- تحكّمات المرحلة الحالية -->
+      <div id="phaseControls"></div>
+
+      <!-- المشاركون -->
+      <div class="card ctrl-card mt-2">
+        <h3>المشاركون <span class="muted" id="participantCount" style="font-size:.9rem;"></span></h3>
+        <p class="muted" style="font-size:.78rem;margin-bottom:12px;">
+          🔒 بتشوف الأسماء الوهمية وحالة الاتصال بس — مفيش وصول لإجابة أي حد باسمه. ده وعد السرّية.
+        </p>
+        <div class="participants-grid" id="participantsGrid"></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="firebase-config.js"></script>
+  <script src="training-session.js"></script>
+  <script src="session-data.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
