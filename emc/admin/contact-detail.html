@@ -162,6 +162,68 @@
   </div>
 </div>
 
+<!-- [6B] Schedule call modal -->
+<div class="emc-modal-overlay" id="sched-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 520px; box-shadow: 0 30px 80px rgba(0,0,0,0.3); overflow: hidden;">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--emc-line);">
+      <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">جدولة مكالمة الاستكشاف</h3>
+      <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;">سجّل موعد المكالمة بعد ما تتفق عليه</div>
+    </div>
+    <div style="padding: 22px 24px;">
+      <div class="field">
+        <label class="field-label">طريقة الحجز</label>
+        <div class="checkbox-group" id="sched-method">
+          <label class="chip-check checked"><input type="radio" name="bookingMethod" value="calendly" checked /> عبر Calendly</label>
+          <label class="chip-check"><input type="radio" name="bookingMethod" value="manual" /> حجز يدوي</label>
+        </div>
+      </div>
+      <div id="calendly-hint" style="margin-bottom: 14px; padding: 12px 14px; background: var(--emc-cream); border-radius: 8px; font-size: 12.5px; color: var(--emc-ink-2); line-height: 1.6;"></div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">تاريخ المكالمة <span class="req">*</span></label>
+          <input class="input" type="date" name="callDate" />
+        </div>
+        <div class="field">
+          <label class="field-label">الوقت</label>
+          <input class="input" type="time" name="callTime" />
+        </div>
+      </div>
+    </div>
+    <div style="padding: 14px 24px; border-top: 1px solid var(--emc-line); display: flex; justify-content: flex-end; gap: 8px; background: var(--emc-cream);">
+      <button class="btn btn-ghost btn-sm" id="sched-cancel">إلغاء</button>
+      <button class="btn btn-primary btn-sm" id="sched-save">تأكيد الحجز</button>
+    </div>
+  </div>
+</div>
+
+<!-- [6B] Discovery outcome modal -->
+<div class="emc-modal-overlay" id="outcome-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 560px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 30px 80px rgba(0,0,0,0.3); overflow: hidden;">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--emc-line);">
+      <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">تسجيل نتيجة المكالمة</h3>
+      <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;">بعد المكالمة — قيّم الملاءمة وحدد المسار</div>
+    </div>
+    <div style="padding: 22px 24px; overflow-y: auto; flex: 1;">
+      <div class="field">
+        <label class="field-label">تقييم الملاءمة (Fit) <span class="req">*</span></label>
+        <div class="checkbox-group" id="outcome-verdict" style="flex-direction: column; gap: 8px;"></div>
+      </div>
+      <div class="field">
+        <label class="field-label">أهم نقاط المكالمة</label>
+        <textarea class="textarea" name="callNotes" placeholder="السقف الحقيقي، الألم، الميزانية، صاحب القرار، الاعتراضات المتوقعة…"></textarea>
+      </div>
+      <div class="field" style="margin-bottom: 0;">
+        <label class="field-label">المسار المقترح <span class="hint">(لو مناسب)</span></label>
+        <input class="input" name="solutionDirection" placeholder="مثلاً: نبدأ بمكوّن الناس + Accountability Chart في أول 30 يوم" />
+      </div>
+    </div>
+    <div style="padding: 14px 24px; border-top: 1px solid var(--emc-line); display: flex; justify-content: flex-end; gap: 8px; background: var(--emc-cream);">
+      <button class="btn btn-ghost btn-sm" id="outcome-cancel">إلغاء</button>
+      <button class="btn btn-primary btn-sm" id="outcome-save">حفظ النتيجة</button>
+    </div>
+  </div>
+</div>
+
 <template id="detail-tpl">
   <div class="emc-crumbs">
     <a href="dashboard.html">لوحة التحكم</a>
@@ -256,6 +318,9 @@
         <div class="pipeline" id="pipeline-strip"></div>
       </div>
     </div>
+
+    <!-- [6B] Discovery panel — يظهر فقط للمرحلة 5 أو 6 -->
+    <div id="discovery-panel"></div>
 
     <!-- Quick stats -->
     <div class="grid-4" style="margin-bottom: 22px;">
@@ -445,6 +510,250 @@
       btn.textContent = originalText;
     }
   });
+
+ // ─── [6B] لوحة مكالمة الاستكشاف (المرحلة 5 و6) ───
+  (async function setupDiscoveryPanel() {
+    const panel = document.getElementById('discovery-panel');
+    if (!panel) return;
+    // تظهر فقط للمرحلة 5 (SQL) أو 6 (Discovery)
+    if (c.currentStage !== 5 && c.currentStage !== 6) return;
+
+    const settings = await EMC.utils.getSettings();
+    const calendlyUrl = settings.calendlyUrl || '';
+    const disc = c.discovery || {};
+    const schedStatus = disc.scheduleStatus || 'not_scheduled';
+    const ss = EMC.DISCOVERY_SCHEDULE_STATUS[schedStatus] || EMC.DISCOVERY_SCHEDULE_STATUS.not_scheduled;
+
+    // معلومات الموعد لو محجوز
+    let scheduleBlock;
+    if (disc.callDate) {
+      const dateStr = EMC.utils.formatDate(disc.callDate);
+      const timeStr = disc.callTime ? ` · ${disc.callTime}` : '';
+      const methodStr = disc.bookingMethod ? EMC.DISCOVERY_BOOKING_METHOD[disc.bookingMethod] : '';
+      scheduleBlock = `
+        <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fff; border:1px solid var(--emc-line); border-radius:10px;">
+          <div style="width:44px; height:44px; border-radius:10px; background:var(--emc-cream); display:grid; place-items:center; flex-shrink:0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--emc-navy)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-weight:700; color:var(--emc-navy); font-size:15px;">${dateStr}${timeStr}</div>
+            <div style="font-size:12px; color:var(--emc-muted);">${methodStr}</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="resched-btn">تعديل الموعد</button>
+        </div>`;
+    } else {
+      scheduleBlock = `
+        <div style="text-align:center; padding:20px;">
+          <div style="font-size:13.5px; color:var(--emc-muted); margin-bottom:14px;">لسه ما اتحددش موعد لمكالمة الاستكشاف</div>
+          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+            ${calendlyUrl ? `<a href="${calendlyUrl}" target="_blank" class="btn btn-outline btn-sm">↗ افتح Calendly للعميل</a>` : ''}
+            <button class="btn btn-primary btn-sm" id="open-sched-btn">📅 سجّل موعد المكالمة</button>
+          </div>
+          ${!calendlyUrl ? `<div style="font-size:11.5px; color:var(--emc-faint); margin-top:10px;">💡 حط لينك Calendly من صفحة الإعدادات عشان يظهر زر الحجز الذاتي</div>` : ''}
+        </div>`;
+    }
+
+    // نتيجة المكالمة لو متسجلة
+    let outcomeBlock = '';
+    if (disc.verdict) {
+      const v = EMC.DISCOVERY_VERDICTS[disc.verdict];
+      outcomeBlock = `
+        <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--emc-line-soft);">
+          <div style="font-size:11.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--emc-muted); font-weight:700; margin-bottom:8px;">نتيجة المكالمة</div>
+          <span class="badge" style="background:${v.bg}; color:${v.color}; border-color:${v.border}; font-size:13px; padding:5px 12px;">${v.label}</span>
+          ${disc.callNotes ? `<div style="margin-top:10px; font-size:13.5px; color:var(--emc-ink); line-height:1.6; white-space:pre-wrap;">${disc.callNotes}</div>` : ''}
+          ${disc.solutionDirection ? `<div style="margin-top:8px; padding:10px 14px; background:var(--emc-cream); border-radius:8px; border-inline-start:3px solid var(--emc-gold); font-size:13px;"><strong>المسار:</strong> ${disc.solutionDirection}</div>` : ''}
+        </div>`;
+    }
+
+    // أزرار النتيجة (تظهر لو المكالمة محجوزة)
+    const outcomeActions = disc.callDate ? `
+      <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-accent btn-sm" id="open-outcome-btn">${disc.verdict ? '✎ تعديل النتيجة' : '✓ سجّل نتيجة المكالمة'}</button>
+        ${disc.verdict === 'fit' && c.currentStage < 7 ? `<button class="btn btn-primary btn-sm" id="to-proposal-btn">→ انقل للعرض الرسمي (المرحلة 7)</button>` : ''}
+      </div>` : '';
+
+    panel.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:22px; border-color:var(--emc-navy);">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:4px; height:20px; background:var(--emc-navy); border-radius:2px;"></span>
+            <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">مكالمة الاستكشاف</h3>
+            <span class="badge" style="background:${ss.bg}; color:${ss.color}; border-color:${ss.border};">${ss.label}</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="toggle-script-btn">📋 سكريبت المكالمة</button>
+        </div>
+        ${scheduleBlock}
+        ${outcomeActions}
+        ${outcomeBlock}
+        <div id="script-box" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--emc-line-soft);"></div>
+      </div>`;
+
+    // ─── السكريبت ───
+    document.getElementById('toggle-script-btn').addEventListener('click', () => {
+      const box = document.getElementById('script-box');
+      if (box.style.display === 'none') {
+        box.innerHTML = EMC.DISCOVERY_SCRIPT.map(phase => `
+          <div style="margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+              <span style="width:8px; height:8px; border-radius:50%; background:${phase.color};"></span>
+              <span style="font-weight:700; color:var(--emc-navy); font-size:13.5px;">${phase.phase}</span>
+            </div>
+            <ul style="margin:0; padding-inline-start:22px; color:var(--emc-ink-2); font-size:13.5px; line-height:1.8;">
+              ${phase.points.map(p => `<li>${p}</li>`).join('')}
+            </ul>
+          </div>`).join('');
+        box.style.display = 'block';
+      } else {
+        box.style.display = 'none';
+      }
+    });
+
+    // ─── جدولة ───
+    const schedModal = document.getElementById('sched-modal');
+    function openSched() {
+      const m = c.discovery || {};
+      schedModal.querySelector('[name="callDate"]').value = (m.callDate || '').slice(0, 10);
+      schedModal.querySelector('[name="callTime"]').value = m.callTime || '';
+      const method = m.bookingMethod || 'calendly';
+      schedModal.querySelectorAll('[name="bookingMethod"]').forEach(r => {
+        r.checked = (r.value === method);
+        r.closest('.chip-check').classList.toggle('checked', r.checked);
+      });
+      updateCalendlyHint();
+      schedModal.style.display = 'flex';
+    }
+    function updateCalendlyHint() {
+      const method = schedModal.querySelector('[name="bookingMethod"]:checked')?.value;
+      const hint = document.getElementById('calendly-hint');
+      if (method === 'calendly') {
+        hint.style.display = 'block';
+        hint.innerHTML = calendlyUrl
+          ? `🔗 العميل بيحجز من: <a href="${calendlyUrl}" target="_blank" style="color:var(--emc-navy); font-weight:600;">${calendlyUrl}</a><br/>بعد ما يحجز، اكتب نفس التاريخ هنا عشان النظام يسجّله.`
+          : `⚠️ لسه ما حطّيتش لينك Calendly. روح الإعدادات وحطه، أو استخدم الحجز اليدوي.`;
+      } else {
+        hint.style.display = 'block';
+        hint.innerHTML = `📞 اتفقت مع العميل على الموعد واتساب/هاتف؟ اكتبه هنا.`;
+      }
+    }
+    schedModal.querySelectorAll('[name="bookingMethod"]').forEach(r => {
+      r.addEventListener('change', () => {
+        schedModal.querySelectorAll('#sched-method .chip-check').forEach(c => c.classList.remove('checked'));
+        r.closest('.chip-check').classList.add('checked');
+        updateCalendlyHint();
+      });
+    });
+    document.getElementById('sched-cancel').addEventListener('click', () => schedModal.style.display = 'none');
+    schedModal.addEventListener('click', (e) => { if (e.target === schedModal) schedModal.style.display = 'none'; });
+
+    document.getElementById('sched-save').addEventListener('click', async () => {
+      const callDate = schedModal.querySelector('[name="callDate"]').value;
+      if (!callDate) { EMC.utils.toast('اختار تاريخ المكالمة', 'error'); return; }
+      const btn = document.getElementById('sched-save');
+      btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+      try {
+        const method = schedModal.querySelector('[name="bookingMethod"]:checked')?.value || 'manual';
+        const newDisc = {
+          ...(c.discovery || {}),
+          callDate,
+          callTime: schedModal.querySelector('[name="callTime"]').value || '',
+          bookingMethod: method,
+          scheduleStatus: 'scheduled'
+        };
+        const updates = { discovery: newDisc };
+        // لو لسه في المرحلة 5، انقله لـ 6 (Discovery) تلقائياً عند الجدولة
+        if (c.currentStage === 5) {
+          await EMC.contacts.moveToStage(id, 6, 'حجز مكالمة استكشاف');
+        }
+        await EMC.contacts.update(id, updates);
+        EMC.utils.toast('تم تسجيل موعد المكالمة', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) {
+        EMC.utils.toast('خطأ: ' + (e.message || ''), 'error');
+        btn.disabled = false; btn.textContent = 'تأكيد الحجز';
+      }
+    });
+
+    const openSchedBtn = document.getElementById('open-sched-btn');
+    if (openSchedBtn) openSchedBtn.addEventListener('click', openSched);
+    const reschedBtn = document.getElementById('resched-btn');
+    if (reschedBtn) reschedBtn.addEventListener('click', openSched);
+
+    // ─── تسجيل النتيجة ───
+    const outcomeModal = document.getElementById('outcome-modal');
+    // ابنِ خيارات الـ verdict
+    const verdictGroup = document.getElementById('outcome-verdict');
+    verdictGroup.innerHTML = Object.entries(EMC.DISCOVERY_VERDICTS).map(([k, v]) => `
+      <label class="chip-check" data-v="${k}" style="justify-content:flex-start; width:100%; border-radius:10px; padding:11px 14px;">
+        <input type="radio" name="verdict" value="${k}" /> ${v.label}
+      </label>`).join('');
+    verdictGroup.querySelectorAll('.chip-check').forEach(chip => {
+      chip.addEventListener('click', () => {
+        verdictGroup.querySelectorAll('.chip-check').forEach(x => x.classList.remove('checked'));
+        chip.classList.add('checked');
+        chip.querySelector('input').checked = true;
+      });
+    });
+
+    function openOutcome() {
+      const m = c.discovery || {};
+      if (m.verdict) {
+        const chip = verdictGroup.querySelector(`[data-v="${m.verdict}"]`);
+        if (chip) { chip.classList.add('checked'); chip.querySelector('input').checked = true; }
+      }
+      outcomeModal.querySelector('[name="callNotes"]').value = m.callNotes || '';
+      outcomeModal.querySelector('[name="solutionDirection"]').value = m.solutionDirection || '';
+      outcomeModal.style.display = 'flex';
+    }
+    document.getElementById('outcome-cancel').addEventListener('click', () => outcomeModal.style.display = 'none');
+    outcomeModal.addEventListener('click', (e) => { if (e.target === outcomeModal) outcomeModal.style.display = 'none'; });
+
+    document.getElementById('outcome-save').addEventListener('click', async () => {
+      const verdict = outcomeModal.querySelector('[name="verdict"]:checked')?.value;
+      if (!verdict) { EMC.utils.toast('اختار تقييم الملاءمة', 'error'); return; }
+      const btn = document.getElementById('outcome-save');
+      btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+      try {
+        const newDisc = {
+          ...(c.discovery || {}),
+          verdict,
+          callNotes: outcomeModal.querySelector('[name="callNotes"]').value.trim(),
+          solutionDirection: outcomeModal.querySelector('[name="solutionDirection"]').value.trim(),
+          scheduleStatus: 'completed'
+        };
+        await EMC.contacts.update(id, { discovery: newDisc });
+        if (EMC.events?.log) {
+          await EMC.events.log({
+            contactId: id, type: 'manual_note', stage: 6, channel: 'manual',
+            data: { action: 'discovery_outcome', verdict }
+          });
+        }
+        EMC.utils.toast('تم حفظ نتيجة المكالمة', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) {
+        EMC.utils.toast('خطأ: ' + (e.message || ''), 'error');
+        btn.disabled = false; btn.textContent = 'حفظ النتيجة';
+      }
+    });
+
+    const openOutcomeBtn = document.getElementById('open-outcome-btn');
+    if (openOutcomeBtn) openOutcomeBtn.addEventListener('click', openOutcome);
+
+    // ─── نقل للعرض الرسمي ───
+    const toProposalBtn = document.getElementById('to-proposal-btn');
+    if (toProposalBtn) {
+      toProposalBtn.addEventListener('click', async () => {
+        if (!confirm(`نقل ${c.identity.fullName} للمرحلة 7 (العرض الرسمي)؟`)) return;
+        try {
+          await EMC.contacts.moveToStage(id, 7, 'نتيجة استكشاف: مناسب — للعرض الرسمي');
+          EMC.utils.toast('تم النقل للعرض الرسمي', 'success');
+          setTimeout(() => window.location.reload(), 700);
+        } catch (e) {
+          EMC.utils.toast('خطأ في النقل', 'error');
+        }
+      });
+    }
+  })();
 
   // ─── [5C] محرر بيانات الفرصة ───
   (function setupOppEditor() {
