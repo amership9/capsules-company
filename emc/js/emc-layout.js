@@ -20,6 +20,7 @@ window.EMC.layout = {
     { id: 'alumni',     label: 'الخريجون والسفراء', href: 'contacts.html?zone=4', icon: 'star' },
   ],
   navItemsSecondary: [
+    { id: 'settings',   label: 'الإعدادات',     href: 'settings.html', icon: 'settings' },
     { id: 'cohorts',    label: 'الكوهورتات',    href: '#',  icon: 'calendar', soon: true },
     { id: 'automations',label: 'الأتمتة',       href: '#',  icon: 'zap', soon: true },
     { id: 'reports',    label: 'التقارير',      href: '#',  icon: 'chart', soon: true }
@@ -85,10 +86,15 @@ window.EMC.layout = {
             `).join('')}
           </nav>
 
-          <div class="emc-nav-label">قريباً</div>
+          <div class="emc-nav-label">النظام</div>
           <nav class="emc-nav">
-            ${this.navItemsSecondary.map(n => `
-              <a href="${n.href}" class="${n.id === page ? 'active' : ''}" style="opacity:.55; cursor:default;" onclick="event.preventDefault()">
+            ${this.navItemsSecondary.map(n => n.soon ? `
+              <a href="#" class="" style="opacity:.55; cursor:default;" onclick="event.preventDefault()">
+                ${this.icons[n.icon] || ''}
+                <span>${n.label}</span>
+              </a>
+            ` : `
+              <a href="${n.href}" class="${n.id === page ? 'active' : ''}">
                 ${this.icons[n.icon] || ''}
                 <span>${n.label}</span>
               </a>
