@@ -183,6 +183,10 @@ window.EMC.contacts = {
         referredContactIds: [], contentContributions: [], eventsSpoken: [],
         advocateLevel: ''
       },
+      discovery: {
+        scheduleStatus: 'not_scheduled', bookingMethod: '', callDate: null, callTime: '',
+        verdict: '', callNotes: '', solutionDirection: ''
+      },
       currentStage: 3,
       stageHistory: [],
       assignedTo: '',
