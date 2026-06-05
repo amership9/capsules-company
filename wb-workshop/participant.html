@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>العافية · مساحتك الخاصة</title>
+  <link rel="stylesheet" href="main.css">
+
+  <!-- Firebase SDK (compat) — لازم قبل firebase-config.js -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="stars-background" id="starsBackground"></div>
+
+  <!-- ===== شاشة التسجيل ===== -->
+  <div id="registrationScreen" class="layer">
+    <div class="p-wrap">
+      <div class="text-center mt-4 mb-3 fade-in">
+        <div class="badge">Executive Master Camp</div>
+        <h1 class="gold-text" style="font-size:2.4rem;margin-top:16px;">العافية</h1>
+        <div class="en" style="font-size:1.15rem;">Inner Wellbeing</div>
+        <p class="muted mt-2">مساحتك الخاصة. اللي تكتبه هنا محدّش هيشوفه باسمك.</p>
+      </div>
+
+      <div class="p-card fade-in-up">
+        <div class="field">
+          <label>اختار اسم وهمي يخصّك</label>
+          <input class="input" id="aliasInput" type="text" maxlength="24"
+                 placeholder="مش اسمك الحقيقي — أي اسم تختاره" autocomplete="off">
+        </div>
+        <label class="flex gap-1 items-center" style="cursor:pointer;font-size:.92rem;color:var(--text-soft);line-height:1.5;">
+          <input type="checkbox" id="consentChk" style="width:20px;height:20px;flex-shrink:0;accent-color:var(--gold);">
+          <span>اللي هكتبه محدّش هيشوفه باسمي. أوافق.</span>
+        </label>
+        <button class="btn btn-gold btn-block btn-large mt-3" id="registerBtn" disabled>ابدأ</button>
+      </div>
+
+      <div class="p-card mt-2 fade-in-up">
+        <p class="muted" style="font-size:.86rem;">بدأت قبل كده على جهاز تاني؟ افتح مساحتك بالكود:</p>
+        <div class="flex gap-1 mt-1">
+          <input class="input" id="codeInput" type="text" maxlength="9" inputmode="latin"
+                 placeholder="XXXX-XXXX" style="text-align:center;letter-spacing:.12em;text-transform:uppercase;">
+          <button class="btn btn-outline" id="codeOpenBtn" style="white-space:nowrap;">افتح</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== شاشة الجلسة ===== -->
+  <div id="dynamicScreen" class="layer hidden">
+    <div class="p-wrap">
+      <div class="p-topbar">
+        <div class="p-name">مساحة <b id="welcomeName"></b></div>
+        <div class="badge">العافية</div>
+      </div>
+
+      <div id="pContent"></div>
+
+      <div class="resume-bar">
+        كودك للرجوع من أي جهاز:
+        <div class="mt-1"><span class="code-chip" id="resumeCode">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- ترتيب التحميل حرِج -->
+  <script src="firebase-config.js"></script>
+  <script src="result-codes.js"></script>
+  <script src="training-session.js"></script>
+  <script src="session-data.js"></script>
+  <script src="participant.js"></script>
+</body>
+</html>
