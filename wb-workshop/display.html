@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>العافية · شاشة العرض</title>
+  <link rel="stylesheet" href="main.css">
+  <style> body { overflow: hidden; } </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="stars-background" id="starsBackground"></div>
+
+  <div class="timer display-timer hidden" id="displayTimer">00:00</div>
+  <div class="display-stage layer" id="stage"></div>
+
+  <script src="firebase-config.js"></script>
+  <script src="training-session.js"></script>
+  <script src="session-data.js"></script>
+  <script src="display.js"></script>
+</body>
+</html>
