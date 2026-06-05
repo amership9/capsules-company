@@ -228,6 +228,20 @@ window.EMC.DISQUALIFY_REASONS = {
   other:              'سبب آخر'
 };
 
+// ─── [المرحلة 5] خيارات استمارة التأهيل (Form B) بصياغة "تجهيز المكالمة" ───
+// كل خيار بيتربط بقيمة في طبقة الفرصة (decisionRole / budgetConfirmed / timelineUrgency)
+window.EMC.APPLY_AUTHORITY = {
+  sole_decision_maker: 'أنا اللي بقرر في النهاية',
+  strong_influencer:   'القرار بإيدي بس بستشير شريك/مجلس',
+  needs_buy_in:        'محتاج موافقة أطراف تانية'
+};
+
+window.EMC.APPLY_READINESS = {
+  yes:       'آه، لو ده الحل الصح أنا جاهز أبدأ',
+  exploring: 'بستكشف وبجمع معلومات لسه',
+  no:        'مهتم بالمعرفة بس مش في وضع التزام دلوقتي'
+};
+
 // ─── Helpers ───
 window.EMC.utils = {
   getStage(id) {
