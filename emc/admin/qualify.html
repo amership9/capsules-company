@@ -308,6 +308,7 @@
   }
 
   function renderCard({ c, q, dq }) {
+    const applied = (c.context?.tags || []).includes('application_submitted');
     const v = EMC.SQL_VERDICTS[q.verdict] || EMC.SQL_VERDICTS.not_ready;
     const opp = c.opportunity || {};
     const eos = c.eosProfile || {};
@@ -362,7 +363,6 @@
     // ─── [5C] استمارة التأهيل (Form B) — لينك واتساب جاهز ───
     const APP_BASE = 'https://amership9.github.io/capsules-company/emc';
     const applyUrl = `${APP_BASE}/lp/apply.html?id=${c.id}`;
-    const applied = (c.context?.tags || []).includes('application_submitted');
     const applyMsg = encodeURIComponent(
       `أهلاً ${firstName}،\n\nأنا عبدالله من Executive Mastery Camp. قبل ما نحدد مكالمة، ياريت تملا الاستمارة دي السريعة (دقيقتين) — بتساعدني أجهّز المكالمة على وضع ${c.identity?.companyName || 'شركتك'} بالظبط:\n\n${applyUrl}\n\nشكراً،\nعبدالله`
     );
