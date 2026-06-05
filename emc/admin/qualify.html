@@ -343,6 +343,7 @@
       ? `<span class="q-ctx-chip">⏱ ${EMC.TIMELINE_URGENCY[opp.timelineUrgency]}</span>`
       : `<span class="q-ctx-chip missing">⏱ التوقيت غير محدد</span>`);
     if (eos.primaryComponent) ctx.push(`<span class="q-ctx-chip">🎯 ${EMC.EOS_COMPONENTS[eos.primaryComponent]}</span>`);
+    if (applied) ctx.unshift(`<span class="q-ctx-chip" style="background:#E1F1E8; color:#1E5C42; border-color:#BFE0CD;">✓ ملأ استمارة التأهيل</span>`);
 
     // flags
     const flagsHTML = (q.flags || []).length
@@ -357,6 +358,15 @@
       `أهلاً ${firstName}،\n\nأنا عبدالله من Executive Mastery Camp. بنراجع أوضاع الشركات اللي اهتمت بالبرنامج، وحبيت أتأكد من شوية تفاصيل سريعة عن ${c.identity?.companyName || 'شركتك'} عشان أقدر أوجّهك صح.\n\nعندك دقيقتين نتكلم؟`
     );
     const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMsg}` : '';
+
+    // ─── [5C] استمارة التأهيل (Form B) — لينك واتساب جاهز ───
+    const APP_BASE = 'https://amership9.github.io/capsules-company/emc';
+    const applyUrl = `${APP_BASE}/lp/apply.html?id=${c.id}`;
+    const applied = (c.context?.tags || []).includes('application_submitted');
+    const applyMsg = encodeURIComponent(
+      `أهلاً ${firstName}،\n\nأنا عبدالله من Executive Mastery Camp. قبل ما نحدد مكالمة، ياريت تملا الاستمارة دي السريعة (دقيقتين) — بتساعدني أجهّز المكالمة على وضع ${c.identity?.companyName || 'شركتك'} بالظبط:\n\n${applyUrl}\n\nشكراً،\nعبدالله`
+    );
+    const applyWaLink = waNumber ? `https://wa.me/${waNumber}?text=${applyMsg}` : '';
 
     return `
       <div class="q-card ${dq ? 'disqualified' : ''}" data-id="${c.id}">
@@ -391,7 +401,8 @@
             <button class="q-promote-btn" data-action="promote" data-id="${c.id}" data-name="${c.identity?.fullName || ''}" data-score="${q.score}">
               ✓ أهّل — نقل لـ SQL
             </button>
-            ${waLink ? `<a href="${waLink}" target="_blank" class="q-wa-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5C18.3 1.2 15.3 0 12 0 5.4 0 0 5.4 0 12c0 2.1.5 4.2 1.6 6L0 24l6.2-1.6c1.7.9 3.7 1.4 5.7 1.4 6.6 0 12-5.4 12-12 .1-3.2-1.2-6.2-3.4-8.3z"/></svg> تواصل</a>` : ''}
+            ${!applied && applyWaLink ? `<a href="${applyWaLink}" target="_blank" class="btn btn-primary btn-sm">📨 ابعت استمارة التأهيل</a>` : ''}
+            ${waLink ? `<a href="${waLink}" target="_blank" class="q-wa-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5C18.3 1.2 15.3 0 12 0 5.4 0 0 5.4 0 12c0 2.1.5 4.2 1.6 6L0 24l6.2-1.6c1.7.9 3.7 1.4 5.7 1.4 6.6 0 12-5.4 12-12 .1-3.2-1.2-6.2-3.4-8.3z"/></svg></a>` : ''}
             <a href="contact-detail.html?id=${c.id}" class="btn btn-outline btn-sm">📋 الملف الكامل</a>
             <button class="btn btn-ghost btn-sm" data-action="disqualify" data-id="${c.id}" data-name="${c.identity?.fullName || ''}" style="color: var(--emc-red); margin-inline-start:auto;">✕ استبعد</button>
           `}
