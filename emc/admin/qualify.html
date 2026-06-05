@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>تأهيل المبيعات · EMC CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-segments.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-templates.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-layout.js"></script>
+<style>
+  /* ─── Hero ─── */
+  .q-hero {
+    background: linear-gradient(135deg, var(--emc-navy) 0%, var(--emc-navy-deep, #08172F) 100%);
+    color: #fff;
+    border-radius: 16px;
+    padding: 30px 34px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .q-hero::before {
+    content: "";
+    position: absolute;
+    top: -80px; left: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(201, 169, 97, 0.18), transparent 60%);
+    filter: blur(30px);
+  }
+  .q-hero-inner { position: relative; z-index: 1; }
+  .q-hero-eyebrow {
+    font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--emc-gold); font-weight: 700; margin-bottom: 8px;
+  }
+  .q-hero-headline { font-size: 30px; font-weight: 800; margin: 0 0 10px; line-height: 1.2; }
+  .q-hero-sub { font-size: 14.5px; color: rgba(255,255,255,0.78); line-height: 1.7; max-width: 660px; margin: 0; }
+  .q-hero-meta {
+    display: flex; gap: 24px; margin-top: 22px; padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: rgba(255,255,255,0.7);
+    flex-wrap: wrap;
+  }
+  .q-hero-meta strong { color: #fff; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* ─── Filters ─── */
+  .q-filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+  .q-filter-btn {
+    padding: 7px 14px; background: #fff; border: 1px solid var(--emc-line);
+    border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--emc-ink-2);
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .q-filter-btn:hover { border-color: var(--emc-navy); color: var(--emc-navy); }
+  .q-filter-btn.active { background: var(--emc-navy); color: #fff; border-color: var(--emc-navy); }
+  .q-filter-count { margin-inline-start: 6px; font-variant-numeric: tabular-nums; opacity: 0.7; }
+
+  /* ─── Card ─── */
+  .q-card {
+    background: #fff; border: 1px solid var(--emc-line); border-radius: 14px;
+    padding: 22px 24px; margin-bottom: 14px; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .q-card:hover { border-color: var(--emc-navy); box-shadow: 0 6px 20px rgba(11, 37, 69, 0.08); }
+  .q-card.disqualified { opacity: 0.6; background: var(--emc-cream); }
+  .q-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 18px; }
+  .q-identity { display: flex; gap: 14px; align-items: center; flex: 1; min-width: 0; }
+  .q-avatar {
+    width: 52px; height: 52px; border-radius: 50%; color: #fff;
+    display: grid; place-items: center; font-weight: 800; font-size: 18px; flex-shrink: 0;
+  }
+  .q-name { font-size: 16.5px; font-weight: 800; color: var(--emc-navy); margin: 0 0 3px; }
+  .q-meta-line { font-size: 12.5px; color: var(--emc-muted); line-height: 1.5; }
+
+  /* ─── Score block ─── */
+  .q-score-block { text-align: center; flex-shrink: 0; min-width: 96px; }
+  .q-score-num {
+    font-size: 34px; font-weight: 800; font-family: "JetBrains Mono", monospace;
+    font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  .q-score-label { font-size: 11px; color: var(--emc-faint); margin-top: 2px; }
+  .q-verdict {
+    display: inline-block; margin-top: 8px; padding: 4px 12px; border-radius: 99px;
+    font-size: 11.5px; font-weight: 700; border: 1px solid transparent;
+  }
+
+  /* ─── BANT grid ─── */
+  .q-bant {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    background: var(--emc-cream); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;
+  }
+  .q-bant-item { }
+  .q-bant-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+  .q-bant-label { font-size: 11.5px; font-weight: 700; color: var(--emc-ink-2); }
+  .q-bant-val { font-size: 11px; font-family: "JetBrains Mono", monospace; color: var(--emc-muted); font-variant-numeric: tabular-nums; }
+  .q-bant-bar { height: 6px; background: #fff; border-radius: 99px; overflow: hidden; border: 1px solid var(--emc-line); }
+  .q-bant-bar > div { height: 100%; border-radius: 99px; transition: width 0.4s; }
+  @media (max-width: 720px) { .q-bant { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ─── Context chips ─── */
+  .q-context { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .q-ctx-chip {
+    display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px;
+    border-radius: 99px; font-size: 12px; font-weight: 600;
+    background: rgba(11,37,69,0.05); color: var(--emc-navy); border: 1px solid rgba(11,37,69,0.1);
+  }
+  .q-ctx-chip.missing { background: #FBE0E2; color: #A2202D; border-color: #F1B6BB; }
+  .q-flags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .q-flag {
+    display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px;
+    border-radius: 8px; font-size: 11.5px; font-weight: 700;
+    background: #FAEEDB; color: #8C5915; border: 1px solid #ECD3A6;
+  }
+
+  /* ─── Actions ─── */
+  .q-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding-top: 14px; border-top: 1px solid var(--emc-line-soft); }
+  .q-promote-btn {
+    background: var(--emc-success, #2E7D5B); color: #fff; border: 0; padding: 9px 18px;
+    border-radius: 8px; font-size: 13.5px; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; font-family: inherit;
+  }
+  .q-promote-btn:hover { background: #25664A; }
+  .q-wa-btn {
+    background: #25D366; color: #fff; border: 0; padding: 9px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center;
+    gap: 6px; text-decoration: none; transition: background 0.15s;
+  }
+  .q-wa-btn:hover { background: #1FA851; }
+
+  /* ─── Empty ─── */
+  .q-empty {
+    background: #fff; border: 1px dashed var(--emc-line); border-radius: 16px;
+    padding: 56px 32px; text-align: center;
+  }
+  .q-empty h3 { color: var(--emc-navy); font-size: 20px; font-weight: 800; margin: 12px 0 8px; }
+  .q-empty p { color: var(--emc-muted); font-size: 14.5px; line-height: 1.7; max-width: 480px; margin: 0 auto 18px; }
+
+  /* ─── Disqualify modal ─── */
+  .q-modal-overlay {
+    position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px);
+    z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;
+  }
+  .q-modal-overlay.show { display: flex; }
+  .q-modal {
+    background: #fff; border-radius: 14px; width: 100%; max-width: 480px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.3); overflow: hidden;
+  }
+  .q-modal-header { padding: 18px 24px; border-bottom: 1px solid var(--emc-line); }
+  .q-modal-header h3 { margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700; }
+  .q-modal-header .sub { font-size: 12.5px; color: var(--emc-muted); margin-top: 3px; }
+  .q-modal-body { padding: 22px 24px; }
+  .q-modal-footer { padding: 14px 24px; border-top: 1px solid var(--emc-line); display: flex; justify-content: flex-end; gap: 8px; background: var(--emc-cream); }
+</style>
+</head>
+<body data-screen-label="12 Qualify">
+
+<div id="emc-shell-root"></div>
+
+<!-- Disqualify modal -->
+<div class="q-modal-overlay" id="dq-modal">
+  <div class="q-modal">
+    <div class="q-modal-header">
+      <h3>استبعاد من المبيعات</h3>
+      <div class="sub" id="dq-sub">—</div>
+    </div>
+    <div class="q-modal-body">
+      <div class="field">
+        <label class="field-label">سبب الاستبعاد <span class="req">*</span></label>
+        <select class="select" id="dq-reason"><option value="">— اختر —</option></select>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label class="field-label">ملاحظة <span class="hint">(اختياري)</span></label>
+        <textarea class="textarea" id="dq-note" placeholder="أي تفصيلة مفيدة نرجعلها بعدين…"></textarea>
+      </div>
+    </div>
+    <div class="q-modal-footer">
+      <button class="btn btn-ghost btn-sm" id="dq-cancel">إلغاء</button>
+      <button class="btn btn-accent btn-sm" id="dq-save">تأكيد الاستبعاد</button>
+    </div>
+  </div>
+</div>
+
+<template id="qualify-tpl">
+  <div class="emc-crumbs">
+    <a href="dashboard.html">لوحة التحكم</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>تأهيل المبيعات</span>
+  </div>
+
+  <div class="q-hero">
+    <div class="q-hero-inner">
+      <div class="q-hero-eyebrow">المرحلة 5 · من MQL إلى SQL</div>
+      <h1 class="q-hero-headline" id="q-headline">جاري التحميل…</h1>
+      <p class="q-hero-sub">المؤهلون تسويقياً (MQL) اللي مستنيين قرارك. النظام بيحسب <strong style="color:#fff;">درجة جاهزية</strong> لكل واحد من 4 محاور (السلطة · الميزانية · الحاجة · التوقيت) — لكن القرار النهائي قرارك إنت. أهّل اللي يستاهل وقت مبيعاتك، واستبعد أو ارعَ الباقي.</p>
+      <div class="q-hero-meta" id="q-meta"></div>
+    </div>
+  </div>
+
+  <div class="q-filters" id="q-filters"></div>
+  <div id="q-list"></div>
+</template>
+
+<script>
+(async function () {
+  const main = await EMC.layout.render({ page: 'qualify' });
+  if (!main) return;
+  await EMC.seedIfEmpty();
+  main.innerHTML = document.getElementById('qualify-tpl').innerHTML;
+
+  const DQ_TAG = 'sales_disqualified';
+  let activeFilter = 'queue';
+  let scored = [];
+
+  // ─── populate disqualify reasons ───
+  const dqReasonSel = document.getElementById('dq-reason');
+  Object.entries(EMC.DISQUALIFY_REASONS).forEach(([k, v]) => {
+    const o = document.createElement('option');
+    o.value = k; o.textContent = v;
+    dqReasonSel.appendChild(o);
+  });
+
+  await loadData();
+
+  async function loadData() {
+    const all = await EMC.contacts.list();
+    const mqls = all.filter(c => c.currentStage === 4);
+    scored = mqls.map(c => ({
+      c,
+      q: EMC.utils.calculateQualificationScore(c),
+      dq: (c.context?.tags || []).includes(DQ_TAG)
+    }));
+    renderHero();
+    renderFilters();
+    renderList();
+  }
+
+  function counts() {
+    const queue = scored.filter(s => !s.dq);
+    return {
+      queue: queue.length,
+      qualified: queue.filter(s => s.q.verdict === 'qualified').length,
+      review: queue.filter(s => s.q.verdict === 'review').length,
+      not_ready: queue.filter(s => s.q.verdict === 'not_ready').length,
+      disqualified: scored.filter(s => s.dq).length,
+      all: scored.length
+    };
+  }
+
+  function renderHero() {
+    const ct = counts();
+    document.getElementById('q-headline').textContent =
+      ct.queue === 0 ? 'مفيش MQLs في طابور التأهيل' :
+      ct.queue === 1 ? 'عندك MQL واحد محتاج قرار تأهيل' :
+      `عندك ${ct.queue} MQLs محتاجين قرار تأهيل`;
+    document.getElementById('q-meta').innerHTML = ct.queue > 0 || ct.disqualified > 0 ? `
+      <span>✅ <strong>${ct.qualified}</strong> جاهز للاستكشاف</span>
+      <span>🟡 <strong>${ct.review}</strong> يحتاج مراجعتك</span>
+      <span>🔵 <strong>${ct.not_ready}</strong> لسه بدري — رعاية</span>
+      ${ct.disqualified > 0 ? `<span>✕ <strong>${ct.disqualified}</strong> مستبعدون</span>` : ''}
+    ` : '';
+  }
+
+  function renderFilters() {
+    const ct = counts();
+    document.getElementById('q-filters').innerHTML = `
+      <button class="q-filter-btn ${activeFilter === 'queue' ? 'active' : ''}" data-f="queue">الطابور <span class="q-filter-count">${ct.queue}</span></button>
+      <button class="q-filter-btn ${activeFilter === 'qualified' ? 'active' : ''}" data-f="qualified">✅ جاهزون <span class="q-filter-count">${ct.qualified}</span></button>
+      <button class="q-filter-btn ${activeFilter === 'review' ? 'active' : ''}" data-f="review">🟡 للمراجعة <span class="q-filter-count">${ct.review}</span></button>
+      <button class="q-filter-btn ${activeFilter === 'not_ready' ? 'active' : ''}" data-f="not_ready">🔵 رعاية <span class="q-filter-count">${ct.not_ready}</span></button>
+      <button class="q-filter-btn ${activeFilter === 'disqualified' ? 'active' : ''}" data-f="disqualified">✕ مستبعدون <span class="q-filter-count">${ct.disqualified}</span></button>
+    `;
+    document.querySelectorAll('.q-filter-btn').forEach(b => {
+      b.addEventListener('click', () => { activeFilter = b.dataset.f; renderFilters(); renderList(); });
+    });
+  }
+
+  function renderList() {
+    let docs;
+    if (activeFilter === 'queue') docs = scored.filter(s => !s.dq);
+    else if (activeFilter === 'disqualified') docs = scored.filter(s => s.dq);
+    else docs = scored.filter(s => !s.dq && s.q.verdict === activeFilter);
+
+    // ترتيب: الأعلى درجة أولاً
+    docs.sort((a, b) => b.q.score - a.q.score);
+
+    const list = document.getElementById('q-list');
+    if (docs.length === 0) {
+      list.innerHTML = `
+        <div class="q-empty">
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="color: var(--emc-faint);"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/><path d="M9 14l2 2 4-4"/></svg>
+          <h3>${activeFilter === 'disqualified' ? 'مفيش مستبعدين' : 'مفيش أحد هنا حالياً'}</h3>
+          <p>${activeFilter === 'disqualified'
+            ? 'لما تستبعد أي MQL من المبيعات، هيظهر هنا. تقدر ترجّعه للطابور في أي وقت.'
+            : 'لما حد يوصل MQL (المرحلة 4)، هيظهر هنا تلقائياً بدرجة جاهزيته للمبيعات.'}</p>
+          <a href="mql-alerts.html" class="btn btn-outline btn-sm">شوف تنبيهات MQL</a>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = docs.map(s => renderCard(s)).join('');
+    attachHandlers();
+  }
+
+  function renderCard({ c, q, dq }) {
+    const v = EMC.SQL_VERDICTS[q.verdict] || EMC.SQL_VERDICTS.not_ready;
+    const opp = c.opportunity || {};
+    const eos = c.eosProfile || {};
+
+    // BANT bars
+    const bant = [
+      { key: 'authority', val: q.breakdown.authority || 0, max: 30, color: 'var(--emc-navy)' },
+      { key: 'budget',    val: q.breakdown.budget || 0,    max: 25, color: 'var(--emc-gold)' },
+      { key: 'need',      val: q.breakdown.need || 0,      max: 25, color: 'var(--emc-red)' },
+      { key: 'timeline',  val: q.breakdown.timeline || 0,  max: 20, color: '#2E7D5B' }
+    ].map(b => `
+      <div class="q-bant-item">
+        <div class="q-bant-head">
+          <span class="q-bant-label">${EMC.SQL_BANT_LABELS[b.key]}</span>
+          <span class="q-bant-val">${b.val}/${b.max}</span>
+        </div>
+        <div class="q-bant-bar"><div style="width:${Math.round((b.val / b.max) * 100)}%; background:${b.color};"></div></div>
+      </div>
+    `).join('');
+
+    // context chips (BANT readable)
+    const ctx = [];
+    ctx.push(opp.decisionRole
+      ? `<span class="q-ctx-chip">👤 ${EMC.DECISION_ROLES[opp.decisionRole]}</span>`
+      : `<span class="q-ctx-chip missing">👤 السلطة غير معروفة</span>`);
+    ctx.push(opp.budgetConfirmed
+      ? `<span class="q-ctx-chip">💰 ميزانية: ${EMC.BUDGET_CONFIRMED[opp.budgetConfirmed]}</span>`
+      : `<span class="q-ctx-chip missing">💰 الميزانية غير محددة</span>`);
+    ctx.push(eos.ceiling
+      ? `<span class="q-ctx-chip">🚧 ${EMC.CEILINGS[eos.ceiling]}</span>`
+      : `<span class="q-ctx-chip missing">🚧 السقف غير محدد</span>`);
+    ctx.push(opp.timelineUrgency
+      ? `<span class="q-ctx-chip">⏱ ${EMC.TIMELINE_URGENCY[opp.timelineUrgency]}</span>`
+      : `<span class="q-ctx-chip missing">⏱ التوقيت غير محدد</span>`);
+    if (eos.primaryComponent) ctx.push(`<span class="q-ctx-chip">🎯 ${EMC.EOS_COMPONENTS[eos.primaryComponent]}</span>`);
+
+    // flags
+    const flagsHTML = (q.flags || []).length
+      ? `<div class="q-flags">${q.flags.map(f => `<span class="q-flag">⚠ ${EMC.SQL_FLAGS[f] || f}</span>`).join('')}</div>`
+      : '';
+
+    // whatsapp
+    const mobile = (c.channels?.mobile || c.channels?.whatsapp || '').replace(/\D/g, '');
+    const waNumber = mobile ? (mobile.startsWith('20') ? mobile : (mobile.startsWith('0') ? '2' + mobile : '2' + mobile)) : '';
+    const firstName = c.identity?.firstName || (c.identity?.fullName || '').split(/\s+/)[0] || '';
+    const waMsg = encodeURIComponent(
+      `أهلاً ${firstName}،\n\nأنا عبدالله من Executive Mastery Camp. بنراجع أوضاع الشركات اللي اهتمت بالبرنامج، وحبيت أتأكد من شوية تفاصيل سريعة عن ${c.identity?.companyName || 'شركتك'} عشان أقدر أوجّهك صح.\n\nعندك دقيقتين نتكلم؟`
+    );
+    const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMsg}` : '';
+
+    return `
+      <div class="q-card ${dq ? 'disqualified' : ''}" data-id="${c.id}">
+        <div class="q-card-top">
+          <div class="q-identity">
+            <div class="q-avatar" style="background:${EMC.utils.avatarColor(c.identity?.fullName)}">${EMC.utils.initials(c.identity?.fullName)}</div>
+            <div style="min-width:0;">
+              <h3 class="q-name">${c.identity?.fullName || '—'}</h3>
+              <div class="q-meta-line">
+                ${c.identity?.title || '—'} · ${c.identity?.companyName || '—'}
+                ${c.identity?.industry ? ' · ' + (EMC.INDUSTRIES[c.identity.industry] || '') : ''}
+                ${c.identity?.companySize ? ' · ' + (EMC.COMPANY_SIZES[c.identity.companySize] || '') : ''}
+              </div>
+            </div>
+          </div>
+          <div class="q-score-block">
+            <div class="q-score-num" style="color:${v.color};">${q.score}</div>
+            <div class="q-score-label">درجة الجاهزية / 100</div>
+            <span class="q-verdict" style="background:${v.bg}; color:${v.color}; border-color:${v.border};">${v.label}</span>
+          </div>
+        </div>
+
+        <div class="q-bant">${bant}</div>
+        <div class="q-context">${ctx.join('')}</div>
+        ${flagsHTML}
+
+        <div class="q-actions">
+          ${dq ? `
+            <button class="btn btn-outline btn-sm" data-action="requeue" data-id="${c.id}">↩︎ رجّع للطابور</button>
+            <a href="contact-detail.html?id=${c.id}" class="btn btn-ghost btn-sm">📋 الملف الكامل</a>
+          ` : `
+            <button class="q-promote-btn" data-action="promote" data-id="${c.id}" data-name="${c.identity?.fullName || ''}" data-score="${q.score}">
+              ✓ أهّل — نقل لـ SQL
+            </button>
+            ${waLink ? `<a href="${waLink}" target="_blank" class="q-wa-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5C18.3 1.2 15.3 0 12 0 5.4 0 0 5.4 0 12c0 2.1.5 4.2 1.6 6L0 24l6.2-1.6c1.7.9 3.7 1.4 5.7 1.4 6.6 0 12-5.4 12-12 .1-3.2-1.2-6.2-3.4-8.3z"/></svg> تواصل</a>` : ''}
+            <a href="contact-detail.html?id=${c.id}" class="btn btn-outline btn-sm">📋 الملف الكامل</a>
+            <button class="btn btn-ghost btn-sm" data-action="disqualify" data-id="${c.id}" data-name="${c.identity?.fullName || ''}" style="color: var(--emc-red); margin-inline-start:auto;">✕ استبعد</button>
+          `}
+        </div>
+      </div>
+    `;
+  }
+
+  function attachHandlers() {
+    document.querySelectorAll('[data-action="promote"]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id, name = btn.dataset.name, score = btn.dataset.score;
+        if (!confirm(`تأهيل ${name} ونقله للمرحلة 5 (SQL)؟\n\nدرجة الجاهزية: ${score}/100`)) return;
+        btn.disabled = true; btn.textContent = 'جاري النقل…';
+        try {
+          await EMC.contacts.moveToStage(id, 5, `تأهيل يدوي للمبيعات — درجة الجاهزية ${score}/100`);
+          EMC.utils.toast('تم تأهيل ' + name + ' للمبيعات (SQL)', 'success');
+          setTimeout(loadData, 600);
+        } catch (e) {
+          EMC.utils.toast('خطأ: ' + (e.message || 'فشل النقل'), 'error');
+          btn.disabled = false; btn.textContent = '✓ أهّل — نقل لـ SQL';
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-action="disqualify"]').forEach(btn => {
+      btn.addEventListener('click', () => openDQ(btn.dataset.id, btn.dataset.name));
+    });
+
+    document.querySelectorAll('[data-action="requeue"]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        btn.disabled = true;
+        try {
+          const c = await EMC.contacts.get(id);
+          const tags = (c.context?.tags || []).filter(t => t !== DQ_TAG);
+          await EMC.contacts.update(id, { context: { ...(c.context || {}), tags } });
+          EMC.utils.toast('رجّع للطابور', 'success');
+          setTimeout(loadData, 500);
+        } catch (e) {
+          EMC.utils.toast('خطأ في الإرجاع', 'error');
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  // ─── Disqualify modal ───
+  let dqId = null;
+  function openDQ(id, name) {
+    dqId = id;
+    document.getElementById('dq-sub').textContent = `${name} — هيخرج من طابور التأهيل (مش هيتحذف)`;
+    dqReasonSel.value = '';
+    document.getElementById('dq-note').value = '';
+    document.getElementById('dq-modal').classList.add('show');
+  }
+  function closeDQ() { document.getElementById('dq-modal').classList.remove('show'); dqId = null; }
+
+  document.getElementById('dq-cancel').addEventListener('click', closeDQ);
+  document.getElementById('dq-modal').addEventListener('click', (e) => { if (e.target.id === 'dq-modal') closeDQ(); });
+
+  document.getElementById('dq-save').addEventListener('click', async () => {
+    if (!dqId) return;
+    const reason = dqReasonSel.value;
+    if (!reason) { EMC.utils.toast('اختار سبب الاستبعاد', 'error'); return; }
+    const note = document.getElementById('dq-note').value.trim();
+    const btn = document.getElementById('dq-save');
+    btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+    try {
+      const c = await EMC.contacts.get(dqId);
+      const tags = [...new Set([...(c.context?.tags || []), DQ_TAG])];
+      const reasonLabel = EMC.DISQUALIFY_REASONS[reason] || reason;
+      const stamp = `[استبعاد من المبيعات: ${reasonLabel}${note ? ' — ' + note : ''}]`;
+      const newNotes = (c.context?.notes || '') + ((c.context?.notes) ? '\n' : '') + stamp;
+      await EMC.contacts.update(dqId, { context: { ...(c.context || {}), tags, notes: newNotes } });
+      if (EMC.events?.log) {
+        await EMC.events.log({
+          contactId: dqId, type: 'manual_note', stage: 4, channel: 'manual',
+          data: { action: 'sales_disqualified', reason, reasonLabel, note }
+        });
+      }
+      EMC.utils.toast('تم الاستبعاد من المبيعات', 'default');
+      closeDQ();
+      btn.disabled = false; btn.textContent = 'تأكيد الاستبعاد';
+      setTimeout(loadData, 500);
+    } catch (e) {
+      EMC.utils.toast('خطأ: ' + (e.message || 'فشل الحفظ'), 'error');
+      btn.disabled = false; btn.textContent = 'تأكيد الاستبعاد';
+    }
+  });
+})();
+</script>
+</body>
+</html>
