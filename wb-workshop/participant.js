@@ -4,16 +4,37 @@
    • تسجيل باسم وهمي + موافقة سرّية.
    • طبقة الحفظ بالكود (إجبارية): كود دائم يُكتب في الرابط + localStorage +
      مستند المشارك، فالمشارك يرجع لنفس مكانه من أي جهاز.
-   • بيتبع المقدّم لحظيًا: كل مرحلة يا تفاعل يا «وجّه انتباهك للشاشة».
+   • بيتبع المقدّم لحظيًا: كل مرحلة يا تفاعل يا «إشارة» مصغّرة على الموبايل.
 
-   تحديثات الترابط (مهمة):
-     - في «مرآة غرفة القادة» (p3_results) المشارك بيفضل شايف بطاقته الشخصية
-       على موبايله — مش شاشة «بصّ للشاشة» — عشان النص بيقوله «دي بطاقتك».
-     - تقدّم التشخيص (الإجابات + رقم السؤال) بيتحفظ محليًا أول بأول، فلو قفل
-       الموبايل أو اتحدّثت الصفحة وسط الـ12 سؤال، بيرجع لنفس مكانه مش من الصفر.
+   ── الإضافات الجديدة (٣ طلبات) ───────────────────────────────────────────
+   (١) «رحلتي»: زرار ثابت فوق + زرار في الإغلاق، بيفتح طبقة فيها كل اللي
+       عمله المشارك خلال الرحلة (آخر مرة بخير، نقطته، تشخيصه، ميثاقه، كوده).
+       بتتبني من state.responses المحفوظة محليًا — صفر قراءات زيادة من
+       الفايرستور، فآمنة تمامًا على الباقة المجانية. ومفيش قواعد أمان جديدة
+       لازم تتنشر — بنقرا نفس الـ subcollection اللي بنكتب فيه أصلًا.
+
+   (٢) دعوة الكورس (CTA): بتظهر في الإغلاق وجوّه «رحلتي» — بعد اللحظة
+       الوجدانية، مش وسطها. الرابط بييجي من SessionData.courseUrl لو موجود،
+       وإلا الافتراضي تحت.
+
+   (٣) كروت الإشارة: بدل «وجّه انتباهك للشاشة» في سلايدات العرض، المشارك بيشوف
+       خلاصة بنيوية مصغّرة معنونة «إشارة — الكلام مع المقدّم»، يقدر يقراها أو
+       يصوّرها من غير ما تبقى بديلة عنك. لحظتان بس بتفضلا صمت على الموبايل:
+       الخطّاف الافتتاحي، واكتشاف الظلّ.
    ========================================================================== */
 (function () {
   'use strict';
+
+  /* ---------------- إعدادات قابلة للتعديل ---------------- */
+  // المراحل اللي بتفضل «صمت» على الموبايل (الكلام والبصرية على الشاشة بس).
+  // ممكن كمان تحطّ mobileSilent:true على المرحلة نفسها في session-data.js.
+  var SILENT_PHASES = { open_hook: 1, p4_shadow: 1 };
+
+  // رابط الرحلة الكاملة (البيع). الأفضل تنقله لـ SessionData.courseUrl لاحقًا.
+  var DEFAULT_COURSE_URL = 'https://mahmoudfouad25.github.io/fouad-perspective/reignite/';
+  function courseUrl() {
+    return (window.SessionData && SessionData.courseUrl) || DEFAULT_COURSE_URL;
+  }
 
   var SAVE_KEY = 'wb_participant_save';
   var state = {
@@ -36,6 +57,7 @@
   async function init() {
     createStars(60);
     bindRegistration();
+    bindJourney();
 
     var resumed = await tryResume();
     if (resumed.resumed) {
@@ -245,14 +267,26 @@
 
     var ix = phase.interaction;
     if (!ix) {
+      // الإغلاق النهائي: الملخّص الشخصي + دعوة الكورس
+      if (phaseId === 'close_ayah') { renderFinalTakeaway(mount); return; }
+
       // «مرآة غرفة القادة»: المشارك يفضل شايف بطاقته الشخصية على موبايله
       if (phaseId === 'p3_results') {
         var diagR = state.responses['diagnostic'];
         if (diagR && diagR.result) { renderResultCard(mount, diagR.result); return; }
+        mount.innerHTML = followScreen('🪞', phase.title,
+          'لو خلّصت التشخيص، بطاقتك ظهرت قبل كده — تقدر ترجعلها من «رحلتي» فوق. غير كده، وجّه انتباهك للشاشة.');
+        return;
       }
-      mount.innerHTML = followScreen('👁️', phase.title, phase.participantPrompt || 'وجّه انتباهك للشاشة.');
-      // في الإغلاق النهائي نعرض الملخّص الشخصي بدل الإشارة
-      if (phaseId === 'close_ayah') renderFinalTakeaway(mount);
+
+      // لحظات الصمت المتعمّدة → الكلام والبصرية على الشاشة بس
+      if (isSilent(phaseId, phase)) {
+        mount.innerHTML = followScreen('🤍', phase.title, phase.participantPrompt || 'خليك مع الشاشة، في صمت.');
+        return;
+      }
+
+      // باقي سلايدات العرض → كارت «إشارة» مصغّر (مساعِد مش بديل)
+      renderMirror(phase, mount);
       return;
     }
 
@@ -263,11 +297,123 @@
     else mount.innerHTML = followScreen('👁️', phase.title, phase.participantPrompt || '');
   }
 
+  function isSilent(pid, phase) {
+    return (phase && phase.mobileSilent === true) || !!SILENT_PHASES[pid];
+  }
+
   function followScreen(ico, title, sub) {
     return '<div class="p-follow fade-in">' +
       '<div class="ico">' + ico + '</div>' +
       '<h2>' + esc(title) + '</h2>' +
       '<p class="muted">' + esc(sub) + '</p></div>';
+  }
+
+  /* ========================================================================
+     (٣) كروت الإشارة — خلاصة بنيوية مصغّرة لكل سلايد عرض
+     بتقرا من نفس مصدر الحقيقة (SessionData) فمفيش تكرار للمحتوى.
+     ====================================================================== */
+  function renderMirror(phase, mount) {
+    mount.innerHTML =
+      '<div class="p-card mirror-card fade-in">' +
+        '<div class="mirror-kicker">' + esc(phase.block || phase.title || '') + '</div>' +
+        '<div class="mirror-headline">' + esc(phase.headline || phase.title) + '</div>' +
+        (phase.sub ? '<p class="mirror-sub">' + esc(phase.sub) + '</p>' : '') +
+        mirrorInner(phase) +
+        '<p class="mirror-foot">📡 إشارة الشاشة — الكلام مع المقدّم. الكارت ده ليك تقراه أو تصوّره.</p>' +
+      '</div>';
+  }
+
+  function mirrorInner(phase) {
+    var T = SessionData.terms, TY = SessionData.types;
+    switch (phase.kind) {
+      case 'visual-contrast': {
+        var L = phase.left || {}, R = phase.right || {};
+        return twoCol(L.tag, L.en, L.note, R.tag, R.en, R.note, true);
+      }
+      case 'visual-mirror-arrow': {
+        var M = phase.mirror || {}, A = phase.arrow || {};
+        return twoCol(M.tag, M.en, M.note, A.tag, A.en, A.note, true);
+      }
+      case 'visual-doors': {
+        var dA = phase.doorA || {}, dB = phase.doorB || {};
+        return twoCol(dA.tag, '', dA.note, dB.tag, '', dB.note, false);
+      }
+      case 'visual-levels': {
+        return miniList(['energy', 'relationship', 'meaning'].map(function (k, i) {
+          return (i + 1) + '.  ' + T[k].ar + ' · ' + T[k].en;
+        }));
+      }
+      case 'visual-types': {
+        return ['burned', 'starved', 'repressed'].map(function (k) {
+          var t = TY[k];
+          return '<div class="mirror-row" style="border-color:' + t.color + '40">' +
+            '<div class="mr-name" style="color:' + t.color + '">' + esc(t.ar) +
+              ' <small class="en">' + esc(t.en) + '</small></div>' +
+            '<div class="mr-note">' + esc(t.essence) + '</div></div>';
+        }).join('');
+      }
+      case 'visual-immunity': {
+        var ex = phase.example || {};
+        return miniList([ex.stated, ex.hidden, ex.assumption]);
+      }
+      case 'visual-layers': {
+        var inner = miniList([
+          'الجذر · ' + T.hiddenCommitment.ar,
+          'الشرارة · ' + T.trigger.ar,
+          'السطح · ' + T.filters.ar
+        ]);
+        if (phase.filters && phase.filters.length) {
+          inner += '<div class="mirror-chips">' +
+            phase.filters.map(function (f) { return '<span>' + esc(f) + '</span>'; }).join('') +
+            '</div>';
+        }
+        return inner;
+      }
+      case 'visual-axes': {
+        var qs = { cohesion: 'هل أنا بخير وآمن؟', vitality: 'هل أنا حيّ فعلًا؟', belonging: 'هل ليّ مكان بين الناس؟' };
+        return ['cohesion', 'vitality', 'belonging'].map(function (k) {
+          return '<div class="mirror-row">' +
+            '<div class="mr-name gold-text">' + esc(T[k].ar) + ' <small class="en">' + esc(T[k].en) + '</small></div>' +
+            '<div class="mr-note">' + esc(qs[k]) + '</div></div>';
+        }).join('');
+      }
+      case 'visual-iceberg': {
+        return miniList([
+          'الظاهر — المحور اللي بتقود بيه',
+          'المدفون — بيشوّه المحور الرئيسي من تحت'
+        ]);
+      }
+      case 'visual-paths': {
+        return '<div class="mirror-chips paths">' +
+          (phase.paths || []).map(function (p) { return '<span>' + esc(p) + '</span>'; }).join('') +
+          '</div>';
+      }
+      // المنحني والخطّاف: العنوان + الـsub كفاية (مفيش تفاصيل زيادة)
+      case 'visual-curve':
+      case 'visual-curve-bend':
+      case 'statement-hero':
+      default:
+        return '';
+    }
+  }
+
+  function twoCol(t1, e1, n1, t2, e2, n2, contrast) {
+    return '<div class="mirror-two' + (contrast ? ' contrast' : '') + '">' +
+      '<div class="m2-side">' +
+        '<div class="m2-tag gold-text">' + esc(t1) + '</div>' +
+        (e1 ? '<div class="en m2-en">' + esc(e1) + '</div>' : '') +
+        '<div class="m2-note">' + esc(n1) + '</div></div>' +
+      '<div class="m2-side">' +
+        '<div class="m2-tag' + (contrast ? '' : ' gold-text') + '"' + (contrast ? ' style="color:#ff8f8c"' : '') + '>' + esc(t2) + '</div>' +
+        (e2 ? '<div class="en m2-en">' + esc(e2) + '</div>' : '') +
+        '<div class="m2-note">' + esc(n2) + '</div></div>' +
+      '</div>';
+  }
+
+  function miniList(items) {
+    return '<div class="mirror-list">' +
+      items.filter(Boolean).map(function (x) { return '<div class="ml-item">' + esc(x) + '</div>'; }).join('') +
+      '</div>';
   }
 
   /* ---------------- (1) اختيار واحد — lastwell ---------------- */
@@ -454,6 +600,7 @@
     html += '</div>';
 
     html += '<div class="mirror-note">' + esc(t.mirror) + '</div>';
+    html += '<p class="muted" style="font-size:.8rem;margin-top:14px;">تقدر ترجع لبطاقتك دي في أي وقت من «رحلتي» فوق.</p>';
     html += '</div>';
     mount.innerHTML = html;
   }
@@ -493,13 +640,146 @@
       var t = SessionData.types[diag.result.type];
       html += '<div class="mt-2 muted">نمطك</div><div class="result-type" style="color:' + t.color + ';font-size:1.5rem">' + esc(t.ar) + '</div>';
     }
+
+    html += '<button class="btn btn-gold btn-block btn-large mt-3" id="openJourneyBtn">📋 شوف رحلتك كاملة</button>';
+
     if (state.code) {
       html += '<div class="mt-3 muted">كودك — مفتاحك لو حبيت ترجع:</div>';
       html += '<div class="mt-1"><span class="code-chip">' + esc(state.code) + '</span></div>';
     }
-    html += '<p class="muted mt-3" style="font-size:.85rem">احتفظ بالرابط ده — بيفتح من أي جهاز.</p>';
+    html += '<p class="muted mt-2" style="font-size:.85rem">احتفظ بالرابط ده — بيفتح من أي جهاز.</p>';
+
+    if (courseUrl()) {
+      html += '<div class="divider"></div>';
+      html += '<p class="muted" style="font-size:.88rem;">النهارده كانت لمحة. لو حابب تكمّل التشخيص والطريق بعمق:</p>';
+      html += '<a class="btn btn-outline btn-block mt-1" href="' + esc(courseUrl()) + '" target="_blank" rel="noopener">تعرف أكتر على الرحلة الكاملة ↗</a>';
+    }
+
     html += '</div>';
     mount.innerHTML = html;
+
+    var b = document.getElementById('openJourneyBtn');
+    if (b) b.addEventListener('click', openJourney);
+  }
+
+  /* ========================================================================
+     (١) رحلتي — الطبقة المنبثقة (بتتبني من state.responses، صفر قراءات زيادة)
+     ====================================================================== */
+  function bindJourney() {
+    var btn = document.getElementById('journeyBtn');
+    if (btn) btn.addEventListener('click', openJourney);
+
+    var close = document.getElementById('summaryClose');
+    if (close) close.addEventListener('click', closeJourney);
+
+    var ov = document.getElementById('summaryOverlay');
+    if (ov) ov.addEventListener('click', function (e) { if (e.target === ov) closeJourney(); });
+
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeJourney(); });
+  }
+
+  function openJourney() {
+    var body = document.getElementById('summaryBody');
+    if (body) body.innerHTML = buildJourneyHTML();
+    var ov = document.getElementById('summaryOverlay');
+    if (ov) ov.classList.remove('hidden');
+  }
+  function closeJourney() {
+    var ov = document.getElementById('summaryOverlay');
+    if (ov) ov.classList.add('hidden');
+  }
+
+  function hasAnyResponse(r) {
+    return !!(r && (
+      (r.lastwell && r.lastwell.choice) ||
+      (r.curve_self && r.curve_self.success && r.curve_self.wellbeing) ||
+      (r.diagnostic && r.diagnostic.result) ||
+      (r.charter && (r.charter.touched || r.charter.discovered || r.charter.question))
+    ));
+  }
+
+  function jrSection(title, innerHTML) {
+    return '<div class="jr-section"><div class="jr-title">' + esc(title) + '</div>' +
+      '<div class="jr-body">' + innerHTML + '</div></div>';
+  }
+
+  function buildJourneyHTML() {
+    var r = state.responses || {};
+    var html = '';
+
+    html += '<div class="jr-head">' +
+      '<h2 class="gold-text">رحلتك — زي ما عشتها</h2>' +
+      '<p class="muted">ده اللي اشتغلت عليه مع نفسك النهارده. محدّش شافه باسمك.</p></div>';
+
+    // آخر مرة بخير
+    if (r.lastwell && r.lastwell.choice) {
+      var opt = SessionData.lastwellOptions.filter(function (o) { return o.id === r.lastwell.choice; })[0];
+      html += jrSection('آخر مرة حسّيت إنك بخير من جوّه',
+        '<div class="jr-line"><b>' + esc(opt ? opt.label : '—') + '</b></div>');
+    }
+
+    // نقطة المنحني
+    if (r.curve_self && r.curve_self.success && r.curve_self.wellbeing) {
+      var s = r.curve_self.success, w = r.curve_self.wellbeing, gap = s - w;
+      var gapLabel = gap >= 4 ? 'فجوة كبيرة بين نجاحك وعافيتك'
+                   : gap >= 2 ? 'فجوة متوسطة'
+                   : gap <= -1 ? 'عافيتك الداخلية أعلى من نجاحك الظاهر'
+                   : 'النجاح والعافية متقاربين عندك';
+      html += jrSection('نقطتك على المنحني',
+        '<div class="jr-line">النجاح الظاهر: <b>' + s + '/10</b> &nbsp;·&nbsp; العافية الداخلية: <b>' + w + '/10</b></div>' +
+        '<div class="jr-line"><span class="muted">' + esc(gapLabel) + '</span></div>');
+    }
+
+    // التشخيص
+    if (r.diagnostic && r.diagnostic.result) {
+      var res = r.diagnostic.result;
+      var t = SessionData.types[res.type];
+      var sp = SessionData.spectrum[res.spectrum];
+      var lv = SessionData.levels[res.erodedLevel];
+      var d = '';
+      if (t) d += '<div class="jr-type" style="color:' + t.color + '">' + esc(t.ar) + ' <small class="en">' + esc(t.en) + '</small></div>';
+      if (sp) d += '<div class="jr-line"><span class="jr-k">موقعك على الطيف:</span> <b>' + esc(sp.ar) + '</b><br><span class="muted">' + esc(sp.note) + '</span></div>';
+      if (lv) d += '<div class="jr-line"><span class="jr-k">أكتر مستوى متآكل:</span> <b>' + esc(lv.ar) + '</b><br><span class="muted">' + esc(lv.note) + '</span></div>';
+      if (t) d += '<div class="mirror-note" style="margin-top:12px;">' + esc(t.mirror) + '</div>';
+      html += jrSection('نتيجة تشخيصك', d);
+
+      if (res.reflection) {
+        html += jrSection('اللي قلته لحياتك الداخلية',
+          '<div class="jr-line" style="font-style:italic;">«' + esc(res.reflection) + '»</div>');
+      }
+    }
+
+    // الميثاق
+    if (r.charter && (r.charter.touched || r.charter.discovered || r.charter.question)) {
+      var c = r.charter, cb = '';
+      if (c.touched)    cb += '<div class="jr-line"><span class="jr-k">أكتر لحظة لمستك:</span><br>' + esc(c.touched) + '</div>';
+      if (c.discovered) cb += '<div class="jr-line"><span class="jr-k">اكتشفت إنه بيشتغل جوّاك:</span><br>' + esc(c.discovered) + '</div>';
+      if (c.question)   cb += '<div class="jr-line"><span class="jr-k">السؤال اللي ماشي بيه:</span><br>' + esc(c.question) + '</div>';
+      html += jrSection('ميثاقك الذاتي', cb);
+    }
+
+    // لو لسه في الأول
+    if (!hasAnyResponse(r)) {
+      html += '<div class="jr-section"><div class="jr-body"><p class="muted">لسه الرحلة في أولها — كل ما تجاوب على موبايلك، هتلاقيه هنا.</p></div></div>';
+    }
+
+    // الكود
+    if (state.code) {
+      html += '<div class="jr-section jr-code"><div class="jr-title">كودك — مفتاحك للرجوع</div>' +
+        '<div class="code-chip">' + esc(state.code) + '</div>' +
+        '<p class="muted" style="font-size:.8rem;margin-top:8px;">افتح الرابط من أي جهاز وهتلاقي رحلتك زي ما هي.</p></div>';
+    }
+
+    // دعوة الكورس (٢)
+    if (courseUrl()) {
+      html += '<div class="jr-cta">' +
+        '<div class="jr-cta-title">الرحلة الكاملة</div>' +
+        '<p class="muted" style="font-size:.88rem;">النهارده كانت لمحة. لو حابب تكمّل بعمق — اعرف أكتر عن الرحلة الكاملة.</p>' +
+        '<a class="btn btn-gold btn-block mt-1" href="' + esc(courseUrl()) + '" target="_blank" rel="noopener">تعرف أكتر ↗</a>' +
+        '</div>';
+    }
+
+    return html;
   }
 
   /* ---------------- حفظ مبسّط ---------------- */
