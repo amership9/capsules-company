@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>العافية · مساحتك الخاصة</title>
   <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="participant-extras.css">
 
   <!-- Firebase SDK (compat) — لازم قبل firebase-config.js -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -52,7 +53,10 @@
     <div class="p-wrap">
       <div class="p-topbar">
         <div class="p-name">مساحة <b id="welcomeName"></b></div>
-        <div class="badge">العافية</div>
+        <div class="flex gap-1 items-center">
+          <button class="btn btn-outline btn-sm" id="journeyBtn" type="button">📋 رحلتي</button>
+          <span class="badge">العافية</span>
+        </div>
       </div>
 
       <div id="pContent"></div>
@@ -61,6 +65,17 @@
         كودك للرجوع من أي جهاز:
         <div class="mt-1"><span class="code-chip" id="resumeCode">—</span></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== طبقة «رحلتي» المنبثقة ===== -->
+  <div id="summaryOverlay" class="summary-overlay hidden">
+    <div class="summary-sheet">
+      <div class="summary-bar">
+        <span class="gold-text" style="font-weight:800;font-size:1.05rem;">رحلتك</span>
+        <button class="summary-close" id="summaryClose" type="button" aria-label="إغلاق">✕</button>
+      </div>
+      <div id="summaryBody"></div>
     </div>
   </div>
 
