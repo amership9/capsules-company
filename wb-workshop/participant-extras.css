@@ -7,6 +7,7 @@
      • كروت «الإشارة» المصغّرة على الموبايل (mirror-*)
      • طبقة «رحلتي» المنبثقة (summary-* / jr-*)
      • دعوة الكورس (jr-cta)
+     • التقرير الشخصي العميق (report-* / gap-* / lvl-* / reading / reflect)
    ضِفه بعد main.css في participant.html فقط.
    ========================================================================== */
 
@@ -137,3 +138,122 @@
 
 /* زرار «رحلتي» في الشريط العلوي */
 .p-topbar #journeyBtn { white-space: nowrap; }
+
+/* ============================================================================
+   التقرير الشخصي العميق  —  بطاقة النتيجة + قسم التشخيص في «رحلتي»
+   ----------------------------------------------------------------------------
+   يُستخدم من buildDiagnosticReportHTML. كله بهوية الذهبي/الكحلي. خاص بالموبايل،
+   فالعمق هنا مطلوب — مش بيظهر على شاشة العرض الكبيرة إطلاقًا.
+   داخل «رحلتي» بيتلفّ في .jr-section، فبنخفّف خلفياته هناك عشان مايتعملش طبقتين.
+   ========================================================================== */
+
+/* رأس التقرير */
+.report-head { text-align: center; margin-bottom: 4px; }
+.report-kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: .72rem; letter-spacing: .16em; color: var(--text-muted);
+  text-transform: uppercase; font-weight: 700; margin-bottom: 8px;
+}
+.report-kicker::before, .report-kicker::after {
+  content: ""; width: 18px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-gold));
+}
+.report-kicker::after { background: linear-gradient(90deg, var(--border-gold), transparent); }
+.report-type { font-size: 2rem; font-weight: 900; line-height: 1.1; }
+.report-head .en { font-size: 1rem; }
+.conf-chip {
+  display: inline-block; margin-top: 12px;
+  font-size: .76rem; font-weight: 700; letter-spacing: .04em;
+  padding: 5px 14px; border-radius: 999px;
+  background: var(--gold-soft); color: var(--gold); border: 1px solid var(--border-gold);
+}
+.report-essence {
+  color: var(--text-soft); font-size: .98rem; line-height: 1.75;
+  max-width: 38ch; margin: 14px auto 0;
+}
+
+/* أقسام التقرير */
+.report-sec {
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border);
+  text-align: right;
+}
+.report-kicker.sm {
+  font-size: .68rem; letter-spacing: .12em; margin-bottom: 12px; color: var(--gold);
+}
+.report-kicker.sm::before, .report-kicker.sm::after { width: 12px; }
+.sec-note { color: var(--text-muted); font-size: .85rem; line-height: 1.7; margin-top: 10px; }
+.reading-p { color: var(--text-soft); font-size: 1.02rem; line-height: 1.95; }
+
+/* منحناك الشخصي — عمودان + قراءة الفجوة */
+.gap-viz { display: flex; flex-direction: column; gap: 14px; }
+.gap-row { text-align: right; }
+.gap-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+.gap-h span { font-size: .92rem; color: var(--text-soft); font-weight: 600; }
+.gap-h b { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.gap-track { height: 16px; border-radius: 999px; background: rgba(255,255,255,.06); overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,.3); }
+.gap-fill { height: 100%; border-radius: 999px; transition: width .9s var(--ease); }
+.gap-fill.gold { background: linear-gradient(90deg, var(--gold-dark), var(--gold-light)); box-shadow: 0 0 16px rgba(232,192,105,.45); }
+.gap-fill.gold + *, .gap-row:first-child .gap-h b { color: var(--gold); }
+.gap-fill.sky  { background: linear-gradient(90deg, #3f6e8e, var(--sky)); box-shadow: 0 0 16px rgba(109,181,232,.4); }
+.gap-row:last-of-type .gap-h b { color: var(--sky-light); }
+.gap-meta {
+  margin-top: 4px; padding: 13px 15px; border-radius: 14px;
+  background: rgba(232,192,105,.06); border: 1px solid var(--border-gold);
+}
+.gap-num { display: block; font-weight: 900; font-size: 1.05rem; color: var(--gold-light); margin-bottom: 4px; }
+.gap-note { color: var(--text-soft); font-size: .9rem; line-height: 1.7; }
+
+/* بروفايل المستويات الثلاثة */
+.lvl-profile { display: flex; flex-direction: column; gap: 14px; }
+.lvl-row { text-align: right; }
+.lvl-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
+.lvl-h span { font-size: .95rem; color: var(--text-soft); font-weight: 700; }
+.lvl-h .en { font-size: .72em; }
+.lvl-tag {
+  font-size: .68rem; font-weight: 800; color: #ff8f8c;
+  background: rgba(239,83,80,.12); border: 1px solid rgba(239,83,80,.4);
+  padding: 3px 10px; border-radius: 999px; white-space: nowrap;
+}
+.lvl-track { height: 14px; border-radius: 999px; background: rgba(255,255,255,.06); overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,.3); }
+.lvl-fill { height: 100%; border-radius: 999px; transition: width .9s var(--ease); background: linear-gradient(90deg, #3f6e8e, var(--sky)); }
+.lvl-fill.is-eroded { background: linear-gradient(90deg, #b3322f, var(--burned)); box-shadow: 0 0 16px rgba(239,83,80,.4); }
+.lvl-row.eroded .lvl-h span { color: var(--text); }
+
+/* المحور + أول خطوة */
+.step-line {
+  margin-top: 14px; padding: 14px 16px; border-radius: 14px;
+  background: linear-gradient(110deg, rgba(232,192,105,.08), rgba(255,255,255,.02));
+  border: 1px solid var(--border-gold);
+  color: var(--text-soft); font-size: .98rem; line-height: 1.8;
+}
+.step-line .step-k {
+  display: inline-block; margin-inline-end: 8px;
+  font-size: .7rem; font-weight: 800; letter-spacing: .08em; color: var(--gold);
+  background: var(--gold-soft); border: 1px solid var(--border-gold);
+  padding: 3px 10px; border-radius: 999px; vertical-align: middle;
+}
+
+/* ملاحظة الثقة */
+.conf-note {
+  margin-top: 16px; color: var(--text-muted); font-size: .85rem; line-height: 1.75;
+  text-align: center; font-style: italic;
+}
+
+/* انعكاسك — q12 */
+.reflect-quote {
+  font-size: 1.08rem; line-height: 1.9; color: var(--gold-light);
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  padding: 14px 16px; border-radius: 14px; text-align: center;
+  background: rgba(255,255,255,.03); border: 1px dashed var(--border-gold);
+}
+
+/* داخل «رحلتي»: التقرير ملفوف في .jr-section — نخفّف الحواف عشان مايبقاش طبقتين */
+.jr-section .report-head { margin-bottom: 0; }
+.jr-section .report-type { font-size: 1.6rem; }
+.jr-section .report-sec:first-of-type { border-top: none; padding-top: 8px; margin-top: 12px; }
+
+@media (max-width: 420px) {
+  .report-type { font-size: 1.7rem; }
+  .reading-p { font-size: .98rem; }
+  .lvl-h span, .gap-h span { font-size: .88rem; }
+}
