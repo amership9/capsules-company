@@ -18,9 +18,15 @@
        وإلا الافتراضي تحت.
 
    (٣) كروت الإشارة: بدل «وجّه انتباهك للشاشة» في سلايدات العرض، المشارك بيشوف
-       خلاصة بنيوية مصغّرة معنونة «إشارة — الكلام مع المقدّم»، يقدر يقراها أو
-       يصوّرها من غير ما تبقى بديلة عنك. لحظتان بس بتفضلا صمت على الموبايل:
-       الخطّاف الافتتاحي، واكتشاف الظلّ.
+       خلاصة بنيوية مصغّرة معنونة «إشارة — الكلام مع المقدّم».
+
+   ── الترقية: التقرير الشخصي العميق ───────────────────────────────────────
+   نتيجة التشخيص بقت تقرير بطبقات (buildDiagnosticReportHTML) بيُستخدم في
+   مكانين بنفس الشكل: البطاقة الحيّة بعد التشخيص + قسم «تشخيصك» في «رحلتي».
+   بيسطّح بيانات كانت بتتحسب وتتضيّع: درجات المستويات الثلاثة، درجة الثقة،
+   ويضيف: منحناك الشخصي (الفجوة بين نجاحك وعافيتك)، القراءة السردية، المحور
+   وراء النمط، أول خطوة، طريقك الأقرب، وانعكاسك (q12) بترجعلك بحنان.
+   العمق هنا مطلوب — التقرير خاص وعلى الموبايل، فمش بيزاحم المقدّم بالعكس.
    ========================================================================== */
 (function () {
   'use strict';
@@ -370,11 +376,11 @@
         return inner;
       }
       case 'visual-axes': {
-        var qs = { cohesion: 'هل أنا بخير وآمن؟', vitality: 'هل أنا حيّ فعلًا؟', belonging: 'هل ليّ مكان بين الناس؟' };
         return ['cohesion', 'vitality', 'belonging'].map(function (k) {
+          var ax = SessionData.axes[k] || {};
           return '<div class="mirror-row">' +
             '<div class="mr-name gold-text">' + esc(T[k].ar) + ' <small class="en">' + esc(T[k].en) + '</small></div>' +
-            '<div class="mr-note">' + esc(qs[k]) + '</div></div>';
+            '<div class="mr-note">' + esc(ax.question || '') + '</div></div>';
         }).join('');
       }
       case 'visual-iceberg': {
@@ -570,7 +576,9 @@
       answers: state.diagnosticAnswers,
       result: {
         type: result.type, typeConfidence: result.typeConfidence,
+        typeTally: result.typeTally,
         spectrum: result.spectrum, erodedLevel: result.erodedLevel,
+        levelScores: result.levelScores,
         gap: result.gap, reflection: result.reflection
       }
     };
@@ -583,26 +591,142 @@
     renderResultCard(mount, payload.result);
   }
 
+  /* ========================================================================
+     التقرير الشخصي العميق — مصدر واحد يخدم البطاقة الحيّة و«رحلتي»
+     ====================================================================== */
+
+  // تفسير الفجوة بين النجاح والعافية (نقطة المشارك من curve_self)
+  function gapInterpret(s, w) {
+    var gap = s - w;
+    var label = gap > 0 ? 'الفجوة = ' + gap + ' درجات'
+              : gap < 0 ? 'العافية أعلى بـ ' + (-gap) + ' درجات'
+              : 'متطابقين تمامًا';
+    var note = gap >= 4 ? 'فجوة كبيرة — نجاحك سابق عافيتك بمسافة. ده أعلى صوت تحذير، وأهدأ ما يكون.'
+             : gap >= 2 ? 'فجوة متوسطة — بدأت تبين، ودلوقتي أرخص وقت تتعامل معاها.'
+             : gap <= -1 ? 'رصيد داخلي قوي — عافيتك أعلى من نجاحك الظاهر. ابنِ عليه.'
+             : 'اتزان نادر — نجاحك وعافيتك قريّبين، حافظ عليه بوعي.';
+    return { label: label, note: note };
+  }
+
+  // منحناك الشخصي: عمودان (نجاح/عافية) + قراءة الفجوة — تجسيد «الاحتراق مسافة»
+  function personalGapHTML(s, w) {
+    var gi = gapInterpret(s, w);
+    return '<div class="gap-viz">' +
+      gapBar('النجاح الظاهر', s, 'gold') +
+      gapBar('العافية الداخلية', w, 'sky') +
+      '<div class="gap-meta"><span class="gap-num">' + esc(gi.label) + '</span>' +
+        '<span class="gap-note">' + esc(gi.note) + '</span></div>' +
+    '</div>';
+  }
+  function gapBar(label, v, cls) {
+    var pct = Math.max(0, Math.min(100, Math.round(Number(v) / 10 * 100)));
+    return '<div class="gap-row"><div class="gap-h"><span>' + esc(label) + '</span>' +
+      '<b>' + esc(v) + '/10</b></div>' +
+      '<div class="gap-track"><div class="gap-fill ' + cls + '" style="width:' + pct + '%"></div></div></div>';
+  }
+
+  // بروفايل المستويات الثلاثة — يسطّح levelScores، ويعلّم الأكثر تآكلًا
+  function levelsProfileHTML(scores, eroded) {
+    var L = SessionData.levels;
+    var order = ['energy', 'relationship', 'meaning'];
+    var html = '<div class="lvl-profile">';
+    order.forEach(function (k) {
+      if (!scores || scores[k] == null) return;
+      var pct = Math.max(6, Math.min(100, Math.round(Number(scores[k]) / 10 * 100)));
+      var isEroded = (k === eroded);
+      html += '<div class="lvl-row' + (isEroded ? ' eroded' : '') + '">' +
+        '<div class="lvl-h"><span>' + esc(L[k].ar) + ' <small class="en">' + esc(L[k].en) + '</small></span>' +
+          (isEroded ? '<span class="lvl-tag">الأكثر تآكلًا</span>' : '') + '</div>' +
+        '<div class="lvl-track"><div class="lvl-fill' + (isEroded ? ' is-eroded' : '') + '" style="width:' + pct + '%"></div></div>' +
+      '</div>';
+    });
+    return html + '</div>';
+  }
+
+  function confidenceNote(conf) {
+    if (conf === 'مبدئية') return 'إجاباتك توزّعت على أكتر من نمط — يعني فيك أكتر من طبقة شغّالة، وده طبيعي جدًا. خد النتيجة كبداية حوار مع نفسك، مش ختام.';
+    if (conf === 'متوسطة') return 'نمطك واضح، ومعاه لمسة من نمط تاني — طبيعي إن الإنسان يبقى فيه أكتر من طبقة في وقت واحد.';
+    return 'إجاباتك متّسقة حوالين نمط واحد — الصورة واضحة بدرجة كبيرة.';
+  }
+
+  function reportSection(kicker, inner) {
+    return '<div class="report-sec"><div class="report-kicker sm">' + esc(kicker) + '</div>' + inner + '</div>';
+  }
+
+  // القلب: يبني تقرير التشخيص الكامل. curve اختياري (لو موجود يرسم المنحنى الشخصي).
+  function buildDiagnosticReportHTML(r, curve) {
+    if (!r) return '';
+    var t = SessionData.types[r.type] || {};
+    var rd = SessionData.buildReading(r);
+    var html = '';
+
+    // رأس البطاقة
+    html += '<div class="report-head">' +
+      '<div class="report-kicker">أقرب نمط ليك دلوقتي</div>' +
+      '<div class="report-type" style="color:' + t.color + '">' + esc(t.ar) + '</div>' +
+      '<div class="en">' + esc(t.en) + '</div>' +
+      (r.typeConfidence ? '<span class="conf-chip">دقة الصورة: ' + esc(r.typeConfidence) + '</span>' : '') +
+      (t.essence ? '<p class="report-essence">' + esc(t.essence) + '</p>' : '') +
+    '</div>';
+
+    // منحناك الشخصي (لو عندنا نقطته من curve_self)
+    if (curve && curve.success && curve.wellbeing) {
+      html += reportSection('منحناك إنت — الفجوة بين خطين',
+        personalGapHTML(curve.success, curve.wellbeing));
+    }
+
+    // قراءة في حالتك (نوع + طيف + مستوى، فقرة متصلة)
+    if (rd.paragraph) {
+      html += reportSection('قراءة في حالتك',
+        '<p class="reading-p">' + esc(rd.paragraph) + '</p>');
+    }
+
+    // بروفايل المستويات الثلاثة
+    if (r.levelScores) {
+      var lv = SessionData.levels[r.erodedLevel] || {};
+      html += reportSection('بروفايل المستويات الثلاثة',
+        levelsProfileHTML(r.levelScores, r.erodedLevel) +
+        (lv.note ? '<p class="sec-note">' + esc(lv.note) + '</p>' : ''));
+    }
+
+    // المحور وراء النمط + أول خطوة
+    if (rd.axisLine || rd.firstStep) {
+      var inner = '';
+      if (rd.axisLine) inner += '<p class="reading-p">' + esc(rd.axisLine) + '</p>';
+      if (rd.firstStep) inner += '<div class="step-line"><span class="step-k">أول خطوة</span>' + esc(rd.firstStep) + '</div>';
+      html += reportSection('المحور اللي ورا النمط', inner);
+    }
+
+    // طريقك الأقرب
+    if (rd.paths && rd.paths.length) {
+      html += reportSection('طريقك الأقرب',
+        '<p class="sec-note">من طرق محور ' + esc(rd.axis.ar || '') + ' — دي أقرب الطرق لمكان فجوتك:</p>' +
+        '<div class="mirror-chips">' +
+          rd.paths.map(function (p) { return '<span>' + esc(p.name) + '</span>'; }).join('') +
+        '</div>');
+    }
+
+    // ملاحظة الثقة
+    if (r.typeConfidence) {
+      html += '<p class="conf-note">' + esc(confidenceNote(r.typeConfidence)) + '</p>';
+    }
+
+    // انعكاسك (q12) — بترجعلك بحنان
+    if (r.reflection) {
+      html += reportSection('اللي قلته لحياتك الداخلية',
+        '<div class="reflect-quote">«' + esc(r.reflection) + '»</div>' +
+        '<p class="sec-note">الكلمة دي ليك إنت. خدها معاك.</p>');
+    }
+
+    return html;
+  }
+
   function renderResultCard(mount, r) {
-    var t = SessionData.types[r.type];
-    var s = SessionData.spectrum[r.spectrum];
-    var l = SessionData.levels[r.erodedLevel];
-
-    var html = '<div class="p-card result-card fade-in">';
-    html += '<div class="muted">أقرب نمط ليك دلوقتي</div>';
-    html += '<div class="result-type" style="color:' + t.color + '">' + esc(t.ar) + '</div>';
-    html += '<div class="en">' + esc(t.en) + '</div>';
-
-    html += '<div class="result-rows">';
-    html += '<div class="result-row"><span class="rk">النوع</span><span class="rv">' + esc(t.ar) + ' <small>' + esc(t.en) + '</small></span></div>';
-    html += '<div class="result-row"><span class="rk">موقعك على الطيف</span><span class="rv">' + esc(s.ar) + ' <small>' + esc(s.en) + '</small></span></div>';
-    html += '<div class="result-row"><span class="rk">أكتر مستوى متآكل</span><span class="rv">' + esc(l.ar) + ' <small>' + esc(l.en) + '</small></span></div>';
-    html += '</div>';
-
-    html += '<div class="mirror-note">' + esc(t.mirror) + '</div>';
-    html += '<p class="muted" style="font-size:.8rem;margin-top:14px;">تقدر ترجع لبطاقتك دي في أي وقت من «رحلتي» فوق.</p>';
-    html += '</div>';
-    mount.innerHTML = html;
+    var curve = state.responses['curve_self'];
+    mount.innerHTML = '<div class="p-card result-card fade-in">' +
+      buildDiagnosticReportHTML(r, curve) +
+      '<p class="muted" style="font-size:.8rem;margin-top:14px;text-align:center;">تقدر ترجع لبطاقتك دي في أي وقت من «رحلتي» فوق.</p>' +
+    '</div>';
   }
 
   /* ---------------- (4) الميثاق ---------------- */
@@ -638,10 +762,12 @@
 
     if (diag && diag.result) {
       var t = SessionData.types[diag.result.type];
-      html += '<div class="mt-2 muted">نمطك</div><div class="result-type" style="color:' + t.color + ';font-size:1.5rem">' + esc(t.ar) + '</div>';
+      html += '<div class="mt-2 muted">نمطك</div>' +
+        '<div class="result-type" style="color:' + t.color + ';font-size:1.5rem">' + esc(t.ar) + '</div>' +
+        (t.essence ? '<p class="muted" style="font-size:.92rem;max-width:34ch;margin:6px auto 0;line-height:1.7;">' + esc(t.essence) + '</p>' : '');
     }
 
-    html += '<button class="btn btn-gold btn-block btn-large mt-3" id="openJourneyBtn">📋 شوف رحلتك كاملة</button>';
+    html += '<button class="btn btn-gold btn-block btn-large mt-3" id="openJourneyBtn">📋 شوف تقريرك الكامل</button>';
 
     if (state.code) {
       html += '<div class="mt-3 muted">كودك — مفتاحك لو حبيت ترجع:</div>';
@@ -720,33 +846,13 @@
 
     // نقطة المنحني
     if (r.curve_self && r.curve_self.success && r.curve_self.wellbeing) {
-      var s = r.curve_self.success, w = r.curve_self.wellbeing, gap = s - w;
-      var gapLabel = gap >= 4 ? 'فجوة كبيرة بين نجاحك وعافيتك'
-                   : gap >= 2 ? 'فجوة متوسطة'
-                   : gap <= -1 ? 'عافيتك الداخلية أعلى من نجاحك الظاهر'
-                   : 'النجاح والعافية متقاربين عندك';
-      html += jrSection('نقطتك على المنحني',
-        '<div class="jr-line">النجاح الظاهر: <b>' + s + '/10</b> &nbsp;·&nbsp; العافية الداخلية: <b>' + w + '/10</b></div>' +
-        '<div class="jr-line"><span class="muted">' + esc(gapLabel) + '</span></div>');
+      var s = r.curve_self.success, w = r.curve_self.wellbeing;
+      html += jrSection('نقطتك على المنحني', personalGapHTML(s, w));
     }
 
-    // التشخيص
+    // التشخيص — التقرير الكامل (من غير المنحنى، لأنه ظهر فوق في قسم النقطة)
     if (r.diagnostic && r.diagnostic.result) {
-      var res = r.diagnostic.result;
-      var t = SessionData.types[res.type];
-      var sp = SessionData.spectrum[res.spectrum];
-      var lv = SessionData.levels[res.erodedLevel];
-      var d = '';
-      if (t) d += '<div class="jr-type" style="color:' + t.color + '">' + esc(t.ar) + ' <small class="en">' + esc(t.en) + '</small></div>';
-      if (sp) d += '<div class="jr-line"><span class="jr-k">موقعك على الطيف:</span> <b>' + esc(sp.ar) + '</b><br><span class="muted">' + esc(sp.note) + '</span></div>';
-      if (lv) d += '<div class="jr-line"><span class="jr-k">أكتر مستوى متآكل:</span> <b>' + esc(lv.ar) + '</b><br><span class="muted">' + esc(lv.note) + '</span></div>';
-      if (t) d += '<div class="mirror-note" style="margin-top:12px;">' + esc(t.mirror) + '</div>';
-      html += jrSection('نتيجة تشخيصك', d);
-
-      if (res.reflection) {
-        html += jrSection('اللي قلته لحياتك الداخلية',
-          '<div class="jr-line" style="font-style:italic;">«' + esc(res.reflection) + '»</div>');
-      }
+      html += jrSection('تشخيصك الكامل', buildDiagnosticReportHTML(r.diagnostic.result, null));
     }
 
     // الميثاق
