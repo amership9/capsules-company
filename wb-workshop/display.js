@@ -198,7 +198,7 @@
       : '<p class="display-sub fade-up d3">افتحوا الرابط على موبايلاتكم… مستنيينكم.</p>';
     stage.innerHTML =
       '<div class="text-center">' +
-        '<div class="badge fade-in">Executive Master Camp</div>' +
+        '<div class="badge fade-in">Proactive Development Solutions</div>' +
         '<div class="rise-in d1"><h1 class="display-hero gold-shimmer" style="margin-top:22px;">' + esc(ph.title || 'العافية') + '</h1></div>' +
         '<div class="en fade-up d2" style="font-size:1.8rem;">' + esc(ph.titleEn || 'Inner Wellbeing') + '</div>' +
         (ph.subtitle ? '<p class="display-sub fade-up d3">' + esc(ph.subtitle) + '</p>' : '') +
