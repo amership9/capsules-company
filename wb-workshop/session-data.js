@@ -302,7 +302,7 @@
       id: 'waiting', part: 0, block: 'قبل البداية',
       kind: 'waiting',
       title: 'العافية', titleEn: 'Inner Wellbeing',
-      subtitle: 'ورشة فهم ما وراء الاحتراق للقادة'
+      subtitle: 'ورشة فهم ما وراء الاحتراق للقادة',
              subtitle: 'Executive Mastery Camp'
 
     },
