@@ -1,7 +1,8 @@
 /* ============================================================================
-   participant-extras.css  —  أنماط إضافية لشاشة المشارك فقط
+   participant-extras.css  —  أنماط إضافية لشاشة المشارك فقط  ·  نسخة مصقولة
    ----------------------------------------------------------------------------
    بيكمّل main.css من غير ما يلمسه. بيستخدم نفس متغيّرات الهوية (الذهبي/الكحلي).
+   كل أسماء الكلاسات محفوظة كما هي — participant.js بيشتغل عليها زي ما هو.
    بيغطّي:
      • كروت «الإشارة» المصغّرة على الموبايل (mirror-*)
      • طبقة «رحلتي» المنبثقة (summary-* / jr-*)
@@ -10,15 +11,27 @@
    ========================================================================== */
 
 /* ---------------- كروت الإشارة ---------------- */
+/* شريط ذهبي رفيع جنب الكارت = "دي إشارة من الشاشة، مش المتن" */
+.mirror-card { position: relative; overflow: hidden; }
+.mirror-card::before {
+  content: ""; position: absolute; top: 0; bottom: 0; inset-inline-start: 0;
+  width: 3px; background: linear-gradient(180deg, var(--gold-light), var(--gold-dark));
+  opacity: .85;
+}
 .mirror-card .mirror-kicker {
-  font-size: .72rem; letter-spacing: .12em; color: var(--text-muted);
-  margin-bottom: 10px;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: .72rem; letter-spacing: .14em; color: var(--text-muted);
+  margin-bottom: 12px; text-transform: uppercase; font-weight: 700;
+}
+.mirror-card .mirror-kicker::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gold); box-shadow: 0 0 10px rgba(232,192,105,.7);
 }
 .mirror-card .mirror-headline {
-  font-size: 1.22rem; font-weight: 800; line-height: 1.5; color: var(--text);
+  font-size: 1.28rem; font-weight: 800; line-height: 1.5; color: var(--text);
 }
 .mirror-card .mirror-sub {
-  color: var(--text-soft); font-size: .95rem; margin-top: 10px; line-height: 1.7;
+  color: var(--text-soft); font-size: .96rem; margin-top: 10px; line-height: 1.7;
 }
 .mirror-card .mirror-foot {
   margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border);
@@ -28,35 +41,39 @@
 /* قائمة مصغّرة */
 .mirror-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 .mirror-list .ml-item {
-  padding: 11px 14px; border-radius: 12px;
+  padding: 12px 15px; border-radius: 12px;
   background: rgba(255,255,255,.04); border: 1px solid var(--border);
   font-size: .94rem; color: var(--text-soft); line-height: 1.6;
+  transition: border-color .2s var(--ease);
 }
+.mirror-list .ml-item:hover { border-color: var(--border-gold); }
 
 /* صف باسم + وصف (الأنواع / المحاور) */
 .mirror-row {
-  padding: 12px 14px; border-radius: 12px; margin-top: 10px;
+  padding: 13px 15px; border-radius: 12px; margin-top: 10px;
   background: rgba(255,255,255,.04); border: 1px solid var(--border);
 }
-.mirror-row .mr-name { font-weight: 800; font-size: 1.02rem; }
+.mirror-row .mr-name { font-weight: 800; font-size: 1.04rem; }
 .mirror-row .mr-name .en { font-size: .78em; }
 .mirror-row .mr-note { color: var(--text-soft); font-size: .88rem; margin-top: 4px; line-height: 1.6; }
 
 /* عمودان (تباين / بابان) */
 .mirror-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
 .mirror-two .m2-side {
-  padding: 14px; border-radius: 12px;
-  background: rgba(255,255,255,.04); border: 1px solid var(--border);
+  padding: 15px; border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  border: 1px solid var(--border);
 }
-.mirror-two .m2-tag { font-weight: 800; font-size: 1.05rem; }
+.mirror-two .m2-tag { font-weight: 800; font-size: 1.08rem; }
 .mirror-two .m2-en { font-size: .82rem; display: block; margin: 2px 0 6px; }
 .mirror-two .m2-note { color: var(--text-soft); font-size: .85rem; line-height: 1.55; }
-.mirror-two.contrast .m2-side:last-child { border-color: rgba(239,83,80,.32); }
+.mirror-two.contrast .m2-side:first-child { border-color: var(--border-gold); }
+.mirror-two.contrast .m2-side:last-child  { border-color: rgba(239,83,80,.32); }
 
 /* رقائق (الفلاتر / الطرق) */
 .mirror-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .mirror-chips span {
-  padding: 8px 12px; border-radius: 999px;
+  padding: 8px 13px; border-radius: 999px;
   background: var(--gold-soft); border: 1px solid var(--border-gold);
   color: var(--gold); font-size: .88rem; font-weight: 700;
 }
@@ -67,18 +84,18 @@
 /* ---------------- طبقة «رحلتي» ---------------- */
 .summary-overlay {
   position: fixed; inset: 0; z-index: 9998;
-  background: rgba(5,8,20,.80);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  background: rgba(4,6,16,.82);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   display: flex; align-items: flex-start; justify-content: center;
   overflow-y: auto; padding: 22px 14px 70px;
 }
 .summary-overlay.hidden { display: none !important; }
 .summary-sheet {
   width: 100%; max-width: 560px; position: relative;
-  background: linear-gradient(155deg, var(--bg-2), var(--bg-1));
+  background: linear-gradient(160deg, var(--bg-2), var(--bg-1));
   border: 1px solid var(--border-gold); border-radius: var(--radius);
-  box-shadow: var(--shadow-soft); padding: 20px;
-  animation: fadeUp .5s var(--ease) both;
+  box-shadow: var(--shadow-deep); padding: 22px;
+  animation: fadeUp .5s var(--ease-out) both;
 }
 .summary-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .summary-close {
@@ -88,26 +105,35 @@
 }
 .summary-close:hover { background: rgba(255,255,255,.1); color: var(--text); }
 
-.jr-head { text-align: center; margin-bottom: 18px; }
-.jr-head h2 { font-size: 1.5rem; }
+.jr-head { text-align: center; margin-bottom: 20px; }
+.jr-head h2 { font-size: 1.55rem; }
 .jr-head p { margin-top: 6px; font-size: .9rem; }
 
 .jr-section {
-  padding: 16px; border-radius: 14px; margin-bottom: 12px;
+  padding: 17px; border-radius: 14px; margin-bottom: 12px;
   background: rgba(255,255,255,.035); border: 1px solid var(--border);
 }
-.jr-title { font-size: .78rem; color: var(--gold); letter-spacing: .04em; font-weight: 700; margin-bottom: 10px; }
+.jr-title {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: .76rem; color: var(--gold); letter-spacing: .06em; font-weight: 700; margin-bottom: 10px;
+}
+.jr-title::before { content: ""; width: 14px; height: 1px; background: var(--border-gold); }
 .jr-line { color: var(--text-soft); font-size: .96rem; line-height: 1.75; }
 .jr-line + .jr-line { margin-top: 10px; }
 .jr-k { color: var(--text-muted); font-size: .82rem; }
-.jr-type { font-size: 1.4rem; font-weight: 900; margin-bottom: 10px; }
+.jr-type { font-size: 1.45rem; font-weight: 900; margin-bottom: 10px; }
 .jr-code { text-align: center; }
 
 .jr-cta {
-  padding: 18px; border-radius: 14px; text-align: center; margin-top: 6px;
-  background: rgba(232,192,105,.07); border: 1px solid var(--border-gold);
+  padding: 20px; border-radius: 16px; text-align: center; margin-top: 6px; position: relative; overflow: hidden;
+  background: linear-gradient(165deg, rgba(232,192,105,.10), rgba(255,255,255,.02));
+  border: 1px solid var(--border-gold);
 }
-.jr-cta-title { font-weight: 800; color: var(--gold-light); font-size: 1.1rem; margin-bottom: 6px; }
+.jr-cta::before {
+  content: ""; position: absolute; top: -40%; left: 50%; transform: translateX(-50%);
+  width: 70%; height: 70%; background: radial-gradient(closest-side, rgba(232,192,105,.18), transparent 70%);
+}
+.jr-cta-title { font-weight: 800; color: var(--gold-light); font-size: 1.12rem; margin-bottom: 6px; position: relative; }
 
 /* زرار «رحلتي» في الشريط العلوي */
 .p-topbar #journeyBtn { white-space: nowrap; }
