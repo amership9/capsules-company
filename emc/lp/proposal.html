@@ -222,6 +222,10 @@
     try { contact = await EMC.contacts.get(contactId); } catch (e) { contact = null; }
     if (!contact || !contact.proposal || !contact.proposal.savedAt) { showError(); return; }
 
+    let poSettings = {};
+    try { poSettings = await EMC.utils.getSettings(); } catch (e) {}
+    const senderName = (poSettings.contactName || '').trim() || 'عبدالله';
+
     const p = contact.proposal;
     const fn = contact.identity?.firstName || (contact.identity?.fullName || '').split(/\s+/)[0] || '';
     const company = contact.identity?.companyName || 'شركتك';
@@ -229,7 +233,12 @@
     if (fn) document.getElementById('po-title').textContent = `${fn}، ده عرضك الرسمي`;
 
     // لو مقبول بالفعل → اعرض شاشة الموافقة مباشرة
-    if (p.status === 'accepted') { acceptedEl.classList.add('active'); return; }
+    if (p.status === 'accepted') {
+      document.getElementById('po-accepted-msg').textContent =
+        `${senderName} هيتواصل معاك قريب لإتمام التفاصيل وخطوة الدفع. أهلاً بيك في الطريق.`;
+      acceptedEl.classList.add('active');
+      return;
+    }
 
     // ── الصلاحية ──
     let expired = false;
@@ -286,13 +295,13 @@
     const zone = document.getElementById('po-accept-zone');
     const digits = (contact.channels?.whatsapp || contact.channels?.mobile || '').replace(/\D/g, '');
     const waNum = digits ? (digits.startsWith('20') ? digits : (digits.startsWith('0') ? '2' + digits : '2' + digits)) : '';
-    const waMsg = encodeURIComponent(`أهلاً عبدالله، اطّلعت على العرض وعايز نكمّل.`);
+    const waMsg = encodeURIComponent(`أهلاً ${senderName}، اطّلعت على العرض وعايز نكمّل.`);
     const waLink = waNum ? `https://wa.me/${waNum}?text=${waMsg}` : '';
 
     if (expired) {
       zone.innerHTML = waLink
-        ? `<p style="color:var(--emc-ink-2); margin-bottom:18px;">انتهت صلاحية العرض، بس لسه نقدر نكمّل — كلّم عبدالله:</p><a href="${waLink}" target="_blank" class="po-wa-contact">💬 تواصل مع عبدالله</a>`
-        : `<p style="color:var(--emc-ink-2);">انتهت صلاحية العرض — تواصل مع عبدالله لتجديده.</p>`;
+        ? `<p style="color:var(--emc-ink-2); margin-bottom:18px;">انتهت صلاحية العرض، بس لسه نقدر نكمّل — كلّم ${senderName}:</p><a href="${waLink}" target="_blank" class="po-wa-contact">💬 تواصل معنا</a>`
+        : `<p style="color:var(--emc-ink-2);">انتهت صلاحية العرض — تواصل مع ${senderName} لتجديده.</p>`;
     } else if (p.allowSelfAccept !== false) {
       zone.innerHTML = `
         <button class="po-accept-btn" id="po-accept-btn">أوافق وأكمل ✓</button>
@@ -300,8 +309,8 @@
       document.getElementById('po-accept-btn').addEventListener('click', onAccept);
     } else {
       zone.innerHTML = waLink
-        ? `<p style="color:var(--emc-ink-2); margin-bottom:18px;">للموافقة وإتمام التفاصيل، تواصل مع عبدالله مباشرة:</p><a href="${waLink}" target="_blank" class="po-wa-contact">💬 تواصل مع عبدالله للموافقة</a>`
-        : `<p style="color:var(--emc-ink-2);">للموافقة، تواصل مع عبدالله مباشرة.</p>`;
+        ? `<p style="color:var(--emc-ink-2); margin-bottom:18px;">للموافقة وإتمام التفاصيل، تواصل معنا مباشرة:</p><a href="${waLink}" target="_blank" class="po-wa-contact">💬 تواصل معنا للموافقة</a>`
+        : `<p style="color:var(--emc-ink-2);">للموافقة، تواصل معنا مباشرة.</p>`;
     }
 
     bodyEl.style.display = 'block';
