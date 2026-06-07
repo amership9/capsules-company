@@ -441,6 +441,9 @@
 
     <!-- [11B] Participation panel — يظهر فقط للمرحلة 11 -->
     <div id="participation-panel"></div>
+
+    <!-- [12B] Implementation panel — يظهر فقط للمرحلة 12 -->
+    <div id="implementation-panel"></div>
     
 
     <!-- Quick stats -->
@@ -1224,6 +1227,195 @@
     });
   })();
 
+  // ─── [12B] لوحة التطبيق والمتابعة (المرحلة 12 — Implementation) ───
+  (async function setupImplementationPanel() {
+    const panel = document.getElementById('implementation-panel');
+    if (!panel) return;
+    if (c.currentStage !== 12) return;
+
+    const DEFAULT_CHECKINS = EMC.DEFAULT_CHECKINS || [];
+    const TOOLS = EMC.IMPLEMENTATION_TOOLS || [];
+
+    const impl = c.implementation || {};
+    // نقاط المتابعة: نبدأ بالافتراضية + أي نقاط مخصّصة أضافها عبد الله
+    const customCheckins = Array.isArray(impl.customCheckins) ? impl.customCheckins : [];
+    const allCheckins = [...DEFAULT_CHECKINS, ...customCheckins];
+    const checkinData = impl.checkins || {}; // { key: { done: true, note: '' } }
+    const toolsDone = impl.tools || {};      // { toolKey: true }
+
+    // حسابات المؤشر
+    const checkinsDone = allCheckins.filter(ci => checkinData[ci.key]?.done).length;
+    const toolsDoneCount = TOOLS.filter(t => toolsDone[t.key]).length;
+    const totalItems = allCheckins.length + TOOLS.length;
+    const doneItems = checkinsDone + toolsDoneCount;
+    const pct = totalItems ? Math.round((doneItems / totalItems) * 100) : 0;
+    const allToolsDone = toolsDoneCount === TOOLS.length;
+    const allCheckinsDone = checkinsDone === allCheckins.length && allCheckins.length > 0;
+    const canAdvance = allToolsDone && allCheckinsDone;
+
+    // ── بناء نقاط المتابعة ──
+    const checkinsHtml = allCheckins.map(ci => {
+      const data = checkinData[ci.key] || {};
+      const done = !!data.done;
+      const isCustom = customCheckins.some(cc => cc.key === ci.key);
+      return `
+        <div style="border:1px solid ${done ? 'var(--emc-success)' : 'var(--emc-line)'}; background:${done ? '#F1F8F4' : '#fff'}; border-radius:11px; padding:13px 15px; margin-bottom:10px;">
+          <div style="display:flex; align-items:flex-start; gap:11px;">
+            <button class="impl-checkin-toggle" data-key="${ci.key}" style="width:22px; height:22px; border-radius:6px; border:2px solid ${done ? 'var(--emc-success)' : 'var(--emc-line)'}; background:${done ? 'var(--emc-success)' : 'transparent'}; cursor:pointer; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; padding:0;">
+              ${done ? '<span style="color:#fff; font-size:13px; font-weight:800;">✓</span>' : ''}
+            </button>
+            <div style="flex:1;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span style="font-size:13.5px; font-weight:700; color:var(--emc-navy); ${done ? 'text-decoration:line-through; opacity:0.65;' : ''}">${ci.label}</span>
+                ${isCustom ? `<button class="impl-checkin-remove" data-key="${ci.key}" style="font-size:11px; color:var(--emc-red); background:none; border:none; cursor:pointer; padding:0;">حذف</button>` : ''}
+              </div>
+              <div style="font-size:11.5px; color:var(--emc-muted); margin-top:2px;">${ci.timing || ''}</div>
+              <textarea class="impl-checkin-note input" data-key="${ci.key}" rows="2" placeholder="إيه اللي اتطبّق؟ إيه العقبات؟" style="margin-top:8px; font-size:12.5px;">${data.note || ''}</textarea>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    // ── بناء الأدوات ──
+    const toolsHtml = TOOLS.map(t => {
+      const done = !!toolsDone[t.key];
+      return `
+        <div class="impl-tool" data-key="${t.key}" style="display:flex; align-items:flex-start; gap:11px; padding:12px 14px; border:1px solid ${done ? 'var(--emc-success)' : 'var(--emc-line)'}; background:${done ? '#F1F8F4' : '#fff'}; border-radius:11px; margin-bottom:9px; cursor:pointer;">
+          <div style="width:22px; height:22px; border-radius:6px; border:2px solid ${done ? 'var(--emc-success)' : 'var(--emc-line)'}; background:${done ? 'var(--emc-success)' : 'transparent'}; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">
+            ${done ? '<span style="color:#fff; font-size:13px; font-weight:800;">✓</span>' : ''}
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13.5px; font-weight:700; color:var(--emc-navy); ${done ? 'text-decoration:line-through; opacity:0.65;' : ''}">${t.icon} ${t.label}</div>
+            <div style="font-size:11.5px; color:var(--emc-muted); line-height:1.5; margin-top:2px;">${t.hint}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    panel.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:22px; border-color:var(--emc-navy-soft);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+          <span style="width:4px; height:20px; background:var(--emc-navy-soft); border-radius:2px;"></span>
+          <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">التطبيق والمتابعة</h3>
+        </div>
+
+        <!-- مؤشر التطبيق -->
+        <div style="margin-bottom:22px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <span style="font-size:13px; color:var(--emc-ink); font-weight:700;">مؤشر التطبيق</span>
+            <span style="font-size:14px; font-weight:800; color:${pct === 100 ? 'var(--emc-success)' : 'var(--emc-navy)'};">${pct}%</span>
+          </div>
+          <div style="height:10px; background:var(--emc-cream); border-radius:6px; overflow:hidden;">
+            <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--emc-success)' : 'var(--emc-navy-soft)'}; border-radius:6px; transition:width 0.3s;"></div>
+          </div>
+          <div style="font-size:11.5px; color:var(--emc-muted); margin-top:6px;">نقاط المتابعة: ${checkinsDone}/${allCheckins.length} · الأدوات: ${toolsDoneCount}/${TOOLS.length}</div>
+        </div>
+
+        <!-- نقاط المتابعة -->
+        <div style="margin-bottom:22px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <span style="font-size:13px; font-weight:700; color:var(--emc-ink);">نقاط المتابعة (Check-ins)</span>
+            <button class="btn btn-ghost btn-sm" id="impl-add-checkin" style="padding:4px 12px; font-size:12px;">➕ أضف نقطة</button>
+          </div>
+          ${checkinsHtml}
+        </div>
+
+        <!-- الأدوات -->
+        <div style="margin-bottom:18px;">
+          <div style="font-size:13px; font-weight:700; color:var(--emc-ink); margin-bottom:12px;">تطبيق الأدوات الأساسية</div>
+          ${toolsHtml}
+        </div>
+
+        <!-- زر الانتقال -->
+        <div style="padding-top:16px; border-top:1px solid var(--emc-line-soft);">
+          ${canAdvance
+            ? `<button class="btn btn-accent btn-sm" id="impl-advance-btn">🎓 اكتمل التطبيق — للمرحلة 13 (الخريجين)</button>`
+            : `<button class="btn btn-outline btn-sm" id="impl-advance-btn" style="opacity:0.6;">🎓 اكتمل التطبيق — للمرحلة 13</button>
+               <span style="font-size:11.5px; color:var(--emc-muted); margin-inline-start:10px;">كمّل كل نقاط المتابعة والأدوات الأول</span>`}
+        </div>
+      </div>`;
+
+    // ── حفظ عام ──
+    async function patchImpl(patch) {
+      const newImpl = { ...(c.implementation || {}), ...patch };
+      await EMC.contacts.update(id, { implementation: newImpl });
+      c.implementation = newImpl;
+    }
+
+    // ── تبديل حالة نقطة متابعة ──
+    panel.querySelectorAll('.impl-checkin-toggle').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const key = btn.dataset.key;
+        const newCheckins = { ...checkinData };
+        const cur = { ...(newCheckins[key] || {}) };
+        cur.done = !cur.done;
+        newCheckins[key] = cur;
+        try { await patchImpl({ checkins: newCheckins }); window.location.reload(); }
+        catch (e) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+      });
+    });
+
+    // ── حفظ ملاحظة نقطة متابعة (عند الخروج من الحقل) ──
+    panel.querySelectorAll('.impl-checkin-note').forEach(ta => {
+      ta.addEventListener('blur', async () => {
+        const key = ta.dataset.key;
+        const newCheckins = { ...checkinData };
+        const cur = { ...(newCheckins[key] || {}) };
+        if (cur.note === ta.value) return;
+        cur.note = ta.value;
+        newCheckins[key] = cur;
+        try { await patchImpl({ checkins: newCheckins }); EMC.utils.toast('تم حفظ الملاحظة', 'success'); }
+        catch (e) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+      });
+    });
+
+    // ── حذف نقطة متابعة مخصّصة ──
+    panel.querySelectorAll('.impl-checkin-remove').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const key = btn.dataset.key;
+        if (!confirm('حذف نقطة المتابعة دي؟')) return;
+        const newCustom = customCheckins.filter(cc => cc.key !== key);
+        const newCheckins = { ...checkinData }; delete newCheckins[key];
+        try { await patchImpl({ customCheckins: newCustom, checkins: newCheckins }); window.location.reload(); }
+        catch (e) { EMC.utils.toast('خطأ في الحذف', 'error'); }
+      });
+    });
+
+    // ── إضافة نقطة متابعة مخصّصة ──
+    const addBtn = document.getElementById('impl-add-checkin');
+    if (addBtn) addBtn.addEventListener('click', async () => {
+      const label = prompt('اسم نقطة المتابعة الجديدة:');
+      if (!label || !label.trim()) return;
+      const timing = prompt('التوقيت (اختياري):') || '';
+      const newCheckin = { key: 'custom_' + Date.now(), label: label.trim(), timing: timing.trim() };
+      try { await patchImpl({ customCheckins: [...customCheckins, newCheckin] }); window.location.reload(); }
+      catch (e) { EMC.utils.toast('خطأ في الإضافة', 'error'); }
+    });
+
+    // ── تبديل حالة أداة ──
+    panel.querySelectorAll('.impl-tool').forEach(el => {
+      el.addEventListener('click', async () => {
+        const key = el.dataset.key;
+        const newTools = { ...toolsDone };
+        if (newTools[key]) delete newTools[key]; else newTools[key] = true;
+        try { await patchImpl({ tools: newTools }); window.location.reload(); }
+        catch (e) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+      });
+    });
+
+    // ── الانتقال للمرحلة 13 ──
+    const advBtn = document.getElementById('impl-advance-btn');
+    if (advBtn) advBtn.addEventListener('click', async () => {
+      if (!canAdvance) { EMC.utils.toast('كمّل كل نقاط المتابعة والأدوات الأول', 'error'); return; }
+      if (!confirm(`تأكيد اكتمال تطبيق ${c.identity.fullName} ونقله للمرحلة 13 (الخريجين)؟`)) return;
+      try {
+        await patchImpl({ completedAt: new Date().toISOString(), implementationPct: pct });
+        await EMC.contacts.moveToStage(id, 13, 'اكتمل التطبيق — خريج');
+        EMC.utils.toast('تم النقل للخريجين', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
+    });
+  })();
 
 // ─── [11B] لوحة المشاركة والحضور (المرحلة 11 — Participation) ───
   (async function setupParticipationPanel() {
