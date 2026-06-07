@@ -550,6 +550,95 @@
           console.error('Prep submission failed:', e);
           return { success: false, error: e?.message || 'حدث خطأ، حاول مرة أخرى' };
         }
+      },
+
+      // ═══════════════════════════════════════════════════
+      // [7B] رد العميل على العرض (المرحلة 7 / Proposal)
+      // accepted → يكتب الحالة + ينقل للمرحلة 8 تلقائياً
+      // ═══════════════════════════════════════════════════
+      async submitProposalResponse(payload) {
+        try {
+          if (typeof EMC === 'undefined' || !EMC.contacts) {
+            throw new Error('EMC not loaded yet');
+          }
+          if (!payload.contactId) {
+            throw new Error('رابط غير صالح — مفيش معرّف للعميل');
+          }
+
+          const existing = await EMC.contacts.get(payload.contactId);
+          if (!existing || !existing.proposal) {
+            throw new Error('العرض غير موجود');
+          }
+
+          const isAccept = payload.response === 'accepted';
+          const newProp = {
+            ...existing.proposal,
+            status: isAccept ? 'accepted' : 'declined',
+            updatedAt: new Date().toISOString()
+          };
+          if (isAccept) {
+            newProp.acceptedAt = new Date().toISOString();
+            newProp.acceptedVia = 'self';
+          } else {
+            newProp.declinedAt = new Date().toISOString();
+          }
+
+          await EMC.contacts.update(payload.contactId, {
+            proposal: newProp,
+            context: {
+              ...(existing.context || {}),
+              lastInteractionAt: new Date().toISOString()
+            }
+          });
+
+          // لو وافق والمرحلة لسه 7 → انقله تلقائياً للمرحلة 8 (تفاوض)
+          if (isAccept && existing.currentStage === 7) {
+            await EMC.contacts.moveToStage(payload.contactId, 8, 'قبول العرض ذاتياً — للتفاوض');
+          }
+
+          if (EMC.events?.log) {
+            EMC.events.log({
+              contactId: payload.contactId,
+              type: 'manual_note',
+              stage: existing.currentStage || 7,
+              channel: 'website',
+              data: { action: isAccept ? 'proposal_accepted' : 'proposal_declined', via: 'self' }
+            }).catch(() => {});
+          }
+
+          await safeCreate({
+            ...baseData,
+            type: 'form_submit',
+            contactId: payload.contactId,
+            data: { formType: 'proposal_response', response: payload.response }
+          });
+
+          return { success: true, contactId: payload.contactId };
+        } catch (e) {
+          console.error('Proposal response failed:', e);
+          return { success: false, error: e?.message || 'حدث خطأ، حاول مرة أخرى' };
+        }
+      },
+
+      // ═══════════════════════════════════════════════════
+      // [7B] تعليم العرض كـ "اتشاف" (بصمت عند فتح العميل للصفحة)
+      // ═══════════════════════════════════════════════════
+      async markProposalViewed(contactId) {
+        try {
+          if (typeof EMC === 'undefined' || !EMC.contacts) return;
+          if (!contactId) return;
+          const existing = await EMC.contacts.get(contactId);
+          if (!existing || !existing.proposal) return;
+          if (existing.proposal.status !== 'sent') return; // ما نغيّرش لو الحالة اتغيّرت
+
+          await EMC.contacts.update(contactId, {
+            proposal: {
+              ...existing.proposal,
+              status: 'viewed',
+              viewedAt: new Date().toISOString()
+            }
+          });
+        } catch (e) { /* صامت — مش مهم لو فشل */ }
       }
     };
   }
