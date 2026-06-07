@@ -472,6 +472,34 @@ window.EMC.IMPLEMENTATION_TOOLS = [
   { key: 'vision',         icon: '🧭', label: 'الرؤية على صفحة', hint: 'رؤية الشركة موثّقة وواضحة للفريق.' }
 ];
 
+// ═══════════════════════════════════════════════════════════════════
+// [المرحلة 13] قاموس الخريجين (Alumni)
+// ═══════════════════════════════════════════════════════════════════
+
+// حالة الشهادة / الحالة الدراسية
+window.EMC.TESTIMONIAL_STATUS = {
+  not_requested: { label: 'لم تُطلب',      color: '#5F5E5A', bg: '#F1EFE8', border: '#D3D1C7' },
+  requested:     { label: 'تم الطلب',      color: '#8C5915', bg: '#FAEEDB', border: '#ECD3A6' },
+  received:      { label: 'تم الاستلام ✓', color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD' },
+  declined:      { label: 'اعتذر',         color: '#A2202D', bg: '#FBE0E2', border: '#F1B6BB' }
+};
+
+// فترات قياس الرضا (NPS)
+window.EMC.NPS_PERIODS = [
+  { key: 'nps3Month',  label: 'بعد 3 شهور' },
+  { key: 'nps6Month',  label: 'بعد 6 شهور' },
+  { key: 'nps12Month', label: 'بعد 12 شهر' }
+];
+
+// تصنيف درجة الـ NPS (0-10)
+window.EMC.npsCategory = function (score) {
+  if (score == null || score === '') return null;
+  const n = Number(score);
+  if (n >= 9) return { label: 'مروّج',  color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD' };
+  if (n >= 7) return { label: 'محايد',  color: '#8C5915', bg: '#FAEEDB', border: '#ECD3A6' };
+  return { label: 'منتقد', color: '#A2202D', bg: '#FBE0E2', border: '#F1B6BB' };
+};
+
 // ─── Helpers ───
 window.EMC.utils = {
   getStage(id) {
