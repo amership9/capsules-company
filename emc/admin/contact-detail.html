@@ -430,6 +430,9 @@
     <!-- [7A] Proposal panel — يظهر فقط للمرحلة 7 -->
     <div id="proposal-panel"></div>
 
+    <!-- [8B] Negotiation panel — يظهر فقط للمرحلة 8 -->
+    <div id="negotiation-panel"></div>
+
     <!-- Quick stats -->
     <div class="grid-4" style="margin-bottom: 22px;">
       <div class="stat-card accent-navy">
@@ -1211,6 +1214,276 @@
     });
   })();
 
+
+  // ─── [8B] لوحة التفاوض (المرحلة 8) ───
+  (async function setupNegotiationPanel() {
+    const panel = document.getElementById('negotiation-panel');
+    if (!panel) return;
+    if (c.currentStage !== 8) return;
+
+    const OBJ = EMC.NEGOTIATION_OBJECTIONS || {};
+    const OBJ_ST = EMC.OBJECTION_STATUS || {};
+    const NEG_ST = EMC.NEGOTIATION_STATUS || {};
+
+    const nego = c.negotiation || {};
+    const objections = Array.isArray(nego.objections) ? nego.objections : [];
+    const negStatus = nego.status || 'active';
+    const ns = NEG_ST[negStatus] || NEG_ST.active;
+
+    // عدّاد الاعتراضات حسب الحالة
+    const openCount = objections.filter(o => (o.status || 'open') === 'open').length;
+    const resolvedCount = objections.filter(o => o.status === 'resolved').length;
+
+    // كتلة المعلومات العلوية (الحالة + التاريخ المتوقع)
+    const expectedDate = nego.expectedDecisionDate
+      ? EMC.utils.formatDate(nego.expectedDecisionDate)
+      : '';
+
+    // بناء قائمة الاعتراضات المسجّلة
+    let objectionsHtml = '';
+    if (objections.length) {
+      objectionsHtml = objections.map((o, idx) => {
+        const def = OBJ[o.type] || { label: o.type, icon: '•', signal: '', responses: [] };
+        const st = OBJ_ST[o.status || 'open'] || OBJ_ST.open;
+        return `
+          <div style="border:1px solid var(--emc-line); border-radius:12px; padding:16px; margin-bottom:12px; background:#fff;">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:18px;">${def.icon}</span>
+                <span style="font-weight:800; color:var(--emc-navy); font-size:14.5px;">${def.label}</span>
+              </div>
+              <span class="badge" style="background:${st.bg}; color:${st.color}; border-color:${st.border};">${st.label}</span>
+            </div>
+            ${def.signal ? `<div style="font-size:12.5px; color:var(--emc-ink-2); line-height:1.6; padding:10px 12px; background:var(--emc-cream); border-radius:8px; border-inline-start:3px solid var(--emc-gold); margin-bottom:10px;"><strong>الإشارة:</strong> ${def.signal}</div>` : ''}
+            ${(def.responses || []).length ? `
+              <div style="font-size:11.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--emc-muted); font-weight:700; margin-bottom:6px;">ردود جاهزة</div>
+              <ul style="margin:0 0 10px; padding-inline-start:20px; color:var(--emc-ink-2); font-size:13px; line-height:1.7;">
+                ${def.responses.map(r => `<li>${r}</li>`).join('')}
+              </ul>` : ''}
+            ${o.stakeholder ? `<div style="font-size:12px; color:var(--emc-muted); margin-bottom:10px;">👥 بيناقش جواه: <strong style="color:var(--emc-ink);">${o.stakeholder}</strong></div>` : ''}
+            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; padding-top:10px; border-top:1px solid var(--emc-line-soft);">
+              <span style="font-size:11.5px; color:var(--emc-muted);">حدّث الحالة:</span>
+              ${Object.entries(OBJ_ST).map(([k, v]) =>
+                `<button class="btn btn-ghost btn-sm nego-obj-status" data-idx="${idx}" data-status="${k}" style="padding:3px 10px; font-size:11.5px; ${(o.status||'open')===k ? 'background:'+v.bg+'; color:'+v.color+'; border:1px solid '+v.border+';' : ''}">${v.label}</button>`
+              ).join('')}
+              <button class="btn btn-ghost btn-sm nego-obj-remove" data-idx="${idx}" style="padding:3px 10px; font-size:11.5px; color:var(--emc-red); margin-inline-start:auto;">حذف</button>
+            </div>
+          </div>`;
+      }).join('');
+    } else {
+      objectionsHtml = `
+        <div style="text-align:center; padding:24px; background:var(--emc-cream); border:1px dashed var(--emc-line); border-radius:12px;">
+          <div style="font-size:13.5px; color:var(--emc-muted); margin-bottom:4px;">لسه ما اتسجّلش أي اعتراض</div>
+          <div style="font-size:12px; color:var(--emc-faint);">كل ما يظهر اعتراض في التفاوض، سجّله هنا عشان يكون قدامك بالرد الجاهز.</div>
+        </div>`;
+    }
+
+    panel.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:22px; border-color:var(--emc-navy-soft);">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:4px; height:20px; background:var(--emc-navy-soft); border-radius:2px;"></span>
+            <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">غرفة التفاوض</h3>
+            <span class="badge" style="background:${ns.bg}; color:${ns.color}; border-color:${ns.border};">${ns.label}</span>
+          </div>
+          <button class="btn btn-primary btn-sm" id="nego-add-btn">➕ سجّل اعتراض</button>
+        </div>
+
+        <!-- شريط ملخص -->
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px;">
+          <div style="text-align:center; padding:12px; background:var(--emc-cream); border-radius:10px;">
+            <div style="font-size:22px; font-weight:800; color:var(--emc-navy);">${objections.length}</div>
+            <div style="font-size:11.5px; color:var(--emc-muted);">إجمالي الاعتراضات</div>
+          </div>
+          <div style="text-align:center; padding:12px; background:var(--emc-cream); border-radius:10px;">
+            <div style="font-size:22px; font-weight:800; color:${openCount ? 'var(--emc-red)' : 'var(--emc-success)'};">${openCount}</div>
+            <div style="font-size:11.5px; color:var(--emc-muted);">مفتوحة</div>
+          </div>
+          <div style="text-align:center; padding:12px; background:var(--emc-cream); border-radius:10px;">
+            <div style="font-size:22px; font-weight:800; color:var(--emc-success);">${resolvedCount}</div>
+            <div style="font-size:11.5px; color:var(--emc-muted);">اطمأن لها</div>
+          </div>
+        </div>
+
+        <!-- التحكم في الحالة العامة + التاريخ المتوقع -->
+        <div class="field-row" style="margin-bottom:18px;">
+          <div class="field" style="margin-bottom:0;">
+            <label class="field-label">الحالة العامة للتفاوض</label>
+            <select class="select" id="nego-status-select">
+              ${Object.entries(NEG_ST).map(([k, v]) => `<option value="${k}" ${negStatus === k ? 'selected' : ''}>${v.label}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label class="field-label">التاريخ المتوقع للقرار</label>
+            <input class="input" type="date" id="nego-date" value="${(nego.expectedDecisionDate || '').slice(0,10)}" />
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          ${objectionsHtml}
+        </div>
+
+        <!-- النقل للقرار -->
+        <div style="display:flex; gap:8px; flex-wrap:wrap; padding-top:16px; border-top:1px solid var(--emc-line-soft);">
+          <button class="btn btn-accent btn-sm" id="nego-won-btn">✓ تم الإغلاق (Won) — المرحلة 9</button>
+          <button class="btn btn-outline btn-sm" id="nego-lost-btn" style="color:var(--emc-red);">✕ خسارة الفرصة (Lost)</button>
+        </div>
+      </div>`;
+
+    // ── حفظ تحديثات الحالة العامة (status + date) ──
+    async function patchNegotiation(extra = {}) {
+      const newNego = {
+        ...(c.negotiation || {}),
+        status: document.getElementById('nego-status-select').value,
+        expectedDecisionDate: document.getElementById('nego-date').value || null,
+        objections: (c.negotiation?.objections) || [],
+        ...extra
+      };
+      await EMC.contacts.update(id, { negotiation: newNego });
+      c.negotiation = newNego;
+    }
+
+    document.getElementById('nego-status-select').addEventListener('change', async () => {
+      try { await patchNegotiation(); EMC.utils.toast('تم تحديث حالة التفاوض', 'success'); }
+      catch (e) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+    });
+    document.getElementById('nego-date').addEventListener('change', async () => {
+      try { await patchNegotiation(); EMC.utils.toast('تم تحديث التاريخ المتوقع', 'success'); }
+      catch (e) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+    });
+
+    // ── الـ Modal: سجّل اعتراض ──
+    const negoModal = document.getElementById('nego-modal');
+    let pickedType = '';
+
+    // ابنِ خيارات الاعتراضات
+    const typeGroup = document.getElementById('nego-type-group');
+    typeGroup.innerHTML = Object.entries(OBJ).map(([k, v]) => `
+      <label class="chip-check" data-type="${k}" style="justify-content:flex-start; width:100%; border-radius:10px; padding:11px 14px;">
+        <input type="radio" name="negoType" value="${k}" /> ${v.icon} ${v.label}
+      </label>`).join('');
+
+    function renderPlaybook(type) {
+      const def = OBJ[type];
+      const box = document.getElementById('nego-playbook');
+      if (!def) { box.style.display = 'none'; return; }
+      box.style.display = 'block';
+      box.innerHTML = `
+        <div style="padding:14px 16px; background:linear-gradient(135deg,#F7FAFF,#EEF4FB); border:1px solid var(--emc-line); border-radius:12px;">
+          ${def.signal ? `<div style="font-size:12.5px; color:var(--emc-ink-2); line-height:1.6; margin-bottom:10px;"><strong>الإشارة:</strong> ${def.signal}</div>` : ''}
+          <div style="font-size:11.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--emc-muted); font-weight:700; margin-bottom:6px;">ردود جاهزة</div>
+          <ul style="margin:0; padding-inline-start:20px; color:var(--emc-ink-2); font-size:13px; line-height:1.7;">
+            ${(def.responses || []).map(r => `<li>${r}</li>`).join('')}
+          </ul>
+        </div>`;
+    }
+
+    typeGroup.querySelectorAll('.chip-check').forEach(chip => {
+      chip.addEventListener('click', () => {
+        typeGroup.querySelectorAll('.chip-check').forEach(x => x.classList.remove('checked'));
+        chip.classList.add('checked');
+        chip.querySelector('input').checked = true;
+        pickedType = chip.dataset.type;
+        renderPlaybook(pickedType);
+      });
+    });
+
+    function openNego() {
+      pickedType = '';
+      typeGroup.querySelectorAll('.chip-check').forEach(x => x.classList.remove('checked'));
+      typeGroup.querySelectorAll('input').forEach(i => i.checked = false);
+      document.getElementById('nego-playbook').style.display = 'none';
+      negoModal.querySelector('[name="negoStakeholder"]').value = '';
+      negoModal.style.display = 'flex';
+    }
+    document.getElementById('nego-add-btn').addEventListener('click', openNego);
+    document.getElementById('nego-cancel').addEventListener('click', () => negoModal.style.display = 'none');
+    negoModal.addEventListener('click', (e) => { if (e.target === negoModal) negoModal.style.display = 'none'; });
+
+    document.getElementById('nego-save').addEventListener('click', async () => {
+      if (!pickedType) { EMC.utils.toast('اختار نوع الاعتراض', 'error'); return; }
+      const btn = document.getElementById('nego-save');
+      btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+      try {
+        const newObjection = {
+          type: pickedType,
+          status: 'open',
+          stakeholder: negoModal.querySelector('[name="negoStakeholder"]').value.trim(),
+          raisedAt: new Date().toISOString()
+        };
+        const existingObjections = (c.negotiation?.objections) || [];
+        const newNego = {
+          ...(c.negotiation || {}),
+          status: c.negotiation?.status || 'active',
+          objections: [...existingObjections, newObjection]
+        };
+        await EMC.contacts.update(id, { negotiation: newNego });
+        if (EMC.events?.log) {
+          await EMC.events.log({ contactId: id, type: 'manual_note', stage: 8, channel: 'manual', data: { action: 'objection_logged', objectionType: pickedType } });
+        }
+        EMC.utils.toast('تم تسجيل الاعتراض', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) {
+        EMC.utils.toast('خطأ: ' + (e.message || ''), 'error');
+        btn.disabled = false; btn.textContent = 'حفظ الاعتراض';
+      }
+    });
+
+    // ── تحديث حالة اعتراض / حذفه (event delegation) ──
+    panel.addEventListener('click', async (e) => {
+      const stBtn = e.target.closest('.nego-obj-status');
+      const rmBtn = e.target.closest('.nego-obj-remove');
+
+      if (stBtn) {
+        const idx = parseInt(stBtn.dataset.idx);
+        const newStatus = stBtn.dataset.status;
+        const objs = [...((c.negotiation?.objections) || [])];
+        if (!objs[idx]) return;
+        objs[idx] = { ...objs[idx], status: newStatus };
+        try {
+          await EMC.contacts.update(id, { negotiation: { ...(c.negotiation || {}), objections: objs } });
+          c.negotiation = { ...(c.negotiation || {}), objections: objs };
+          EMC.utils.toast('تم تحديث حالة الاعتراض', 'success');
+          setTimeout(() => window.location.reload(), 500);
+        } catch (err) { EMC.utils.toast('خطأ في التحديث', 'error'); }
+      }
+
+      if (rmBtn) {
+        const idx = parseInt(rmBtn.dataset.idx);
+        if (!confirm('حذف الاعتراض ده؟')) return;
+        const objs = [...((c.negotiation?.objections) || [])];
+        objs.splice(idx, 1);
+        try {
+          await EMC.contacts.update(id, { negotiation: { ...(c.negotiation || {}), objections: objs } });
+          c.negotiation = { ...(c.negotiation || {}), objections: objs };
+          EMC.utils.toast('تم حذف الاعتراض', 'success');
+          setTimeout(() => window.location.reload(), 500);
+        } catch (err) { EMC.utils.toast('خطأ في الحذف', 'error'); }
+      }
+    });
+
+    // ── النقل للمرحلة 9 (Won / Lost) ──
+    document.getElementById('nego-won-btn').addEventListener('click', async () => {
+      if (!confirm(`تأكيد إغلاق صفقة ${c.identity.fullName} كـ "Won" ونقلها للمرحلة 9 (القرار)؟`)) return;
+      try {
+        await EMC.contacts.update(id, { negotiation: { ...(c.negotiation || {}), status: 'leaning_yes', outcome: 'won', outcomeAt: new Date().toISOString() } });
+        await EMC.contacts.moveToStage(id, 9, 'إغلاق التفاوض: Won — للقرار');
+        EMC.utils.toast('تم النقل للقرار (Won)', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
+    });
+
+    document.getElementById('nego-lost-btn').addEventListener('click', async () => {
+      if (!confirm(`تأكيد خسارة فرصة ${c.identity.fullName} (Lost) ونقلها للمرحلة 9 (القرار)؟`)) return;
+      try {
+        await EMC.contacts.update(id, { negotiation: { ...(c.negotiation || {}), status: 'leaning_no', outcome: 'lost', outcomeAt: new Date().toISOString() } });
+        await EMC.contacts.moveToStage(id, 9, 'إغلاق التفاوض: Lost — للقرار');
+        EMC.utils.toast('تم النقل للقرار (Lost)', 'default');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
+    });
+  })();
+  
   // ─── [5C] محرر بيانات الفرصة ───
   (function setupOppEditor() {
     const modal = document.getElementById('opp-modal');
