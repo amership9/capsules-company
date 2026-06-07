@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>عرضك الرسمي · Executive Mastery Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<link rel="stylesheet" href="lp-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="tracker.js"></script>
+<style>
+  .po-shell { max-width: 760px; margin: 0 auto; padding: 0 24px 64px; }
+
+  .po-hero {
+    text-align: center; padding: 52px 24px 38px;
+    background: linear-gradient(180deg, var(--emc-navy-deep, var(--emc-navy)) 0%, var(--emc-navy) 100%);
+    color: #fff; position: relative; overflow: hidden;
+  }
+  .po-hero::before {
+    content: ""; position: absolute; top: -60px; left: -80px; width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(201, 169, 97, 0.18), transparent 60%); filter: blur(22px);
+  }
+  .po-hero-eyebrow {
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--emc-gold); font-weight: 700; margin-bottom: 10px; position: relative; z-index: 1;
+  }
+  .po-hero h1 { font-size: 30px; font-weight: 800; margin: 0 0 12px; position: relative; z-index: 1; line-height: 1.3; }
+  .po-hero p { font-size: 14.5px; color: rgba(255,255,255,0.82); max-width: 540px; margin: 0 auto; line-height: 1.7; position: relative; z-index: 1; }
+  .po-validity {
+    position: relative; z-index: 1; display: inline-block; margin-top: 18px;
+    padding: 7px 16px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 99px; font-size: 12.5px; color: rgba(255,255,255,0.9);
+  }
+  .po-validity.expired { background: rgba(215,38,56,0.2); border-color: rgba(215,38,56,0.4); color: #FFD9DD; }
+
+  .po-card {
+    background: #fff; border: 1px solid var(--emc-line); border-radius: 16px;
+    margin-top: 28px; overflow: hidden; box-shadow: 0 8px 24px rgba(11, 37, 69, 0.06); padding: 30px 28px;
+  }
+  .po-section-title {
+    font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--emc-muted); font-weight: 700; margin-bottom: 12px;
+  }
+  .po-diagnosis {
+    font-size: 15px; color: var(--emc-ink); line-height: 1.85;
+    padding: 18px 20px; background: linear-gradient(135deg,#FBFAF6,#F5F1E8);
+    border: 1px solid var(--emc-line); border-radius: 12px; border-inline-start: 4px solid var(--emc-gold);
+  }
+
+  /* السعر الواحد */
+  .po-single-price {
+    text-align: center; padding: 26px; background: var(--emc-cream); border-radius: 14px; margin-top: 10px;
+  }
+  .po-single-price .num { font-size: 40px; font-weight: 800; color: var(--emc-navy); line-height: 1; }
+  .po-single-price .inst { font-size: 13px; color: var(--emc-ink-2); margin-top: 12px; }
+
+  /* الباقات */
+  .po-tiers { display: grid; gap: 16px; margin-top: 10px; }
+  @media (min-width: 600px) { .po-tiers.cols-2 { grid-template-columns: 1fr 1fr; } .po-tiers.cols-3 { grid-template-columns: 1fr 1fr 1fr; } }
+  .po-tier {
+    border: 1px solid var(--emc-line); border-radius: 14px; padding: 22px 20px; background: #fff; position: relative;
+    display: flex; flex-direction: column;
+  }
+  .po-tier.featured { border-color: var(--emc-gold); border-width: 2px; box-shadow: 0 8px 24px rgba(201,169,97,0.18); }
+  .po-tier-badge {
+    position: absolute; top: -11px; inset-inline-start: 50%; transform: translateX(50%);
+    background: var(--emc-gold); color: var(--emc-navy); font-size: 11px; font-weight: 800;
+    padding: 3px 14px; border-radius: 99px; white-space: nowrap;
+  }
+  .po-tier-name { font-size: 16px; font-weight: 800; color: var(--emc-navy); margin-bottom: 6px; }
+  .po-tier-price { font-size: 28px; font-weight: 800; color: var(--emc-navy); line-height: 1; margin-bottom: 4px; }
+  .po-tier-duration { font-size: 12px; color: var(--emc-muted); margin-bottom: 14px; }
+  .po-tier-features { list-style: none; padding: 0; margin: 0; flex: 1; }
+  .po-tier-features li {
+    font-size: 13.5px; color: var(--emc-ink-2); line-height: 1.6; padding-inline-start: 24px;
+    position: relative; margin-bottom: 9px;
+  }
+  .po-tier-features li::before {
+    content: "✓"; position: absolute; inset-inline-start: 0; color: var(--emc-success, #2E7D5B); font-weight: 800;
+  }
+
+  .po-inst-note {
+    margin-top: 16px; padding: 12px 16px; background: rgba(11,37,69,0.04);
+    border-radius: 10px; font-size: 13px; color: var(--emc-ink-2); text-align: center;
+  }
+
+  /* القبول */
+  .po-accept-zone { text-align: center; padding: 30px 24px 8px; }
+  .po-accept-btn {
+    width: 100%; max-width: 420px; height: 56px; background: var(--emc-gold); color: var(--emc-navy);
+    border: 0; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer;
+    transition: background 0.15s; font-family: inherit;
+  }
+  .po-accept-btn:hover:not(:disabled) { background: #B89538; }
+  .po-accept-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .po-accept-note { font-size: 12px; color: var(--emc-faint); margin-top: 12px; }
+  .po-wa-contact {
+    display: inline-flex; align-items: center; gap: 8px; background: #25D366; color: #fff;
+    padding: 13px 26px; border-radius: 10px; font-size: 15px; font-weight: 700; text-decoration: none; transition: background 0.15s;
+  }
+  .po-wa-contact:hover { background: #1FA851; }
+
+  /* Success / states */
+  .po-state { display: none; text-align: center; padding: 24px 0; }
+  .po-state.active { display: block; }
+  .po-state-check {
+    width: 76px; height: 76px; margin: 0 auto 18px; border-radius: 50%; display: grid; place-items: center;
+    animation: poPop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .po-state-check.ok { background: #E1F1E8; color: var(--emc-success, #2E7D5B); }
+  @keyframes poPop { 0% { transform: scale(0); } 60% { transform: scale(1.1); } 100% { transform: scale(1); } }
+  .po-state h3 { color: var(--emc-navy); font-size: 23px; font-weight: 800; margin: 0 0 10px; }
+  .po-state p { color: var(--emc-ink-2); font-size: 15px; line-height: 1.7; max-width: 460px; margin: 0 auto; }
+
+  .po-error-state { display: none; text-align: center; padding: 44px 24px; }
+  .po-error-state.active { display: block; }
+  .po-error-state .icon { width: 56px; height: 56px; margin: 0 auto 16px; color: var(--emc-faint); }
+  .po-error-state h3 { color: var(--emc-navy); font-size: 20px; font-weight: 800; margin: 0 0 8px; }
+  .po-error-state p { color: var(--emc-muted); font-size: 14px; line-height: 1.7; max-width: 400px; margin: 0 auto; }
+</style>
+</head>
+<body class="lp-shell" data-landing-page="proposal" data-screen-label="LP proposal">
+
+<nav class="lp-nav">
+  <div class="lp-nav-brand">
+    <div class="lp-nav-brand-mark">
+      <svg width="100%" height="100%" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="18" width="32" height="7" rx="1" fill="#0B2545"/>
+        <rect x="14" y="31" width="36" height="6" rx="1" fill="#D72638"/>
+        <line x1="18" y1="25" x2="14" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="46" y1="25" x2="50" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="46" y2="25" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
+      <div class="lp-nav-brand-sub">العرض الرسمي</div>
+    </div>
+  </div>
+</nav>
+
+<section class="po-hero">
+  <div class="po-hero-eyebrow">عرض مخصّص</div>
+  <h1 id="po-title">عرضك الرسمي</h1>
+  <p id="po-subtitle">عرض مبني على تشخيص وضع شركتك تحديداً — مش قالب جاهز.</p>
+  <div class="po-validity" id="po-validity" style="display:none;"></div>
+</section>
+
+<div class="po-shell">
+
+  <!-- Error state: no valid id / no proposal -->
+  <div class="po-card po-error-state" id="po-error">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <h3>العرض ده مش متاح</h3>
+    <p>يبدو إن الرابط ناقص أو إن العرض لسه ما اتجهّزش. تواصل مع عبدالله على واتساب وهيبعتلك اللينك الصح.</p>
+  </div>
+
+  <!-- Proposal body -->
+  <div id="po-body" style="display:none;">
+    <div class="po-card">
+      <div class="po-section-title">التشخيص</div>
+      <div class="po-diagnosis" id="po-diagnosis">—</div>
+
+      <div style="margin-top:28px;">
+        <div class="po-section-title">الاستثمار</div>
+        <div id="po-pricing"></div>
+        <div class="po-inst-note" id="po-installment" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Accept zone -->
+    <div class="po-card" id="po-accept-card">
+      <div class="po-accept-zone" id="po-accept-zone"></div>
+    </div>
+  </div>
+
+  <!-- Accepted state -->
+  <div class="po-card po-state" id="po-accepted">
+    <div class="po-state-check ok">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3>وصلتنا موافقتك ✓</h3>
+    <p id="po-accepted-msg">عبدالله هيتواصل معاك قريب لإتمام التفاصيل وخطوة الدفع. أهلاً بيك في الطريق.</p>
+  </div>
+
+</div>
+
+<footer class="lp-footer">
+  <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  let contactId = null;
+  let contact = null;
+
+  const errEl = document.getElementById('po-error');
+  const bodyEl = document.getElementById('po-body');
+  const acceptedEl = document.getElementById('po-accepted');
+
+  const CUR = { EGP: 'جنيه', USD: 'دولار', SAR: 'ريال', AED: 'درهم' };
+  const money = (n, cur) => (n ? Number(n).toLocaleString('en-US') + ' ' + (CUR[cur] || cur || 'جنيه') : '—');
+
+  function showError() { errEl.classList.add('active'); }
+
+  (async function init() {
+    const params = new URLSearchParams(window.location.search);
+    contactId = params.get('id');
+    if (!contactId) { showError(); return; }
+
+    try { contact = await EMC.contacts.get(contactId); } catch (e) { contact = null; }
+    if (!contact || !contact.proposal || !contact.proposal.savedAt) { showError(); return; }
+
+    const p = contact.proposal;
+    const fn = contact.identity?.firstName || (contact.identity?.fullName || '').split(/\s+/)[0] || '';
+    const company = contact.identity?.companyName || 'شركتك';
+
+    if (fn) document.getElementById('po-title').textContent = `${fn}، ده عرضك الرسمي`;
+
+    // لو مقبول بالفعل → اعرض شاشة الموافقة مباشرة
+    if (p.status === 'accepted') { acceptedEl.classList.add('active'); return; }
+
+    // ── الصلاحية ──
+    let expired = false;
+    if (p.savedAt && p.validityDays) {
+      const exp = new Date(new Date(p.savedAt).getTime() + p.validityDays * 86400000);
+      const daysLeft = Math.ceil((exp - Date.now()) / 86400000);
+      const vEl = document.getElementById('po-validity');
+      vEl.style.display = 'inline-block';
+      if (daysLeft > 0) {
+        vEl.textContent = `صالح لمدة ${daysLeft} يوم`;
+      } else {
+        expired = true;
+        vEl.textContent = 'انتهت صلاحية هذا العرض — تواصل مع عبدالله';
+        vEl.classList.add('expired');
+      }
+    }
+
+    // ── التشخيص ──
+    const ceiling = contact.eosProfile?.ceiling ? (EMC.CEILINGS[contact.eosProfile.ceiling] || '') : '';
+    const comp = contact.eosProfile?.primaryComponent ? (EMC.EOS_COMPONENTS[contact.eosProfile.primaryComponent] || '') : '';
+    const dir = contact.discovery?.solutionDirection || '';
+    const diagParts = [];
+    if (ceiling) diagParts.push(`بناءً على تشخيصنا، السقف الأساسي اللي بيواجه ${company} هو <strong>${ceiling}</strong>.`);
+    if (comp) diagParts.push(`المكوّن اللي محتاج أعلى تركيز دلوقتي هو <strong>${comp}</strong>.`);
+    if (dir) diagParts.push(`المسار اللي هنبدأ بيه: ${dir}.`);
+    if (!diagParts.length) diagParts.push('برنامج EOS المكثّف مصمّم لتثبيت المكوّنات الستة في شركتك خطوة بخطوة.');
+    document.getElementById('po-diagnosis').innerHTML = diagParts.join(' ');
+
+    // ── التسعير ──
+    const pricingEl = document.getElementById('po-pricing');
+    if (p.pricingMode === 'tiers' && (p.tiers || []).length) {
+      const n = p.tiers.length;
+      pricingEl.innerHTML = `<div class="po-tiers cols-${Math.min(n, 3)}">
+        ${p.tiers.map(t => `
+          <div class="po-tier ${t.featured ? 'featured' : ''}">
+            ${t.featured ? '<span class="po-tier-badge">الأكثر اختياراً</span>' : ''}
+            <div class="po-tier-name">${t.name || 'باقة'}</div>
+            <div class="po-tier-price">${money(t.price, p.currency)}</div>
+            ${t.duration ? `<div class="po-tier-duration">${t.duration}</div>` : ''}
+            ${(t.features || []).length ? `<ul class="po-tier-features">${t.features.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
+          </div>`).join('')}
+      </div>`;
+    } else {
+      pricingEl.innerHTML = `<div class="po-single-price"><div class="num">${money(p.singlePrice, p.currency)}</div></div>`;
+    }
+
+    if (p.installmentsEnabled && p.installmentDetails) {
+      const iEl = document.getElementById('po-installment');
+      iEl.style.display = 'block';
+      iEl.textContent = '💳 ' + p.installmentDetails;
+    }
+
+    // ── منطقة القبول ──
+    const zone = document.getElementById('po-accept-zone');
+    const digits = (contact.channels?.whatsapp || contact.channels?.mobile || '').replace(/\D/g, '');
+    const waNum = digits ? (digits.startsWith('20') ? digits : (digits.startsWith('0') ? '2' + digits : '2' + digits)) : '';
+    const waMsg = encodeURIComponent(`أهلاً عبدالله، اطّلعت على العرض وعايز نكمّل.`);
+    const waLink = waNum ? `https://wa.me/${waNum}?text=${waMsg}` : '';
+
+    if (expired) {
+      zone.innerHTML = waLink
+        ? `<p style="color:var(--emc-ink-2); margin-bottom:18px;">انتهت صلاحية العرض، بس لسه نقدر نكمّل — كلّم عبدالله:</p><a href="${waLink}" target="_blank" class="po-wa-contact">💬 تواصل مع عبدالله</a>`
+        : `<p style="color:var(--emc-ink-2);">انتهت صلاحية العرض — تواصل مع عبدالله لتجديده.</p>`;
+    } else if (p.allowSelfAccept !== false) {
+      zone.innerHTML = `
+        <button class="po-accept-btn" id="po-accept-btn">أوافق وأكمل ✓</button>
+        <div class="po-accept-note">بالضغط، بتأكد موافقتك المبدئية — وعبدالله هيتواصل معاك لإتمام التفاصيل.</div>`;
+      document.getElementById('po-accept-btn').addEventListener('click', onAccept);
+    } else {
+      zone.innerHTML = waLink
+        ? `<p style="color:var(--emc-ink-2); margin-bottom:18px;">للموافقة وإتمام التفاصيل، تواصل مع عبدالله مباشرة:</p><a href="${waLink}" target="_blank" class="po-wa-contact">💬 تواصل مع عبدالله للموافقة</a>`
+        : `<p style="color:var(--emc-ink-2);">للموافقة، تواصل مع عبدالله مباشرة.</p>`;
+    }
+
+    bodyEl.style.display = 'block';
+
+    // علّم العرض كـ "اتشاف" لو لسه مُرسَل (مرة واحدة، بصمت)
+    if (p.status === 'sent' && window.EMC_LP && window.EMC_LP.markProposalViewed) {
+      window.EMC_LP.markProposalViewed(contactId).catch(() => {});
+    }
+  })();
+
+  async function onAccept() {
+    const btn = document.getElementById('po-accept-btn');
+    btn.disabled = true; btn.textContent = 'جاري التأكيد…';
+
+    if (!window.EMC_LP || !window.EMC_LP.submitProposalResponse) {
+      btn.disabled = false; btn.textContent = 'أوافق وأكمل ✓';
+      alert('النظام لسه بيحمّل، حاول بعد ثانيتين');
+      return;
+    }
+
+    const result = await window.EMC_LP.submitProposalResponse({ contactId, response: 'accepted' });
+    if (result.success) {
+      bodyEl.style.display = 'none';
+      acceptedEl.classList.add('active');
+    } else {
+      btn.disabled = false; btn.textContent = 'أوافق وأكمل ✓';
+      alert('حدث خطأ: ' + (result.error || 'حاول مرة أخرى'));
+    }
+  }
+})();
+</script>
+
+</body>
+</html>
