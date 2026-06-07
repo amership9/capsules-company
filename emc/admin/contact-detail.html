@@ -444,6 +444,9 @@
 
     <!-- [12B] Implementation panel — يظهر فقط للمرحلة 12 -->
     <div id="implementation-panel"></div>
+
+    <!-- [13B] Alumni panel — يظهر فقط للمرحلة 13 -->
+    <div id="alumni-panel"></div>
     
 
     <!-- Quick stats -->
@@ -1227,6 +1230,143 @@
     });
   })();
 
+
+  // ─── [13B] لوحة الخريجين (المرحلة 13 — Alumni) ───
+  (async function setupAlumniPanel() {
+    const panel = document.getElementById('alumni-panel');
+    if (!panel) return;
+    if (c.currentStage !== 13) return;
+
+    const TST = EMC.TESTIMONIAL_STATUS || {};
+    const NPS_PERIODS = EMC.NPS_PERIODS || [];
+
+    const out = c.outcomes || {};
+    const testimonialStatus = out.testimonialStatus || 'not_requested';
+    const ts = TST[testimonialStatus] || TST.not_requested;
+
+    // ── بناء حقول الـ NPS ──
+    const npsHtml = NPS_PERIODS.map(p => {
+      const score = out[p.key];
+      const cat = EMC.npsCategory(score);
+      return `
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <span style="font-size:12.5px; color:var(--emc-ink); min-width:90px;">${p.label}</span>
+          <input class="input alum-nps" data-key="${p.key}" type="number" min="0" max="10" value="${score ?? ''}" placeholder="0-10" style="max-width:90px; font-size:13px;" />
+          ${cat ? `<span class="badge" style="background:${cat.bg}; color:${cat.color}; border-color:${cat.border};">${cat.label}</span>` : `<span style="font-size:11.5px; color:var(--emc-faint);">لسه</span>`}
+        </div>`;
+    }).join('');
+
+    panel.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:22px; border-color:var(--emc-navy-soft);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+          <span style="width:4px; height:20px; background:var(--emc-navy-soft); border-radius:2px;"></span>
+          <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">ملف الخريج</h3>
+          <span class="badge" style="background:#E1F1E8; color:#1E5C42; border-color:#BFE0CD;">🎓 خريج</span>
+        </div>
+
+        <!-- النتائج: قبل / بعد -->
+        <div style="margin-bottom:22px;">
+          <div style="font-size:13px; font-weight:700; color:var(--emc-ink); margin-bottom:12px;">النتائج المحقّقة</div>
+          <div class="field"><label class="field-label">ملخص النتيجة</label>
+            <textarea class="input" id="alum-narrative" rows="3" placeholder="إيه اللي اتغيّر في الشركة بعد البرنامج؟ (قصة النجاح)">${out.resultsNarrative || ''}</textarea></div>
+          <div class="field-row">
+            <div class="field" style="margin-bottom:0;"><label class="field-label">مؤشر قبل</label>
+              <input class="input" id="alum-before" value="${out.metricsBefore?.summary || ''}" placeholder="مثلاً: إيراد 12 مليون / 70 ساعة عمل" /></div>
+            <div class="field" style="margin-bottom:0;"><label class="field-label">مؤشر بعد</label>
+              <input class="input" id="alum-after" value="${out.metricsAfter?.summary || ''}" placeholder="مثلاً: إيراد 15 مليون / 45 ساعة عمل" /></div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="alum-save-results" style="margin-top:14px;">حفظ النتائج</button>
+        </div>
+
+        <!-- قياس الرضا NPS -->
+        <div style="margin-bottom:22px; padding-top:18px; border-top:1px solid var(--emc-line-soft);">
+          <div style="font-size:13px; font-weight:700; color:var(--emc-ink); margin-bottom:12px;">قياس الرضا (NPS) — درجة من 0 لـ 10</div>
+          ${npsHtml}
+        </div>
+
+        <!-- الشهادة -->
+        <div style="margin-bottom:18px; padding-top:18px; border-top:1px solid var(--emc-line-soft);">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+            <span style="font-size:13px; font-weight:700; color:var(--emc-ink);">الشهادة / الحالة الدراسية</span>
+            <span class="badge" style="background:${ts.bg}; color:${ts.color}; border-color:${ts.border};">${ts.label}</span>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+            ${Object.entries(TST).map(([k, v]) =>
+              `<button class="btn btn-ghost btn-sm alum-tst" data-val="${k}" style="padding:4px 12px; font-size:12px; ${testimonialStatus === k ? 'background:'+v.bg+'; color:'+v.color+'; border:1px solid '+v.border+';' : ''}">${v.label}</button>`
+            ).join('')}
+          </div>
+          ${testimonialStatus === 'received' ? `
+            <div class="field" style="margin-bottom:0;"><label class="field-label">نص الشهادة</label>
+              <textarea class="input" id="alum-testimonial" rows="3" placeholder="نص شهادة الخريج…">${out.testimonialContent || ''}</textarea>
+              <button class="btn btn-primary btn-sm" id="alum-save-testimonial" style="margin-top:10px;">حفظ نص الشهادة</button>
+            </div>` : ''}
+        </div>
+
+        <!-- زر الانتقال -->
+        <div style="padding-top:16px; border-top:1px solid var(--emc-line-soft);">
+          <button class="btn btn-accent btn-sm" id="alum-advance-btn">🤝 ترقية لسفير — المرحلة 14</button>
+          <span style="font-size:11.5px; color:var(--emc-muted); margin-inline-start:10px;">الخريج الراضي = مصدر إحالات</span>
+        </div>
+      </div>`;
+
+    // ── حفظ عام للـ outcomes ──
+    async function patchOutcomes(patch) {
+      const newOut = { ...(c.outcomes || {}), ...patch };
+      await EMC.contacts.update(id, { outcomes: newOut });
+      c.outcomes = newOut;
+    }
+
+    // ── حفظ النتائج ──
+    document.getElementById('alum-save-results').addEventListener('click', async () => {
+      try {
+        await patchOutcomes({
+          resultsNarrative: document.getElementById('alum-narrative').value.trim(),
+          metricsBefore: { ...(c.outcomes?.metricsBefore || {}), summary: document.getElementById('alum-before').value.trim() },
+          metricsAfter: { ...(c.outcomes?.metricsAfter || {}), summary: document.getElementById('alum-after').value.trim() }
+        });
+        EMC.utils.toast('تم حفظ النتائج', 'success');
+      } catch (e) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+    });
+
+    // ── حفظ درجة NPS (عند الخروج من الحقل) ──
+    panel.querySelectorAll('.alum-nps').forEach(inp => {
+      inp.addEventListener('blur', async () => {
+        const key = inp.dataset.key;
+        const val = inp.value === '' ? null : Number(inp.value);
+        if ((c.outcomes?.[key] ?? null) === val) return;
+        try { await patchOutcomes({ [key]: val }); window.location.reload(); }
+        catch (e) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+      });
+    });
+
+    // ── تغيير حالة الشهادة ──
+    panel.querySelectorAll('.alum-tst').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try { await patchOutcomes({ testimonialStatus: btn.dataset.val }); window.location.reload(); }
+        catch (e) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+      });
+    });
+
+    // ── حفظ نص الشهادة (لو ظاهر) ──
+    const saveTst = document.getElementById('alum-save-testimonial');
+    if (saveTst) saveTst.addEventListener('click', async () => {
+      try {
+        await patchOutcomes({ testimonialContent: document.getElementById('alum-testimonial').value.trim() });
+        EMC.utils.toast('تم حفظ الشهادة', 'success');
+      } catch (e) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+    });
+
+    // ── الترقية لسفير (المرحلة 14) ──
+    document.getElementById('alum-advance-btn').addEventListener('click', async () => {
+      if (!confirm(`ترقية ${c.identity.fullName} لسفير ونقله للمرحلة 14؟`)) return;
+      try {
+        await EMC.contacts.moveToStage(id, 14, 'ترقية لسفير — Advocate');
+        EMC.utils.toast('تم النقل للسفراء', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
+    });
+  })();
+  
   // ─── [12B] لوحة التطبيق والمتابعة (المرحلة 12 — Implementation) ───
   (async function setupImplementationPanel() {
     const panel = document.getElementById('implementation-panel');
