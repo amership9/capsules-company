@@ -566,12 +566,83 @@
         </div>`;
     }
 
-    // أزرار النتيجة (تظهر لو المكالمة محجوزة)
+   // أزرار النتيجة (تظهر لو المكالمة محجوزة)
     const outcomeActions = disc.callDate ? `
       <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
         <button class="btn btn-accent btn-sm" id="open-outcome-btn">${disc.verdict ? '✎ تعديل النتيجة' : '✓ سجّل نتيجة المكالمة'}</button>
         ${disc.verdict === 'fit' && c.currentStage < 7 ? `<button class="btn btn-primary btn-sm" id="to-proposal-btn">→ انقل للعرض الرسمي (المرحلة 7)</button>` : ''}
       </div>` : '';
+
+    // ─── [6C] صندوق تحضير العميل للمكالمة (إجابات prep.html) ───
+    const APP_BASE = 'https://amership9.github.io/capsules-company/emc';
+    const prepUrl = `${APP_BASE}/lp/prep.html?id=${id}`;
+    const prepFirstName = c.identity?.firstName || (c.identity?.fullName || '').split(/\s+/)[0] || '';
+    const prepDigits = (c.channels?.whatsapp || c.channels?.mobile || '').replace(/\D/g, '');
+    const prepWaNum = prepDigits ? (prepDigits.startsWith('20') ? prepDigits : (prepDigits.startsWith('0') ? '2' + prepDigits : '2' + prepDigits)) : '';
+    const prepMsg = encodeURIComponent(
+      `أهلاً ${prepFirstName}،\n\nقبل مكالمتنا، ياريت تملا نموذج التحضير السريع ده (دقيقتين) — بيخلّينا ندخل المكالمة وإحنا متفقين على النقطة المهمة بالظبط:\n\n${prepUrl}\n\nمستني أشوفك في المكالمة،\nعبدالله`
+    );
+    const prepWaLink = prepWaNum ? `https://wa.me/${prepWaNum}?text=${prepMsg}` : '';
+
+    // خريطة الأسئلة → label + مرحلة Pain Funnel (تتعامل مع أكثر من تسمية محتملة)
+    const PREP_QUESTIONS = [
+      { keys: ['topic'], label: 'الموضوع الأساسي اللي عايز يطلع من المكالمة بحل ليه', phase: 'Identify', color: 'var(--emc-red)' },
+      { keys: ['tried'], label: 'جرّب يعالج الموضوع قبل كده إزاي، وإيه اللي حصل', phase: 'Discuss', color: 'var(--emc-gold)' },
+      { keys: ['change'], label: 'أول حاجة هتتغير في شركته لو اتحل', phase: 'Solve', color: 'var(--emc-success)' },
+      { keys: ['stakeholders'], label: 'حد تاني في الفريق المفروض يحضر المكالمة', phase: 'Authority', color: 'var(--emc-navy)' }
+    ];
+    const prepData = disc.prep || {};
+    const prepPick = (keys) => { for (const k of keys) { if (prepData[k] != null && String(prepData[k]).trim() !== '') return String(prepData[k]).trim(); } return ''; };
+    const prepMatched = PREP_QUESTIONS.map(q => ({ ...q, answer: prepPick(q.keys) })).filter(r => r.answer);
+    // fallback: لو فيه بيانات بأسماء مختلفة، اعرضها بدل ما تفضل فاضية
+    const knownKeys = new Set(PREP_QUESTIONS.flatMap(q => q.keys));
+    const metaKeys = new Set(['submittedAt','updatedAt','prepSubmittedAt','createdAt','status']);
+    const prepExtra = Object.entries(prepData)
+      .filter(([k, v]) => !knownKeys.has(k) && !metaKeys.has(k) && typeof v !== 'object' && String(v).trim() !== '')
+      .map(([k, v]) => ({ label: k, phase: '', color: 'var(--emc-navy)', answer: String(v).trim() }));
+    const prepRows = [...prepMatched, ...prepExtra];
+    const hasPrep = prepRows.length > 0;
+    const prepStamp = prepData.submittedAt || prepData.updatedAt || disc.prepSubmittedAt;
+
+    let prepBlock = '';
+    if (hasPrep) {
+      prepBlock = `
+        <div style="margin-top:16px; padding:16px; background:linear-gradient(135deg,#F7FAFF,#EEF4FB); border:1px solid var(--emc-line); border-radius:12px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:18px;">📝</span>
+              <div>
+                <div style="font-weight:800; color:var(--emc-navy); font-size:14.5px;">تحضير العميل للمكالمة</div>
+                <div style="font-size:11.5px; color:var(--emc-muted);">إجابات العميل قبل المكالمة · مرتّبة على Pain Funnel${prepStamp ? ' · ' + EMC.utils.formatDate(prepStamp, { relative: true }) : ''}</div>
+              </div>
+            </div>
+            ${prepWaLink ? `<a href="${prepWaLink}" target="_blank" class="btn btn-ghost btn-sm">📨 إعادة الإرسال</a>` : ''}
+          </div>
+          ${prepRows.map(r => `
+            <div style="margin-bottom:12px; padding-inline-start:12px; border-inline-start:3px solid ${r.color};">
+              <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;">
+                <span style="font-size:11.5px; font-weight:700; color:var(--emc-ink-2);">${r.label}</span>
+                ${r.phase ? `<span class="badge" style="font-size:10px; padding:1px 7px; background:${r.color}15; color:${r.color}; border-color:${r.color}40;">${r.phase}</span>` : ''}
+              </div>
+              <div style="font-size:13.5px; color:var(--emc-ink); line-height:1.6; white-space:pre-wrap;">${r.answer}</div>
+            </div>
+          `).join('')}
+        </div>`;
+    } else {
+      prepBlock = `
+        <div style="margin-top:16px; padding:16px; background:var(--emc-cream); border:1px dashed var(--emc-line); border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:18px;">📝</span>
+            <div>
+              <div style="font-weight:700; color:var(--emc-navy); font-size:14px;">العميل لسه ما ملاش نموذج التحضير</div>
+              <div style="font-size:12px; color:var(--emc-muted);">ابعتله النموذج عشان تدخل المكالمة وانت عارف وجعه بالظبط.</div>
+            </div>
+          </div>
+          ${prepWaLink
+            ? `<a href="${prepWaLink}" target="_blank" class="btn btn-primary btn-sm">📨 ابعت نموذج التحضير</a>`
+            : `<span style="font-size:11.5px; color:var(--emc-faint);">مفيش رقم واتساب — ابعت اللينك يدوياً: <span class="mono">${prepUrl}</span></span>`}
+        </div>`;
+    }
 
     panel.innerHTML = `
       <div class="card card-pad" style="margin-bottom:22px; border-color:var(--emc-navy);">
@@ -584,6 +655,7 @@
           <button class="btn btn-ghost btn-sm" id="toggle-script-btn">📋 سكريبت المكالمة</button>
         </div>
         ${scheduleBlock}
+        ${prepBlock}
         ${outcomeActions}
         ${outcomeBlock}
         <div id="script-box" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--emc-line-soft);"></div>
