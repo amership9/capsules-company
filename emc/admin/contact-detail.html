@@ -447,7 +447,9 @@
 
     <!-- [13B] Alumni panel — يظهر فقط للمرحلة 13 -->
     <div id="alumni-panel"></div>
-    
+
+    <!-- [14B] Advocate panel — يظهر فقط للمرحلة 14 -->
+    <div id="advocate-panel"></div>
 
     <!-- Quick stats -->
     <div class="grid-4" style="margin-bottom: 22px;">
@@ -1231,6 +1233,172 @@
   })();
 
 
+
+  // ─── [14B] لوحة السفراء (المرحلة 14 — Advocate) ───
+  (async function setupAdvocatePanel() {
+    const panel = document.getElementById('advocate-panel');
+    if (!panel) return;
+    if (c.currentStage !== 14) return;
+
+    const LEVELS = EMC.ADVOCATE_LEVELS || {};
+    const RST = EMC.REFERRAL_STATUS || {};
+    const CONTRIBS = EMC.ADVOCATE_CONTRIBUTIONS || [];
+
+    const adv = c.advocacy || {};
+    const referrals = Array.isArray(adv.referrals) ? adv.referrals : [];
+    const contribsDone = adv.contributions || {}; // { key: true }
+
+    // المستوى التلقائي
+    const levelKey = EMC.computeAdvocateLevel(referrals);
+    const lvl = LEVELS[levelKey] || LEVELS.satisfied;
+
+    // عدّادات الإحالات
+    const totalRef = referrals.length;
+    const convertedRef = referrals.filter(r => r.status === 'converted').length;
+    const totalValue = referrals.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
+    const fmtEGP = (n) => (n == null || n === '' || n === 0) ? '0 ج.م' : Number(n).toLocaleString('en-US') + ' ج.م';
+
+    // بناء قائمة الإحالات
+    let referralsHtml = '';
+    if (referrals.length) {
+      referralsHtml = referrals.map((r, idx) => {
+        const st = RST[r.status || 'logged'] || RST.logged;
+        return `
+          <div style="border:1px solid var(--emc-line); border-radius:11px; padding:13px 15px; margin-bottom:10px; background:#fff;">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:10px;">
+              <div style="flex:1;">
+                <div style="font-size:13.5px; font-weight:700; color:var(--emc-navy);">${r.name || 'إحالة بدون اسم'}</div>
+                ${r.note ? `<div style="font-size:11.5px; color:var(--emc-muted); line-height:1.5; margin-top:2px;">${r.note}</div>` : ''}
+                ${r.value ? `<div style="font-size:11.5px; color:var(--emc-success); margin-top:3px;">قيمة: ${fmtEGP(r.value)}</div>` : ''}
+              </div>
+              <span class="badge" style="background:${st.bg}; color:${st.color}; border-color:${st.border};">${st.label}</span>
+            </div>
+            <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center; padding-top:10px; border-top:1px solid var(--emc-line-soft);">
+              <span style="font-size:11px; color:var(--emc-muted);">الحالة:</span>
+              ${Object.entries(RST).map(([k, v]) =>
+                `<button class="btn btn-ghost btn-sm ref-status" data-idx="${idx}" data-status="${k}" style="padding:3px 9px; font-size:11px; ${(r.status||'logged')===k ? 'background:'+v.bg+'; color:'+v.color+'; border:1px solid '+v.border+';' : ''}">${v.label}</button>`
+              ).join('')}
+              <button class="btn btn-ghost btn-sm ref-remove" data-idx="${idx}" style="padding:3px 9px; font-size:11px; color:var(--emc-red); margin-inline-start:auto;">حذف</button>
+            </div>
+          </div>`;
+      }).join('');
+    } else {
+      referralsHtml = `
+        <div style="text-align:center; padding:20px; background:var(--emc-cream); border:1px dashed var(--emc-line); border-radius:11px;">
+          <div style="font-size:13px; color:var(--emc-muted);">لسه ما سجّلش أي إحالة</div>
+        </div>`;
+    }
+
+    panel.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:22px; border-color:var(--emc-navy-soft);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+          <span style="width:4px; height:20px; background:var(--emc-navy-soft); border-radius:2px;"></span>
+          <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">ملف السفير</h3>
+          <span class="badge" style="background:${lvl.bg}; color:${lvl.color}; border-color:${lvl.border};">${lvl.icon} ${lvl.label}</span>
+        </div>
+
+        <!-- عدّادات الإحالات -->
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px;">
+          <div style="text-align:center; padding:14px; background:var(--emc-cream); border-radius:10px;">
+            <div style="font-size:22px; font-weight:800; color:var(--emc-navy);">${totalRef}</div>
+            <div style="font-size:11.5px; color:var(--emc-muted);">إجمالي الإحالات</div>
+          </div>
+          <div style="text-align:center; padding:14px; background:var(--emc-cream); border-radius:10px;">
+            <div style="font-size:22px; font-weight:800; color:var(--emc-success);">${convertedRef}</div>
+            <div style="font-size:11.5px; color:var(--emc-muted);">تحوّلت لعملاء</div>
+          </div>
+          <div style="text-align:center; padding:14px; background:var(--emc-cream); border-radius:10px;">
+            <div style="font-size:16px; font-weight:800; color:var(--emc-navy);">${fmtEGP(totalValue)}</div>
+            <div style="font-size:11.5px; color:var(--emc-muted);">قيمة الإحالات</div>
+          </div>
+        </div>
+
+        <!-- الإحالات -->
+        <div style="margin-bottom:22px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <span style="font-size:13px; font-weight:700; color:var(--emc-ink);">الإحالات</span>
+            <button class="btn btn-primary btn-sm" id="adv-add-ref" style="padding:4px 12px; font-size:12px;">➕ سجّل إحالة</button>
+          </div>
+          ${referralsHtml}
+        </div>
+
+        <!-- المساهمات -->
+        <div style="padding-top:18px; border-top:1px solid var(--emc-line-soft);">
+          <div style="font-size:13px; font-weight:700; color:var(--emc-ink); margin-bottom:12px;">مساهمات أخرى</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            ${CONTRIBS.map(ct => {
+              const on = !!contribsDone[ct.key];
+              return `<button class="btn btn-ghost btn-sm adv-contrib" data-key="${ct.key}" style="padding:6px 14px; font-size:12.5px; ${on ? 'background:#E1F1E8; color:#1E5C42; border:1px solid #BFE0CD;' : ''}">${ct.icon} ${ct.label} ${on ? '✓' : ''}</button>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>`;
+
+    // ── حفظ عام للـ advocacy ──
+    async function patchAdvocacy(patch) {
+      const newAdv = { ...(c.advocacy || {}), ...patch };
+      // أعِد حساب المستوى والعدّادات
+      const refs = patch.referrals || newAdv.referrals || [];
+      newAdv.advocateLevel = EMC.computeAdvocateLevel(refs);
+      newAdv.referralsCount = refs.length;
+      newAdv.successfulReferrals = refs.filter(r => r.status === 'converted').length;
+      newAdv.referralsValue = refs.reduce((s, r) => s + (Number(r.value) || 0), 0);
+      await EMC.contacts.update(id, { advocacy: newAdv });
+      c.advocacy = newAdv;
+    }
+
+    // ── تسجيل إحالة جديدة ──
+    document.getElementById('adv-add-ref').addEventListener('click', async () => {
+      const name = prompt('اسم الشخص المُحال:');
+      if (!name || !name.trim()) return;
+      const note = prompt('ملاحظة (اختياري):') || '';
+      const newRef = { name: name.trim(), note: note.trim(), status: 'logged', value: 0, loggedAt: new Date().toISOString() };
+      try { await patchAdvocacy({ referrals: [...referrals, newRef] }); window.location.reload(); }
+      catch (e) { EMC.utils.toast('خطأ في التسجيل', 'error'); }
+    });
+
+    // ── تحديث حالة إحالة / حذفها ──
+    panel.addEventListener('click', async (e) => {
+      const stBtn = e.target.closest('.ref-status');
+      const rmBtn = e.target.closest('.ref-remove');
+
+      if (stBtn) {
+        const idx = parseInt(stBtn.dataset.idx);
+        const newStatus = stBtn.dataset.status;
+        const refs = [...referrals];
+        if (!refs[idx]) return;
+        // لو الحالة بقت "تحوّل لعميل"، اسأل عن القيمة
+        if (newStatus === 'converted' && !refs[idx].value) {
+          const val = prompt('قيمة الصفقة بالجنيه (اختياري):');
+          if (val && !isNaN(Number(val))) refs[idx] = { ...refs[idx], value: Number(val) };
+        }
+        refs[idx] = { ...refs[idx], status: newStatus };
+        try { await patchAdvocacy({ referrals: refs }); window.location.reload(); }
+        catch (err) { EMC.utils.toast('خطأ في التحديث', 'error'); }
+      }
+
+      if (rmBtn) {
+        const idx = parseInt(rmBtn.dataset.idx);
+        if (!confirm('حذف الإحالة دي؟')) return;
+        const refs = [...referrals];
+        refs.splice(idx, 1);
+        try { await patchAdvocacy({ referrals: refs }); window.location.reload(); }
+        catch (err) { EMC.utils.toast('خطأ في الحذف', 'error'); }
+      }
+    });
+
+    // ── تبديل المساهمات ──
+    panel.querySelectorAll('.adv-contrib').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const key = btn.dataset.key;
+        const newContribs = { ...contribsDone };
+        if (newContribs[key]) delete newContribs[key]; else newContribs[key] = true;
+        try { await patchAdvocacy({ contributions: newContribs }); window.location.reload(); }
+        catch (e) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+      });
+    });
+  })();
+  
   // ─── [13B] لوحة الخريجين (المرحلة 13 — Alumni) ───
   (async function setupAlumniPanel() {
     const panel = document.getElementById('alumni-panel');
