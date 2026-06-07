@@ -44,22 +44,22 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emc-navy)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
         </div>
         <div>
-          <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">رابط Calendly</h3>
-          <div style="font-size:12.5px; color:var(--emc-muted);">لحجز مكالمات الاستكشاف ذاتياً (المرحلة 6)</div>
+          <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">رابط الحجز الذاتي</h3>
+          <div style="font-size:12.5px; color:var(--emc-muted);">لحجز مكالمات الاستكشاف ذاتياً (المرحلة 6) · Calendly أو Google أو أي أداة</div>
         </div>
       </div>
 
       <div style="background:var(--emc-cream); border-radius:8px; padding:12px 14px; font-size:12.5px; color:var(--emc-ink-2); line-height:1.7; margin:14px 0;">
         <strong>إزاي تجهّزه (مرة واحدة):</strong><br/>
-        1. اعمل حساب مجاني على <a href="https://calendly.com" target="_blank" style="color:var(--emc-navy); font-weight:600;">calendly.com</a><br/>
+        1. استخدم أي أداة حجز: <a href="https://calendly.com" target="_blank" style="color:var(--emc-navy); font-weight:600;">Calendly</a> (مجاني) أو <strong>Google Appointment Scheduling</strong> (لو عندك Google Workspace)<br/>
         2. اعمل نوع موعد واحد اسمه "مكالمة استكشاف" (45 دقيقة)<br/>
-        3. انسخ اللينك بتاعه (شكله: <span class="mono" style="font-size:11px;">calendly.com/your-name/discovery</span>)<br/>
+        3. انسخ لينك الحجز العام بتاعه<br/>
         4. الصقه تحت واحفظ — هيظهر زر الحجز الذاتي في ملفات العملاء
       </div>
 
       <div class="field" style="margin-bottom: 14px;">
-        <label class="field-label">رابط Calendly</label>
-        <input class="input" type="url" id="calendly-url" placeholder="https://calendly.com/your-name/discovery" />
+        <label class="field-label">رابط الحجز الذاتي</label>
+        <input class="input" type="url" id="calendly-url" placeholder="https://calendly.com/... أو https://calendar.app.google/..." />
         <div class="hint" style="font-size:11.5px; color:var(--emc-faint); margin-top:6px;">سيبه فاضي لو لسه ما جهّزتوش — النظام هيشتغل بالحجز اليدوي عادي.</div>
       </div>
       <button class="btn btn-primary btn-sm" id="save-calendly">حفظ الرابط</button>
@@ -103,7 +103,7 @@
 
     <!-- Info card -->
     <div class="card card-pad" style="background:var(--emc-cream); border-color:var(--emc-line);">
-      <h4 style="margin:0 0 8px; font-size:13.5px; color:var(--emc-navy); font-weight:700;">💡 ملاحظة عن Calendly المجاني</h4>
+      <h4 style="margin:0 0 8px; font-size:13.5px; color:var(--emc-navy); font-weight:700;">💡 ملاحظة عن الحجز المجاني</h4>
       <div style="font-size:12.5px; color:var(--emc-ink-2); line-height:1.7;">
         الباقة المجانية كافية تماماً (نوع موعد واحد). بعد ما العميل يحجز، Calendly بيبعتلك تأكيد بالإيميل — وقتها بتفتح ملف العميل في النظام وتسجّل الموعد بضغطة. التأكيد التلقائي الكامل بيحتاج باقة مدفوعة، وده مش ضروري دلوقتي.
       </div>
@@ -126,9 +126,9 @@
   document.getElementById('save-calendly').addEventListener('click', async () => {
     const btn = document.getElementById('save-calendly');
     const url = input.value.trim();
-    // تحقق بسيط
-    if (url && !/^https?:\/\/(www\.)?calendly\.com\//i.test(url)) {
-      EMC.utils.toast('الرابط لازم يكون من calendly.com', 'error');
+    // تحقق بسيط — أي رابط صحيح (مش Calendly فقط)
+    if (url && !/^https?:\/\/.+\..+/i.test(url)) {
+      EMC.utils.toast('اكتب رابط صحيح يبدأ بـ https://', 'error');
       return;
     }
     btn.disabled = true; btn.textContent = 'جاري الحفظ…';
