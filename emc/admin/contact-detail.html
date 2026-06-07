@@ -909,10 +909,14 @@
   })();
 
   // ─── [7A] لوحة العرض الرسمي (المرحلة 7) ───
-  (function setupProposalPanel() {
+  (async function setupProposalPanel() {
     const panel = document.getElementById('proposal-panel');
     if (!panel) return;
     if (c.currentStage !== 7) return;
+
+    const propSettings = await EMC.utils.getSettings();
+    const senderName = (propSettings.contactName || '').trim() || 'عبدالله';
+    const senderEmail = (propSettings.contactEmail || '').trim();
 
     const prop = c.proposal || {};
     const eos = c.eosProfile || {};
@@ -948,10 +952,14 @@
     const firstName = c.identity?.firstName || (c.identity?.fullName || '').split(/\s+/)[0] || '';
     const digits = (c.channels?.whatsapp || c.channels?.mobile || '').replace(/\D/g, '');
     const waNum = digits ? (digits.startsWith('20') ? digits : (digits.startsWith('0') ? '2' + digits : '2' + digits)) : '';
-    const waMsg = encodeURIComponent(
-      `أهلاً ${firstName}،\n\nجهّزت لك العرض الرسمي المخصّص لـ ${c.identity?.companyName || 'شركتك'} بناءً على مكالمتنا. تقدر تطّلع عليه من هنا:\n\n${propUrl}\n\nمستني رأيك،\nعبدالله`
-    );
+    const propMsgText = `أهلاً ${firstName}،\n\nجهّزت لك العرض الرسمي المخصّص لـ ${c.identity?.companyName || 'شركتك'} بناءً على مكالمتنا. تقدر تطّلع عليه من هنا:\n\n${propUrl}\n\nمستني رأيك،\n${senderName}`;
+    const waMsg = encodeURIComponent(propMsgText);
     const waLink = waNum ? `https://wa.me/${waNum}?text=${waMsg}` : '';
+    // لينك إيميل mailto — يفتح إيميل جاهز بنفس الرسالة واللينك
+    const propEmailAddr = c.channels?.primaryEmail || '';
+    const emailSubject = encodeURIComponent(`عرض Executive Mastery Camp — ${c.identity?.companyName || c.identity?.fullName || ''}`);
+    const emailBody = encodeURIComponent(propMsgText);
+    const emailLink = propEmailAddr ? `mailto:${propEmailAddr}?subject=${emailSubject}&body=${emailBody}` : '';
 
     // ── ملخص التسعير ──
     let priceSummary = '';
@@ -1007,7 +1015,8 @@
         ${hasProposal ? `
           <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
             <a href="${propUrl}" target="_blank" class="btn btn-outline btn-sm">↗ افتح صفحة العرض</a>
-            ${waLink ? `<a href="${waLink}" target="_blank" class="btn btn-primary btn-sm">📨 ابعت العرض للعميل</a>` : ''}
+            ${waLink ? `<a href="${waLink}" target="_blank" class="btn btn-primary btn-sm">📨 واتساب</a>` : ''}
+            ${emailLink ? `<a href="${emailLink}" class="btn btn-outline btn-sm">✉ إيميل</a>` : ''}
             ${status === 'accepted' && c.currentStage < 8 ? `<button class="btn btn-accent btn-sm" id="prop-to-nego-btn">→ انقل للتفاوض (المرحلة 8)</button>` : ''}
             <span style="margin-inline-start:auto; font-size:11.5px;">${acceptNote}</span>
           </div>
