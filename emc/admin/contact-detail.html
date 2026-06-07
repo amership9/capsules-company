@@ -224,6 +224,84 @@
   </div>
 </div>
 
+<!-- [7A] Proposal builder modal -->
+<div class="emc-modal-overlay" id="prop-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 640px; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.3);">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--emc-line);">
+      <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">تجهيز العرض الرسمي</h3>
+      <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;">المقدمة بتتولّد من التشخيص — إنت بتحدد السعر والشروط</div>
+    </div>
+    <div style="padding: 22px 24px; overflow-y: auto; flex: 1;" id="prop-form">
+
+      <!-- طريقة التسعير -->
+      <div class="field">
+        <label class="field-label">طريقة التسعير</label>
+        <div class="checkbox-group" id="prop-pricing-mode">
+          <label class="chip-check checked"><input type="radio" name="pricingMode" value="single" checked /> سعر واحد</label>
+          <label class="chip-check"><input type="radio" name="pricingMode" value="tiers" /> باقات / مستويات</label>
+        </div>
+      </div>
+
+      <!-- العملة + التقسيط -->
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">العملة</label>
+          <select class="select" name="currency">
+            <option value="EGP">جنيه مصري (EGP)</option>
+            <option value="USD">دولار (USD)</option>
+            <option value="SAR">ريال سعودي (SAR)</option>
+            <option value="AED">درهم إماراتي (AED)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">صلاحية العرض (أيام)</label>
+          <input class="input" type="number" name="validityDays" min="1" value="14" />
+        </div>
+      </div>
+
+      <!-- سعر واحد -->
+      <div id="prop-single-block">
+        <div class="field">
+          <label class="field-label">سعر الدورة</label>
+          <input class="input" type="number" name="singlePrice" min="0" placeholder="0" />
+        </div>
+      </div>
+
+      <!-- باقات -->
+      <div id="prop-tiers-block" style="display:none;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+          <label class="field-label" style="margin:0;">الباقات</label>
+          <button type="button" class="btn btn-outline btn-sm" id="prop-add-tier">+ أضف باقة</button>
+        </div>
+        <div id="prop-tiers-list"></div>
+      </div>
+
+      <!-- التقسيط -->
+      <div class="field" style="margin-top:6px;">
+        <label class="chip-check" style="width:auto; display:inline-flex;"><input type="checkbox" name="installmentsEnabled" /> أتيح التقسيط</label>
+      </div>
+      <div class="field" id="prop-installment-block" style="display:none;">
+        <label class="field-label">تفاصيل التقسيط</label>
+        <input class="input" name="installmentDetails" placeholder="مثلاً: على 3 دفعات شهرية متساوية" />
+      </div>
+
+      <div class="h-divide"></div>
+
+      <!-- القبول الذاتي -->
+      <div class="field" style="margin-bottom:0;">
+        <label class="chip-check" style="width:auto; display:inline-flex;"><input type="checkbox" name="allowSelfAccept" checked /> اسمح للعميل بالقبول الذاتي من صفحة العرض</label>
+        <div style="font-size:11.5px; color:var(--emc-muted); margin-top:8px; line-height:1.6;">
+          لو مفعّل: العميل يضغط "أوافق" فيتنقل تلقائياً للمرحلة 8 (تفاوض) وتتنبّه إنت. لو مُطفأ: العميل يتواصل معاك يدوياً وإنت تعلّم القبول بنفسك.
+        </div>
+      </div>
+    </div>
+    <div style="padding: 14px 24px; border-top: 1px solid var(--emc-line); display: flex; justify-content: flex-end; gap: 8px; background: var(--emc-cream);">
+      <button class="btn btn-ghost btn-sm" id="prop-cancel">إلغاء</button>
+      <button class="btn btn-primary btn-sm" id="prop-save">حفظ العرض</button>
+    </div>
+  </div>
+</div>
+
 <template id="detail-tpl">
   <div class="emc-crumbs">
     <a href="dashboard.html">لوحة التحكم</a>
@@ -321,6 +399,9 @@
 
     <!-- [6B] Discovery panel — يظهر فقط للمرحلة 5 أو 6 -->
     <div id="discovery-panel"></div>
+
+    <!-- [7A] Proposal panel — يظهر فقط للمرحلة 7 -->
+    <div id="proposal-panel"></div>
 
     <!-- Quick stats -->
     <div class="grid-4" style="margin-bottom: 22px;">
@@ -825,6 +906,273 @@
         }
       });
     }
+  })();
+
+  // ─── [7A] لوحة العرض الرسمي (المرحلة 7) ───
+  (function setupProposalPanel() {
+    const panel = document.getElementById('proposal-panel');
+    if (!panel) return;
+    if (c.currentStage !== 7) return;
+
+    const prop = c.proposal || {};
+    const eos = c.eosProfile || {};
+    const disc = c.discovery || {};
+
+    // ── التوليد التلقائي من التشخيص ──
+    const ceilingLabel = eos.ceiling ? (EMC.CEILINGS[eos.ceiling] || '') : '';
+    const compLabel = eos.primaryComponent ? (EMC.EOS_COMPONENTS[eos.primaryComponent] || '') : '';
+    const autoIntro = (() => {
+      const parts = [];
+      if (ceilingLabel) parts.push(`بناءً على تشخيصنا، السقف الأساسي اللي بيواجه ${c.identity?.companyName || 'شركتك'} هو: ${ceilingLabel}.`);
+      if (compLabel) parts.push(`المكوّن اللي محتاج أعلى تركيز دلوقتي هو: ${compLabel}.`);
+      if (disc.solutionDirection) parts.push(`المسار المقترح: ${disc.solutionDirection}.`);
+      if (!parts.length) parts.push('برنامج EOS المكثّف مصمّم لتثبيت المكوّنات الستة في شركتك خطوة بخطوة.');
+      return parts.join(' ');
+    })();
+
+    const currencyLabel = (cur) => ({ EGP: 'جنيه', USD: 'دولار', SAR: 'ريال', AED: 'درهم' }[cur] || cur || 'جنيه');
+    const fmtMoney = (n, cur) => (n ? Number(n).toLocaleString('en-US') + ' ' + currencyLabel(cur) : '—');
+
+    const PROP_STATUS = {
+      draft:    { label: 'مسوّدة',          bg: 'var(--emc-cream)',  color: 'var(--emc-ink-2)', border: 'var(--emc-line)' },
+      sent:     { label: 'مُرسَل · في انتظار الرد', bg: '#E0EBF7', color: '#1B3A66', border: '#B5CFE8' },
+      viewed:   { label: 'اتشاف · في انتظار الرد', bg: '#FAEEDB', color: '#8C5915', border: '#ECD3A6' },
+      accepted: { label: 'وافق العميل ✓',   bg: '#E1F1E8', color: '#1E5C42', border: '#BFE0CD' },
+      declined: { label: 'اعتذر العميل',     bg: '#FBE0E2', color: '#A2202D', border: '#F1B6BB' }
+    };
+    const status = prop.status || (prop.savedAt ? 'sent' : 'draft');
+    const st = PROP_STATUS[status] || PROP_STATUS.draft;
+
+    const APP_BASE = 'https://amership9.github.io/capsules-company/emc';
+    const propUrl = `${APP_BASE}/lp/proposal.html?id=${id}`;
+    const firstName = c.identity?.firstName || (c.identity?.fullName || '').split(/\s+/)[0] || '';
+    const digits = (c.channels?.whatsapp || c.channels?.mobile || '').replace(/\D/g, '');
+    const waNum = digits ? (digits.startsWith('20') ? digits : (digits.startsWith('0') ? '2' + digits : '2' + digits)) : '';
+    const waMsg = encodeURIComponent(
+      `أهلاً ${firstName}،\n\nجهّزت لك العرض الرسمي المخصّص لـ ${c.identity?.companyName || 'شركتك'} بناءً على مكالمتنا. تقدر تطّلع عليه من هنا:\n\n${propUrl}\n\nمستني رأيك،\nعبدالله`
+    );
+    const waLink = waNum ? `https://wa.me/${waNum}?text=${waMsg}` : '';
+
+    // ── ملخص التسعير ──
+    let priceSummary = '';
+    if (prop.pricingMode === 'tiers' && (prop.tiers || []).length) {
+      priceSummary = `
+        <div style="display:grid; gap:10px; margin-top:12px;">
+          ${prop.tiers.map(t => `
+            <div style="padding:12px 14px; background:#fff; border:1px solid ${t.featured ? 'var(--emc-gold)' : 'var(--emc-line)'}; border-radius:10px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <span style="font-weight:700; color:var(--emc-navy);">${t.name || 'باقة'} ${t.featured ? '<span class="badge" style="background:#FAEEDB; color:#8C5915; border-color:#ECD3A6; font-size:10px;">الأكثر اختياراً</span>' : ''}</span>
+                <span style="font-weight:800; color:var(--emc-navy);">${fmtMoney(t.price, prop.currency)}</span>
+              </div>
+              ${t.duration ? `<div style="font-size:11.5px; color:var(--emc-muted); margin-top:3px;">${t.duration}</div>` : ''}
+              ${(t.features || []).length ? `<ul style="margin:8px 0 0; padding-inline-start:18px; font-size:12.5px; color:var(--emc-ink-2); line-height:1.7;">${t.features.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
+            </div>`).join('')}
+        </div>`;
+    } else if (prop.pricingMode === 'single' && prop.singlePrice) {
+      priceSummary = `<div style="margin-top:12px; font-size:22px; font-weight:800; color:var(--emc-navy);">${fmtMoney(prop.singlePrice, prop.currency)}</div>`;
+    }
+
+    const validityNote = prop.validityDays
+      ? `صلاحية العرض: ${prop.validityDays} يوم${prop.savedAt ? ' · جُهّز ' + EMC.utils.formatDate(prop.savedAt, { relative: true }) : ''}`
+      : '';
+
+    const installmentNote = prop.installmentsEnabled && prop.installmentDetails
+      ? `<div style="margin-top:8px; font-size:12.5px; color:var(--emc-ink-2);">💳 التقسيط: ${prop.installmentDetails}</div>` : '';
+
+    const acceptNote = prop.allowSelfAccept !== false
+      ? `<span style="color:var(--emc-success);">✓ القبول الذاتي مفعّل</span>`
+      : `<span style="color:var(--emc-muted);">القبول الذاتي مُطفأ — تعلّمه يدوياً</span>`;
+
+    const hasProposal = !!prop.savedAt;
+
+    panel.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:22px; border-color:var(--emc-gold);">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:4px; height:20px; background:var(--emc-gold); border-radius:2px;"></span>
+            <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">العرض الرسمي</h3>
+            <span class="badge" style="background:${st.bg}; color:${st.color}; border-color:${st.border};">${st.label}</span>
+          </div>
+          <button class="btn btn-accent btn-sm" id="open-prop-btn">${hasProposal ? '✎ تعديل العرض' : '＋ جهّز العرض'}</button>
+        </div>
+
+        <div style="padding:14px 16px; background:linear-gradient(135deg,#FBFAF6,#F5F1E8); border:1px solid var(--emc-line); border-radius:12px;">
+          <div style="font-size:11.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--emc-muted); font-weight:700; margin-bottom:6px;">المقدمة المُولّدة من التشخيص</div>
+          <div style="font-size:13.5px; color:var(--emc-ink); line-height:1.7;">${autoIntro}</div>
+          ${priceSummary}
+          ${installmentNote}
+          ${validityNote ? `<div style="margin-top:10px; font-size:12px; color:var(--emc-muted);">${validityNote}</div>` : ''}
+        </div>
+
+        ${hasProposal ? `
+          <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <a href="${propUrl}" target="_blank" class="btn btn-outline btn-sm">↗ افتح صفحة العرض</a>
+            ${waLink ? `<a href="${waLink}" target="_blank" class="btn btn-primary btn-sm">📨 ابعت العرض للعميل</a>` : ''}
+            ${status === 'accepted' && c.currentStage < 8 ? `<button class="btn btn-accent btn-sm" id="prop-to-nego-btn">→ انقل للتفاوض (المرحلة 8)</button>` : ''}
+            <span style="margin-inline-start:auto; font-size:11.5px;">${acceptNote}</span>
+          </div>
+          ${status !== 'accepted' ? `<div style="margin-top:10px;"><button class="btn btn-ghost btn-sm" id="prop-mark-accept-btn" style="color:var(--emc-success);">✓ تعليم القبول يدوياً</button></div>` : ''}
+        ` : `
+          <div style="margin-top:14px; font-size:12.5px; color:var(--emc-muted);">جهّز العرض الأول عشان تقدر تبعته للعميل.</div>
+        `}
+      </div>`;
+
+    // ── Modal logic ──
+    const modal = document.getElementById('prop-modal');
+    const pform = document.getElementById('prop-form');
+
+    const renderTierRow = (t = {}) => {
+      const row = document.createElement('div');
+      row.className = 'prop-tier-row';
+      row.style.cssText = 'border:1px solid var(--emc-line); border-radius:10px; padding:12px; margin-bottom:10px;';
+      row.innerHTML = `
+        <div class="field-row">
+          <div class="field"><label class="field-label">اسم الباقة</label><input class="input prop-t-name" value="${t.name || ''}" placeholder="البرنامج الأساسي" /></div>
+          <div class="field"><label class="field-label">السعر</label><input class="input prop-t-price" type="number" min="0" value="${t.price || ''}" /></div>
+        </div>
+        <div class="field"><label class="field-label">المدة / الجلسات <span class="hint">(اختياري)</span></label><input class="input prop-t-duration" value="${t.duration || ''}" placeholder="مثلاً: 8 جلسات · 6 أسابيع" /></div>
+        <div class="field"><label class="field-label">المميزات <span class="hint">(سطر لكل ميزة)</span></label><textarea class="textarea prop-t-features" placeholder="جلسات مباشرة&#10;قوالب EOS جاهزة&#10;متابعة 30 يوم">${(t.features || []).join('\n')}</textarea></div>
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <label class="chip-check ${t.featured ? 'checked' : ''}" style="width:auto; display:inline-flex;"><input type="checkbox" class="prop-t-featured" ${t.featured ? 'checked' : ''} /> الأكثر اختياراً</label>
+          <button type="button" class="btn btn-ghost btn-sm prop-t-remove" style="color:var(--emc-red);">حذف</button>
+        </div>`;
+      row.querySelector('.prop-t-remove').addEventListener('click', () => row.remove());
+      row.querySelector('.chip-check').addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        const inp = row.querySelector('.prop-t-featured');
+        inp.checked = !inp.checked;
+        row.querySelector('.chip-check').classList.toggle('checked', inp.checked);
+      });
+      return row;
+    };
+
+    function syncPricingMode() {
+      const mode = pform.querySelector('[name="pricingMode"]:checked').value;
+      document.getElementById('prop-single-block').style.display = mode === 'single' ? 'block' : 'none';
+      document.getElementById('prop-tiers-block').style.display = mode === 'tiers' ? 'block' : 'none';
+    }
+    function syncInstallment() {
+      const on = pform.querySelector('[name="installmentsEnabled"]').checked;
+      document.getElementById('prop-installment-block').style.display = on ? 'block' : 'none';
+    }
+
+    pform.querySelectorAll('[name="pricingMode"]').forEach(r => {
+      r.addEventListener('change', () => {
+        pform.querySelectorAll('#prop-pricing-mode .chip-check').forEach(ch => ch.classList.remove('checked'));
+        r.closest('.chip-check').classList.add('checked');
+        syncPricingMode();
+      });
+    });
+    pform.querySelector('[name="installmentsEnabled"]').addEventListener('change', (e) => {
+      e.target.closest('.chip-check').classList.toggle('checked', e.target.checked);
+      syncInstallment();
+    });
+    pform.querySelector('[name="allowSelfAccept"]').addEventListener('change', (e) => {
+      e.target.closest('.chip-check').classList.toggle('checked', e.target.checked);
+    });
+    document.getElementById('prop-add-tier').addEventListener('click', () => {
+      document.getElementById('prop-tiers-list').appendChild(renderTierRow());
+    });
+
+    function openProp() {
+      const p = c.proposal || {};
+      pform.querySelector('[name="currency"]').value = p.currency || 'EGP';
+      pform.querySelector('[name="validityDays"]').value = p.validityDays || 14;
+      pform.querySelector('[name="singlePrice"]').value = p.singlePrice || '';
+      pform.querySelector('[name="installmentsEnabled"]').checked = !!p.installmentsEnabled;
+      pform.querySelector('[name="installmentsEnabled"]').closest('.chip-check').classList.toggle('checked', !!p.installmentsEnabled);
+      pform.querySelector('[name="installmentDetails"]').value = p.installmentDetails || '';
+      const selfAccept = p.allowSelfAccept !== false;
+      pform.querySelector('[name="allowSelfAccept"]').checked = selfAccept;
+      pform.querySelector('[name="allowSelfAccept"]').closest('.chip-check').classList.toggle('checked', selfAccept);
+
+      const mode = p.pricingMode || 'single';
+      pform.querySelectorAll('[name="pricingMode"]').forEach(r => {
+        r.checked = (r.value === mode);
+        r.closest('.chip-check').classList.toggle('checked', r.checked);
+      });
+
+      const list = document.getElementById('prop-tiers-list');
+      list.innerHTML = '';
+      if ((p.tiers || []).length) p.tiers.forEach(t => list.appendChild(renderTierRow(t)));
+      else list.appendChild(renderTierRow());
+
+      syncPricingMode();
+      syncInstallment();
+      modal.style.display = 'flex';
+    }
+
+    document.getElementById('open-prop-btn').addEventListener('click', openProp);
+    document.getElementById('prop-cancel').addEventListener('click', () => modal.style.display = 'none');
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
+    document.getElementById('prop-save').addEventListener('click', async () => {
+      const btn = document.getElementById('prop-save');
+      const mode = pform.querySelector('[name="pricingMode"]:checked').value;
+
+      let tiers = [];
+      if (mode === 'tiers') {
+        tiers = [...document.querySelectorAll('.prop-tier-row')].map(row => ({
+          name: row.querySelector('.prop-t-name').value.trim(),
+          price: parseInt(row.querySelector('.prop-t-price').value) || 0,
+          duration: row.querySelector('.prop-t-duration').value.trim(),
+          features: row.querySelector('.prop-t-features').value.split('\n').map(s => s.trim()).filter(Boolean),
+          featured: row.querySelector('.prop-t-featured').checked
+        })).filter(t => t.name || t.price);
+        if (!tiers.length) { EMC.utils.toast('أضف باقة واحدة على الأقل', 'error'); return; }
+      } else {
+        const sp = parseInt(pform.querySelector('[name="singlePrice"]').value) || 0;
+        if (!sp) { EMC.utils.toast('اكتب سعر الدورة', 'error'); return; }
+      }
+
+      btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+      try {
+        const existing = c.proposal || {};
+        const newProp = {
+          ...existing,
+          pricingMode: mode,
+          currency: pform.querySelector('[name="currency"]').value,
+          validityDays: parseInt(pform.querySelector('[name="validityDays"]').value) || 14,
+          singlePrice: mode === 'single' ? (parseInt(pform.querySelector('[name="singlePrice"]').value) || 0) : (existing.singlePrice || 0),
+          tiers: mode === 'tiers' ? tiers : (existing.tiers || []),
+          installmentsEnabled: pform.querySelector('[name="installmentsEnabled"]').checked,
+          installmentDetails: pform.querySelector('[name="installmentDetails"]').value.trim(),
+          allowSelfAccept: pform.querySelector('[name="allowSelfAccept"]').checked,
+          status: existing.status && existing.status !== 'draft' ? existing.status : 'sent',
+          savedAt: existing.savedAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        await EMC.contacts.update(id, { proposal: newProp });
+        EMC.utils.toast('تم حفظ العرض', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) {
+        EMC.utils.toast('خطأ: ' + (e.message || ''), 'error');
+        btn.disabled = false; btn.textContent = 'حفظ العرض';
+      }
+    });
+
+    // تعليم القبول يدوياً
+    const markBtn = document.getElementById('prop-mark-accept-btn');
+    if (markBtn) markBtn.addEventListener('click', async () => {
+      if (!confirm(`تعليم عرض ${c.identity?.fullName} كـ "مقبول" ونقله للمرحلة 8 (تفاوض)؟`)) return;
+      try {
+        await EMC.contacts.update(id, { proposal: { ...(c.proposal || {}), status: 'accepted', acceptedAt: new Date().toISOString(), acceptedVia: 'manual' } });
+        await EMC.contacts.moveToStage(id, 8, 'قبول العرض (يدوي) — للتفاوض');
+        if (EMC.events?.log) await EMC.events.log({ contactId: id, type: 'manual_note', stage: 7, channel: 'manual', data: { action: 'proposal_accepted', via: 'manual' } });
+        EMC.utils.toast('تم تعليم القبول والنقل للتفاوض', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
+    });
+
+    // نقل للتفاوض (لو القبول اتسجّل ذاتياً والمرحلة لسه 7)
+    const toNegoBtn = document.getElementById('prop-to-nego-btn');
+    if (toNegoBtn) toNegoBtn.addEventListener('click', async () => {
+      try {
+        await EMC.contacts.moveToStage(id, 8, 'قبول العرض — للتفاوض');
+        EMC.utils.toast('تم النقل للتفاوض', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
+    });
   })();
 
   // ─── [5C] محرر بيانات الفرصة ───
