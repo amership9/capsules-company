@@ -224,6 +224,33 @@
   </div>
 </div>
 
+
+  <!-- [8B] Negotiation: log objection modal -->
+<div class="emc-modal-overlay" id="nego-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 640px; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.3);">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--emc-line);">
+      <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">سجّل اعتراض</h3>
+      <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;">اختار الاعتراض اللي اتقال — هيظهرلك الإشارة والردود الجاهزة فوراً</div>
+    </div>
+    <div style="padding: 22px 24px; overflow-y: auto; flex: 1;" id="nego-form">
+      <div class="field">
+        <label class="field-label">نوع الاعتراض <span class="req">*</span></label>
+        <div class="checkbox-group" id="nego-type-group" style="flex-direction: column; gap: 8px;"></div>
+      </div>
+      <!-- معاينة الإشارة + الردود (بتظهر بعد الاختيار) -->
+      <div id="nego-playbook" style="display:none; margin-top: 6px;"></div>
+      <div class="field" style="margin-top: 16px; margin-bottom: 0;">
+        <label class="field-label">مين بيناقش جواه؟ <span class="hint">(اختياري)</span></label>
+        <input class="input" name="negoStakeholder" placeholder="مثلاً: الشريك المؤسس / مجلس الإدارة / لوحده" />
+      </div>
+    </div>
+    <div style="padding: 14px 24px; border-top: 1px solid var(--emc-line); display: flex; justify-content: flex-end; gap: 8px; background: var(--emc-cream);">
+      <button class="btn btn-ghost btn-sm" id="nego-cancel">إلغاء</button>
+      <button class="btn btn-primary btn-sm" id="nego-save">حفظ الاعتراض</button>
+    </div>
+  </div>
+</div>
+  
 <!-- [7A] Proposal builder modal -->
 <div class="emc-modal-overlay" id="prop-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
   <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 640px; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.3);">
