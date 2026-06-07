@@ -401,6 +401,32 @@ window.EMC.NEGOTIATION_OBJECTIONS = {
   }
 };
 
+
+// ═══════════════════════════════════════════════════════════════════
+// [المرحلة 10] قاموس مهام الإعداد (Onboarding)
+// ═══════════════════════════════════════════════════════════════════
+
+// أصحاب المهام — المساران
+window.EMC.ONBOARDING_OWNERS = {
+  admin:  { label: 'مهام عبد الله', short: 'إداري',  color: '#1B3A66', bg: '#E0EBF7', border: '#B5CFE8' },
+  client: { label: 'مهام العميل',   short: 'جاهزية', color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD' }
+};
+
+// مهام الإعداد — مسارين متوازيين، الترتيب مقصود
+window.EMC.ONBOARDING_TASKS = [
+  // ── مسار عبد الله (إداري) ──
+  { key: 'payment_confirmed', owner: 'admin', icon: '💳', label: 'تأكيد الدفع الكامل', hint: 'اتأكد إن قيمة الكوهورت اتدفعت بالكامل أو حسب الاتفاق.' },
+  { key: 'coach_assigned',    owner: 'admin', icon: '🎯', label: 'تحديد المدرب المسؤول', hint: 'حدّد مين هيدرّب ويتابع العميل خلال الكوهورت.' },
+  { key: 'added_to_group',    owner: 'admin', icon: '💬', label: 'إضافته لجروب الكوهورت', hint: 'ضيف العميل لقناة التواصل (واتساب/جروب) الخاصة بالكوهورت.' },
+  { key: 'welcome_sent',      owner: 'admin', icon: '📦', label: 'إرسال حزمة الترحيب', hint: 'ابعت حزمة الترحيب الرسمية خلال 48 ساعة من الدفع.' },
+
+  // ── مسار العميل (جاهزية) ──
+  { key: 'intro_viewed',      owner: 'client', icon: '🎬', label: 'شاهد مادة التعريف', hint: 'العميل اطّلع على مادة التعريف الأساسية قبل أول جلسة.' },
+  { key: 'numbers_collected', owner: 'client', icon: '📊', label: 'جمع أرقام شركته', hint: 'العميل جمّع الأرقام الأساسية: الإيراد، عدد الموظفين، أكبر تحديات.' },
+  { key: 'team_identified',   owner: 'client', icon: '👥', label: 'حدّد فريق القيادة المشارك', hint: 'العميل حدّد مين من فريقه هيشارك في الرحلة.' },
+  { key: 'session_confirmed', owner: 'client', icon: '📅', label: 'أكّد موعد أول جلسة', hint: 'العميل أكّد حضوره وموعد أول يوم في الكوهورت.' }
+];
+
 // ─── Helpers ───
 window.EMC.utils = {
   getStage(id) {
