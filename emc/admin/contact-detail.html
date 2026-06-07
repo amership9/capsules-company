@@ -1375,7 +1375,10 @@
               <div><div style="color:var(--emc-muted); font-size:11.5px;">المبلغ المدفوع</div><strong style="color:var(--emc-ink);">${fmtEGP(saved.paidAmount)}</strong></div>
               <div><div style="color:var(--emc-muted); font-size:11.5px;">حالة الدفع</div><strong style="color:var(--emc-ink);">${PAY_STATUS[saved.paymentStatus] || '—'}</strong></div>
             </div>
-            <div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--emc-line); font-size:12.5px; color:var(--emc-muted);">🚀 جاهز للإعداد (Onboarding) — المرحلة 10 قيد الإنشاء.</div>
+            <div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--emc-line); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-accent btn-sm" id="dec-start-onboarding">🚀 ابدأ الإعداد (المرحلة 10)</button>
+              <span style="font-size:11.5px; color:var(--emc-muted);">العميل دفع وجاهز للإعداد</span>
+            </div>`;
           </div>`;
       }
       return `
@@ -1462,6 +1465,15 @@
 
     function bind() {
       panel.querySelectorAll('.dec-mode').forEach(b => b.addEventListener('click', () => { mode = b.dataset.mode; render(); }));
+      const startOb = panel.querySelector('#dec-start-onboarding');
+      if (startOb) startOb.addEventListener('click', async () => {
+        if (!confirm(`تأكيد بدء إعداد ${c.identity.fullName} ونقله للمرحلة 10؟`)) return;
+        try {
+          await EMC.contacts.moveToStage(id, 10, 'بدء الإعداد (Onboarding)');
+          EMC.utils.toast('تم النقل للإعداد', 'success');
+          setTimeout(() => window.location.reload(), 700);
+        } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
+      });
 
       const cohortSel = panel.querySelector('#dec-cohort-select');
       const cohortNew = panel.querySelector('#dec-cohort-new');
