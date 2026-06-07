@@ -1217,7 +1217,7 @@
     });
   })();
 
-  // ─── [9A] لوحة القرار (المرحلة 9 — Won / Lost) ───
+  // ─── [9B] لوحة القرار (المرحلة 9 — Won / Lost) + اختيار/إضافة كوهورت ───
   (async function setupDecisionPanel() {
     const panel = document.getElementById('decision-panel');
     if (!panel) return;
@@ -1225,6 +1225,11 @@
 
     const saved = c.decision || {};
     let mode = saved.outcome || null;
+
+    // اقرأ الكوهورتات الموجودة للقائمة المنسدلة
+    let cohorts = [];
+    try { cohorts = await EMC.store.list('emc_cohorts'); } catch (e) { cohorts = []; }
+    cohorts = (cohorts || []).filter(x => x && x.name);
 
     const LOST_REASONS = {
       price: 'السعر / الميزانية',
@@ -1286,7 +1291,22 @@
       if (mode === 'won') {
         form = `
           <div class="field"><label class="field-label">الكوهورت <span class="req">*</span></label>
-            <input class="input" id="dec-cohort" value="${saved.cohort || ''}" placeholder="مثلاً: كوهورت يونيو 2026" /></div>
+            <select class="select" id="dec-cohort-select">
+              <option value="">— اختار كوهورت —</option>
+              ${cohorts.map(co => `<option value="${co.id}" ${saved.cohortId===co.id?'selected':''}>${co.name}</option>`).join('')}
+              <option value="__new__">➕ كوهورت جديد…</option>
+            </select>
+          </div>
+          <div id="dec-cohort-new" style="display:none; padding:12px; background:var(--emc-cream); border:1px dashed var(--emc-line); border-radius:10px; margin-bottom:14px;">
+            <label class="field-label">اسم الكوهورت الجديد <span class="req">*</span></label>
+            <input class="input" id="dec-cohort-name" placeholder="مثلاً: كوهورت سبتمبر 2026" />
+            <div class="field-row" style="margin-top:10px; margin-bottom:0;">
+              <div class="field" style="margin-bottom:0;"><label class="field-label">تاريخ البدء <span class="hint">(اختياري)</span></label>
+                <input class="input" id="dec-cohort-start" type="date" /></div>
+              <div class="field" style="margin-bottom:0;"><label class="field-label">تاريخ الانتهاء <span class="hint">(اختياري)</span></label>
+                <input class="input" id="dec-cohort-end" type="date" /></div>
+            </div>
+          </div>
           <div class="field-row">
             <div class="field" style="margin-bottom:0;"><label class="field-label">المبلغ المدفوع (ج.م)</label>
               <input class="input" id="dec-amount" type="number" min="0" value="${saved.paidAmount ?? ''}" placeholder="0" /></div>
@@ -1329,26 +1349,67 @@
 
     function bind() {
       panel.querySelectorAll('.dec-mode').forEach(b => b.addEventListener('click', () => { mode = b.dataset.mode; render(); }));
+
+      const cohortSel = panel.querySelector('#dec-cohort-select');
+      const cohortNew = panel.querySelector('#dec-cohort-new');
+      if (cohortSel && cohortNew) cohortSel.addEventListener('change', () => {
+        cohortNew.style.display = cohortSel.value === '__new__' ? 'block' : 'none';
+      });
+
       const doorLabel = panel.querySelector('#dec-door-label');
       const door = panel.querySelector('#dec-door');
       if (door && doorLabel) door.addEventListener('change', () => doorLabel.classList.toggle('checked', door.checked));
 
       const saveBtn = panel.querySelector('#dec-save');
       if (saveBtn) saveBtn.addEventListener('click', async () => {
-        let decision;
         if (mode === 'won') {
-          const cohort = panel.querySelector('#dec-cohort').value.trim();
-          if (!cohort) { EMC.utils.toast('اكتب اسم الكوهورت', 'error'); return; }
+          const sel = panel.querySelector('#dec-cohort-select').value;
+          let cohortId = '', cohortName = '';
+          if (sel === '__new__') {
+            cohortName = panel.querySelector('#dec-cohort-name').value.trim();
+            if (!cohortName) { EMC.utils.toast('اكتب اسم الكوهورت الجديد', 'error'); return; }
+          } else if (sel) {
+            cohortId = sel;
+            const found = cohorts.find(co => co.id === sel);
+            cohortName = found ? found.name : '';
+          } else {
+            EMC.utils.toast('اختار كوهورت', 'error'); return;
+          }
           const amt = panel.querySelector('#dec-amount').value;
-          decision = {
-            outcome: 'won',
-            cohort,
-            paidAmount: amt === '' ? null : Number(amt),
-            paymentStatus: panel.querySelector('#dec-pay').value,
-            decidedAt: saved.decidedAt || new Date().toISOString()
-          };
-        } else if (mode === 'lost') {
-          decision = {
+          saveBtn.disabled = true; saveBtn.textContent = 'جاري الحفظ…';
+          try {
+            if (sel === '__new__') {
+              cohortId = await EMC.store.create('emc_cohorts', {
+                name: cohortName,
+                startDate: panel.querySelector('#dec-cohort-start').value || null,
+                endDate: panel.querySelector('#dec-cohort-end').value || null,
+                status: 'upcoming',
+                sessions: []
+              });
+            }
+            const decision = {
+              outcome: 'won',
+              cohortId,
+              cohort: cohortName,
+              paidAmount: amt === '' ? null : Number(amt),
+              paymentStatus: panel.querySelector('#dec-pay').value,
+              decidedAt: saved.decidedAt || new Date().toISOString()
+            };
+            await EMC.contacts.update(id, { decision });
+            if (EMC.events?.log) {
+              await EMC.events.log({ contactId: id, type: 'manual_note', stage: 9, channel: 'manual', data: { action: 'decision_won' } });
+            }
+            EMC.utils.toast('تم حفظ القرار', 'success');
+            setTimeout(() => window.location.reload(), 700);
+          } catch (e) {
+            EMC.utils.toast('خطأ: ' + (e.message || ''), 'error');
+            saveBtn.disabled = false; saveBtn.textContent = 'حفظ القرار (Won)';
+          }
+          return;
+        }
+
+        if (mode === 'lost') {
+          const decision = {
             outcome: 'lost',
             lostReason: panel.querySelector('#dec-reason').value,
             lostNote: panel.querySelector('#dec-note').value.trim(),
@@ -1356,21 +1417,22 @@
             reengageAt: panel.querySelector('#dec-reengage').value || null,
             decidedAt: saved.decidedAt || new Date().toISOString()
           };
-        } else {
-          EMC.utils.toast('اختار النتيجة الأول', 'error'); return;
-        }
-        saveBtn.disabled = true; saveBtn.textContent = 'جاري الحفظ…';
-        try {
-          await EMC.contacts.update(id, { decision });
-          if (EMC.events?.log) {
-            await EMC.events.log({ contactId: id, type: 'manual_note', stage: 9, channel: 'manual', data: { action: mode === 'won' ? 'decision_won' : 'decision_lost' } });
+          saveBtn.disabled = true; saveBtn.textContent = 'جاري الحفظ…';
+          try {
+            await EMC.contacts.update(id, { decision });
+            if (EMC.events?.log) {
+              await EMC.events.log({ contactId: id, type: 'manual_note', stage: 9, channel: 'manual', data: { action: 'decision_lost' } });
+            }
+            EMC.utils.toast('تم حفظ القرار', 'success');
+            setTimeout(() => window.location.reload(), 700);
+          } catch (e) {
+            EMC.utils.toast('خطأ: ' + (e.message || ''), 'error');
+            saveBtn.disabled = false; saveBtn.textContent = 'حفظ القرار (Lost)';
           }
-          EMC.utils.toast('تم حفظ القرار', 'success');
-          setTimeout(() => window.location.reload(), 700);
-        } catch (e) {
-          EMC.utils.toast('خطأ: ' + (e.message || ''), 'error');
-          saveBtn.disabled = false; saveBtn.textContent = 'حفظ القرار';
+          return;
         }
+
+        EMC.utils.toast('اختار النتيجة الأول', 'error');
       });
     }
 
