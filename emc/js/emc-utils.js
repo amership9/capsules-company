@@ -500,6 +500,42 @@ window.EMC.npsCategory = function (score) {
   return { label: 'منتقد', color: '#A2202D', bg: '#FBE0E2', border: '#F1B6BB' };
 };
 
+// ═══════════════════════════════════════════════════════════════════
+// [المرحلة 14] قاموس السفراء (Advocate)
+// ═══════════════════════════════════════════════════════════════════
+
+// مستوى السفير — بيتحسب تلقائياً حسب نشاطه (مش بيتحدّد يدوياً)
+window.EMC.ADVOCATE_LEVELS = {
+  satisfied: { label: 'خريج راضٍ',   icon: '🎓', color: '#5F5E5A', bg: '#F1EFE8', border: '#D3D1C7', desc: 'لسه ما أحالش حد' },
+  referrer:  { label: 'محيل نشط',    icon: '🤝', color: '#1B3A66', bg: '#E0EBF7', border: '#B5CFE8', desc: 'أحال حد أو أكتر' },
+  certified: { label: 'سفير معتمد',  icon: '⭐', color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD', desc: 'إحالاته اتحوّلت لعملاء' }
+};
+
+// حالة كل إحالة على حدة (دورة حياة الإحالة)
+window.EMC.REFERRAL_STATUS = {
+  logged:      { label: 'اتسجّلت',     color: '#5F5E5A', bg: '#F1EFE8', border: '#D3D1C7' },
+  contacted:   { label: 'اتواصلنا',    color: '#1B3A66', bg: '#E0EBF7', border: '#B5CFE8' },
+  in_pipeline: { label: 'دخل المسار',  color: '#8C5915', bg: '#FAEEDB', border: '#ECD3A6' },
+  converted:   { label: 'تحوّل لعميل ✓', color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD' },
+  lost:        { label: 'ضاع',         color: '#A2202D', bg: '#FBE0E2', border: '#F1B6BB' }
+};
+
+// أنواع المساهمات الأخرى للسفير
+window.EMC.ADVOCATE_CONTRIBUTIONS = [
+  { key: 'video_testimonial', icon: '🎥', label: 'شهادة فيديو' },
+  { key: 'case_study',        icon: '📄', label: 'حالة دراسية' },
+  { key: 'event_speaker',     icon: '🎤', label: 'تكلّم في فعالية' },
+  { key: 'content',           icon: '✍️', label: 'مساهمة بمحتوى' }
+];
+
+// حساب مستوى السفير تلقائياً من الإحالات
+window.EMC.computeAdvocateLevel = function (referrals) {
+  const list = Array.isArray(referrals) ? referrals : [];
+  if (list.some(r => r.status === 'converted')) return 'certified';
+  if (list.length > 0) return 'referrer';
+  return 'satisfied';
+};
+
 // ─── Helpers ───
 window.EMC.utils = {
   getStage(id) {
