@@ -66,6 +66,36 @@
       <span id="calendly-saved" style="display:none; margin-inline-start:10px; color:var(--emc-success); font-size:13px; font-weight:600;">✓ تم الحفظ</span>
     </div>
 
+    <!-- جهة التواصل -->
+    <div class="card card-pad" style="margin-bottom: 18px;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom: 6px;">
+        <div style="width:38px; height:38px; border-radius:10px; background:var(--emc-cream); display:grid; place-items:center; flex-shrink:0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emc-navy)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">جهة التواصل في الرسائل</h3>
+          <div style="font-size:12.5px; color:var(--emc-muted);">الاسم اللي بيظهر للعميل في رسائل العرض والمتابعة</div>
+        </div>
+      </div>
+
+      <div style="background:var(--emc-cream); border-radius:8px; padding:12px 14px; font-size:12.5px; color:var(--emc-ink-2); line-height:1.7; margin:14px 0;">
+        الاسم ده بيتحط تلقائياً في توقيع رسائل الواتساب والإيميل اللي بتتبعت للعملاء. لو سابته فاضي، النظام هيستخدم "عبدالله". لو دخل مساعد أو فريق، غيّره من هنا مرة واحدة وكل الرسائل تتحدّث.
+      </div>
+
+      <div class="field-row" style="margin-bottom: 14px;">
+        <div class="field">
+          <label class="field-label">اسم جهة التواصل</label>
+          <input class="input" id="contact-name" placeholder="عبدالله عامر" />
+        </div>
+        <div class="field">
+          <label class="field-label">إيميل التواصل <span class="hint">(لإرسال العروض)</span></label>
+          <input class="input" type="email" id="contact-email" placeholder="abdullah@emc.academy" />
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="save-contact">حفظ جهة التواصل</button>
+      <span id="contact-saved" style="display:none; margin-inline-start:10px; color:var(--emc-success); font-size:13px; font-weight:600;">✓ تم الحفظ</span>
+    </div>
+
     <!-- Info card -->
     <div class="card card-pad" style="background:var(--emc-cream); border-color:var(--emc-line);">
       <h4 style="margin:0 0 8px; font-size:13.5px; color:var(--emc-navy); font-weight:700;">💡 ملاحظة عن Calendly المجاني</h4>
@@ -104,9 +134,36 @@
       setTimeout(() => saved.style.display = 'none', 2500);
       EMC.utils.toast('تم حفظ رابط Calendly', 'success');
       btn.disabled = false; btn.textContent = 'حفظ الرابط';
-    } catch (e) {
+   } catch (e) {
       EMC.utils.toast('خطأ: ' + (e.message || 'فشل الحفظ'), 'error');
       btn.disabled = false; btn.textContent = 'حفظ الرابط';
+    }
+  });
+
+  // ─── جهة التواصل ───
+  document.getElementById('contact-name').value = settings.contactName || '';
+  document.getElementById('contact-email').value = settings.contactEmail || '';
+
+  document.getElementById('save-contact').addEventListener('click', async () => {
+    const btn = document.getElementById('save-contact');
+    const name = document.getElementById('contact-name').value.trim();
+    const email = document.getElementById('contact-email').value.trim();
+    if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      EMC.utils.toast('الإيميل مش صحيح', 'error');
+      return;
+    }
+    btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+    try {
+      await EMC.utils.saveSetting('contactName', name);
+      await EMC.utils.saveSetting('contactEmail', email);
+      const saved = document.getElementById('contact-saved');
+      saved.style.display = 'inline';
+      setTimeout(() => saved.style.display = 'none', 2500);
+      EMC.utils.toast('تم حفظ جهة التواصل', 'success');
+      btn.disabled = false; btn.textContent = 'حفظ جهة التواصل';
+    } catch (e) {
+      EMC.utils.toast('خطأ: ' + (e.message || 'فشل الحفظ'), 'error');
+      btn.disabled = false; btn.textContent = 'حفظ جهة التواصل';
     }
   });
 })();
