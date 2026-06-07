@@ -436,6 +436,9 @@
     <!-- [9A] Decision panel — يظهر فقط للمرحلة 9 -->
     <div id="decision-panel"></div>
 
+    <!-- [10B] Onboarding panel — يظهر فقط للمرحلة 10 -->
+    <div id="onboarding-panel"></div>
+
     <!-- Quick stats -->
     <div class="grid-4" style="margin-bottom: 22px;">
       <div class="stat-card accent-navy">
@@ -1217,6 +1220,116 @@
     });
   })();
 
+
+  // ─── [10B] لوحة الإعداد (المرحلة 10 — Onboarding) ───
+  (async function setupOnboardingPanel() {
+    const panel = document.getElementById('onboarding-panel');
+    if (!panel) return;
+    if (c.currentStage !== 10) return;
+
+    const TASKS = EMC.ONBOARDING_TASKS || [];
+    const OWNERS = EMC.ONBOARDING_OWNERS || {};
+    const ob = c.onboarding || {};
+    const done = ob.tasks || {}; // { taskKey: true }
+
+    const total = TASKS.length;
+    const completed = TASKS.filter(t => done[t.key]).length;
+    const pct = total ? Math.round((completed / total) * 100) : 0;
+    const allDone = completed === total && total > 0;
+
+    function trackHtml(ownerKey) {
+      const owner = OWNERS[ownerKey] || { label: ownerKey, bg: '#eee', color: '#333', border: '#ccc' };
+      const tasks = TASKS.filter(t => t.owner === ownerKey);
+      const doneCount = tasks.filter(t => done[t.key]).length;
+      return `
+        <div style="flex:1; min-width:280px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+            <span class="badge" style="background:${owner.bg}; color:${owner.color}; border-color:${owner.border};">${owner.label}</span>
+            <span style="font-size:12px; color:var(--emc-muted);">${doneCount}/${tasks.length}</span>
+          </div>
+          ${tasks.map(t => {
+            const isDone = !!done[t.key];
+            return `
+              <div class="ob-task" data-key="${t.key}" style="display:flex; align-items:flex-start; gap:11px; padding:12px 14px; border:1px solid ${isDone ? owner.border : 'var(--emc-line)'}; background:${isDone ? owner.bg : '#fff'}; border-radius:11px; margin-bottom:9px; cursor:pointer; transition:all 0.15s;">
+                <div style="width:22px; height:22px; border-radius:6px; border:2px solid ${isDone ? owner.color : 'var(--emc-line)'}; background:${isDone ? owner.color : 'transparent'}; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">
+                  ${isDone ? '<span style="color:#fff; font-size:13px; font-weight:800;">✓</span>' : ''}
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:13.5px; font-weight:700; color:var(--emc-navy); ${isDone ? 'text-decoration:line-through; opacity:0.65;' : ''}">${t.icon} ${t.label}</div>
+                  <div style="font-size:11.5px; color:var(--emc-muted); line-height:1.5; margin-top:2px;">${t.hint}</div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>`;
+    }
+
+    panel.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:22px; border-color:var(--emc-navy-soft);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+          <span style="width:4px; height:20px; background:var(--emc-navy-soft); border-radius:2px;"></span>
+          <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">الإعداد (Onboarding)</h3>
+        </div>
+
+        <!-- مؤشر الجاهزية -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <span style="font-size:13px; color:var(--emc-ink); font-weight:700;">مؤشر الجاهزية</span>
+            <span style="font-size:14px; font-weight:800; color:${allDone ? 'var(--emc-success)' : 'var(--emc-navy)'};">${pct}%</span>
+          </div>
+          <div style="height:10px; background:var(--emc-cream); border-radius:6px; overflow:hidden;">
+            <div style="height:100%; width:${pct}%; background:${allDone ? 'var(--emc-success)' : 'var(--emc-navy-soft)'}; border-radius:6px; transition:width 0.3s;"></div>
+          </div>
+          <div style="font-size:11.5px; color:var(--emc-muted); margin-top:6px;">${completed} من ${total} مهام مكتملة</div>
+        </div>
+
+        <!-- المساران -->
+        <div style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:18px;">
+          ${trackHtml('admin')}
+          ${trackHtml('client')}
+        </div>
+
+        <!-- زر الانتقال -->
+        <div style="padding-top:16px; border-top:1px solid var(--emc-line-soft);">
+          ${allDone
+            ? `<button class="btn btn-accent btn-sm" id="ob-advance-btn">🚀 جاهز للبدء — المرحلة 11</button>`
+            : `<button class="btn btn-outline btn-sm" id="ob-advance-btn" style="opacity:0.6;">🚀 جاهز للبدء — المرحلة 11</button>
+               <span style="font-size:11.5px; color:var(--emc-muted); margin-inline-start:10px;">كمّل كل المهام الأول</span>`}
+        </div>
+      </div>`;
+
+    // ── تبديل حالة المهمة ──
+    async function patchTasks(newDone) {
+      const newOb = { ...(c.onboarding || {}), tasks: newDone };
+      await EMC.contacts.update(id, { onboarding: newOb });
+      c.onboarding = newOb;
+    }
+
+    panel.querySelectorAll('.ob-task').forEach(el => {
+      el.addEventListener('click', async () => {
+        const key = el.dataset.key;
+        const newDone = { ...done };
+        if (newDone[key]) delete newDone[key]; else newDone[key] = true;
+        try {
+          await patchTasks(newDone);
+          window.location.reload();
+        } catch (e) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+      });
+    });
+
+    // ── الانتقال للمرحلة 11 ──
+    const advBtn = document.getElementById('ob-advance-btn');
+    if (advBtn) advBtn.addEventListener('click', async () => {
+      if (!allDone) { EMC.utils.toast('كمّل كل مهام الإعداد الأول', 'error'); return; }
+      if (!confirm(`تأكيد إن ${c.identity.fullName} جاهز للبدء ونقله للمرحلة 11؟`)) return;
+      try {
+        await EMC.contacts.update(id, { onboarding: { ...(c.onboarding || {}), completedAt: new Date().toISOString() } });
+        await EMC.contacts.moveToStage(id, 11, 'اكتمل الإعداد — جاهز للبدء');
+        EMC.utils.toast('تم النقل للمرحلة 11', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
+    });
+  })();
+                                                                  
   // ─── [9B] لوحة القرار (المرحلة 9 — Won / Lost) + اختيار/إضافة كوهورت ───
   (async function setupDecisionPanel() {
     const panel = document.getElementById('decision-panel');
