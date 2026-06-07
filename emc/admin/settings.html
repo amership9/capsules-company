@@ -92,6 +92,11 @@
           <input class="input" type="email" id="contact-email" placeholder="abdullah@emc.academy" />
         </div>
       </div>
+      <div class="field" style="margin-bottom: 14px;">
+        <label class="field-label">رقم واتساب الفريق <span class="hint">(الرقم اللي العميل يكلّمه)</span></label>
+        <input class="input" id="contact-whatsapp" placeholder="201001234567" />
+        <div class="hint" style="font-size:11.5px; color:var(--emc-faint); margin-top:6px;">بالكود الدولي بدون + أو مسافات (مثلاً: 201001234567). ده الرقم اللي بيظهر للعميل في صفحة العرض لو حب يتواصل.</div>
+      </div>
       <button class="btn btn-primary btn-sm" id="save-contact">حفظ جهة التواصل</button>
       <span id="contact-saved" style="display:none; margin-inline-start:10px; color:var(--emc-success); font-size:13px; font-weight:600;">✓ تم الحفظ</span>
     </div>
@@ -143,11 +148,13 @@
   // ─── جهة التواصل ───
   document.getElementById('contact-name').value = settings.contactName || '';
   document.getElementById('contact-email').value = settings.contactEmail || '';
+  document.getElementById('contact-whatsapp').value = settings.contactWhatsapp || '';
 
   document.getElementById('save-contact').addEventListener('click', async () => {
     const btn = document.getElementById('save-contact');
     const name = document.getElementById('contact-name').value.trim();
     const email = document.getElementById('contact-email').value.trim();
+    const whatsapp = document.getElementById('contact-whatsapp').value.replace(/\D/g, '');
     if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       EMC.utils.toast('الإيميل مش صحيح', 'error');
       return;
@@ -156,6 +163,7 @@
     try {
       await EMC.utils.saveSetting('contactName', name);
       await EMC.utils.saveSetting('contactEmail', email);
+      await EMC.utils.saveSetting('contactWhatsapp', whatsapp);
       const saved = document.getElementById('contact-saved');
       saved.style.display = 'inline';
       setTimeout(() => saved.style.display = 'none', 2500);
