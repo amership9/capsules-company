@@ -293,9 +293,10 @@
 
     // ── منطقة القبول ──
     const zone = document.getElementById('po-accept-zone');
-    const digits = (contact.channels?.whatsapp || contact.channels?.mobile || '').replace(/\D/g, '');
-    const waNum = digits ? (digits.startsWith('20') ? digits : (digits.startsWith('0') ? '2' + digits : '2' + digits)) : '';
-    const waMsg = encodeURIComponent(`أهلاً ${senderName}، اطّلعت على العرض وعايز نكمّل.`);
+    // رقم الفريق (من الإعدادات) — ده اللي العميل يكلّمه، مش رقم العميل نفسه
+    const teamDigits = (poSettings.contactWhatsapp || '').replace(/\D/g, '');
+    const waNum = teamDigits;
+    const waMsg = encodeURIComponent(`أهلاً ${senderName}، اطّلعت على العرض الخاص بـ ${company} وعايز نكمّل.`);
     const waLink = waNum ? `https://wa.me/${waNum}?text=${waMsg}` : '';
 
     if (expired) {
