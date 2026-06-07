@@ -433,6 +433,9 @@
     <!-- [8B] Negotiation panel — يظهر فقط للمرحلة 8 -->
     <div id="negotiation-panel"></div>
 
+    <!-- [9A] Decision panel — يظهر فقط للمرحلة 9 -->
+    <div id="decision-panel"></div>
+
     <!-- Quick stats -->
     <div class="grid-4" style="margin-bottom: 22px;">
       <div class="stat-card accent-navy">
@@ -1214,6 +1217,166 @@
     });
   })();
 
+  // ─── [9A] لوحة القرار (المرحلة 9 — Won / Lost) ───
+  (async function setupDecisionPanel() {
+    const panel = document.getElementById('decision-panel');
+    if (!panel) return;
+    if (c.currentStage !== 9) return;
+
+    const saved = c.decision || {};
+    let mode = saved.outcome || null;
+
+    const LOST_REASONS = {
+      price: 'السعر / الميزانية',
+      timing: 'التوقيت غير مناسب',
+      competitor: 'اختار منافس',
+      lost_urgency: 'فقد الإلحاح / تغيّر الأولويات',
+      trust: 'مشكلة ثقة أو مصداقية',
+      external: 'ظروف خارجية (الشركة / السوق)',
+      unreachable: 'تعذّر الوصول إليه',
+      other: 'سبب آخر'
+    };
+    const PAY_STATUS = {
+      unpaid: 'لم يدفع بعد',
+      deposit: 'دفع دفعة مقدمة',
+      paid: 'مدفوع بالكامل'
+    };
+    const fmtEGP = (n) => (n == null || n === '') ? '—' : Number(n).toLocaleString('en-US') + ' ج.م';
+
+    function summaryHtml() {
+      if (!saved.outcome) return '';
+      if (saved.outcome === 'won') {
+        return `
+          <div style="padding:16px; background:var(--emc-cream); border:1px solid var(--emc-line); border-inline-start:4px solid var(--emc-success); border-radius:12px; margin-bottom:18px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+              <span class="badge" style="background:#E1F1E8; color:#1E5C42; border-color:#BFE0CD;">✓ تم الإغلاق (Won)</span>
+              ${saved.decidedAt ? `<span style="font-size:11.5px; color:var(--emc-muted);">${EMC.utils.formatDate(saved.decidedAt)}</span>` : ''}
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; font-size:13px;">
+              <div><div style="color:var(--emc-muted); font-size:11.5px;">الكوهورت</div><strong style="color:var(--emc-ink);">${saved.cohort || '—'}</strong></div>
+              <div><div style="color:var(--emc-muted); font-size:11.5px;">المبلغ المدفوع</div><strong style="color:var(--emc-ink);">${fmtEGP(saved.paidAmount)}</strong></div>
+              <div><div style="color:var(--emc-muted); font-size:11.5px;">حالة الدفع</div><strong style="color:var(--emc-ink);">${PAY_STATUS[saved.paymentStatus] || '—'}</strong></div>
+            </div>
+            <div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--emc-line); font-size:12.5px; color:var(--emc-muted);">🚀 جاهز للإعداد (Onboarding) — المرحلة 10 قيد الإنشاء.</div>
+          </div>`;
+      }
+      return `
+        <div style="padding:16px; background:var(--emc-cream); border:1px solid var(--emc-line); border-inline-start:4px solid var(--emc-red); border-radius:12px; margin-bottom:18px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+            <span class="badge" style="background:#FBE0E2; color:#A2202D; border-color:#F1B6BB;">✕ خسارة (Lost)</span>
+            ${saved.decidedAt ? `<span style="font-size:11.5px; color:var(--emc-muted);">${EMC.utils.formatDate(saved.decidedAt)}</span>` : ''}
+          </div>
+          <div style="font-size:13px; margin-bottom:6px;"><span style="color:var(--emc-muted); font-size:11.5px;">السبب: </span><strong style="color:var(--emc-ink);">${LOST_REASONS[saved.lostReason] || '—'}</strong></div>
+          ${saved.lostNote ? `<div style="font-size:12.5px; color:var(--emc-ink-2); line-height:1.6;">${saved.lostNote}</div>` : ''}
+          <div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--emc-line); font-size:12.5px;">
+            ${saved.doorOpen ? `<span style="color:var(--emc-success);">🚪 الباب مفتوح للمستقبل</span>` : `<span style="color:var(--emc-muted);">الباب مغلق حالياً</span>`}
+            ${saved.reengageAt ? ` · <span style="color:var(--emc-muted);">متابعة: ${EMC.utils.formatDate(saved.reengageAt)}</span>` : ''}
+          </div>
+        </div>`;
+    }
+
+    function formHtml() {
+      const chooser = `
+        <div style="display:flex; gap:10px; margin-bottom:18px;">
+          <button class="btn ${mode==='won'?'btn-accent':'btn-outline'} btn-sm dec-mode" data-mode="won" style="flex:1;">✓ تم الإغلاق (Won)</button>
+          <button class="btn ${mode==='lost'?'btn-primary':'btn-outline'} btn-sm dec-mode" data-mode="lost" style="flex:1; ${mode==='lost'?'':'color:var(--emc-red);'}">✕ خسارة (Lost)</button>
+        </div>`;
+
+      let form = '';
+      if (mode === 'won') {
+        form = `
+          <div class="field"><label class="field-label">الكوهورت <span class="req">*</span></label>
+            <input class="input" id="dec-cohort" value="${saved.cohort || ''}" placeholder="مثلاً: كوهورت يونيو 2026" /></div>
+          <div class="field-row">
+            <div class="field" style="margin-bottom:0;"><label class="field-label">المبلغ المدفوع (ج.م)</label>
+              <input class="input" id="dec-amount" type="number" min="0" value="${saved.paidAmount ?? ''}" placeholder="0" /></div>
+            <div class="field" style="margin-bottom:0;"><label class="field-label">حالة الدفع</label>
+              <select class="select" id="dec-pay">${Object.entries(PAY_STATUS).map(([k,v])=>`<option value="${k}" ${saved.paymentStatus===k?'selected':''}>${v}</option>`).join('')}</select></div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="dec-save" style="margin-top:16px;">حفظ القرار (Won)</button>`;
+      } else if (mode === 'lost') {
+        form = `
+          <div class="field"><label class="field-label">سبب الخسارة الدقيق <span class="req">*</span></label>
+            <select class="select" id="dec-reason">${Object.entries(LOST_REASONS).map(([k,v])=>`<option value="${k}" ${saved.lostReason===k?'selected':''}>${v}</option>`).join('')}</select></div>
+          <div class="field"><label class="field-label">تفاصيل <span class="hint">(اختياري)</span></label>
+            <textarea class="input" id="dec-note" rows="2" placeholder="إيه اللي حصل بالظبط؟ ده بيحدد نوع الرعاية اللاحقة.">${saved.lostNote || ''}</textarea></div>
+          <div class="field-row">
+            <label class="chip-check ${saved.doorOpen!==false?'checked':''}" id="dec-door-label" style="flex:1; justify-content:flex-start;">
+              <input type="checkbox" id="dec-door" ${saved.doorOpen!==false?'checked':''} /> 🚪 الباب مفتوح للمستقبل</label>
+            <div class="field" style="margin-bottom:0; flex:1;"><label class="field-label">تاريخ متابعة <span class="hint">(اختياري)</span></label>
+              <input class="input" id="dec-reengage" type="date" value="${(saved.reengageAt||'').slice(0,10)}" /></div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="dec-save" style="margin-top:16px;">حفظ القرار (Lost)</button>`;
+      } else {
+        form = `<div style="text-align:center; padding:18px; color:var(--emc-muted); font-size:13px;">اختار نتيجة القرار فوق عشان تكمّل.</div>`;
+      }
+      return chooser + form;
+    }
+
+    function render() {
+      panel.innerHTML = `
+        <div class="card card-pad" style="margin-bottom:22px; border-color:var(--emc-navy-soft);">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+            <span style="width:4px; height:20px; background:var(--emc-navy-soft); border-radius:2px;"></span>
+            <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">القرار</h3>
+            ${saved.outcome ? `<span style="font-size:12px; color:var(--emc-muted);">(محفوظ — تقدر تعدّله)</span>` : ''}
+          </div>
+          ${summaryHtml()}
+          ${formHtml()}
+        </div>`;
+      bind();
+    }
+
+    function bind() {
+      panel.querySelectorAll('.dec-mode').forEach(b => b.addEventListener('click', () => { mode = b.dataset.mode; render(); }));
+      const doorLabel = panel.querySelector('#dec-door-label');
+      const door = panel.querySelector('#dec-door');
+      if (door && doorLabel) door.addEventListener('change', () => doorLabel.classList.toggle('checked', door.checked));
+
+      const saveBtn = panel.querySelector('#dec-save');
+      if (saveBtn) saveBtn.addEventListener('click', async () => {
+        let decision;
+        if (mode === 'won') {
+          const cohort = panel.querySelector('#dec-cohort').value.trim();
+          if (!cohort) { EMC.utils.toast('اكتب اسم الكوهورت', 'error'); return; }
+          const amt = panel.querySelector('#dec-amount').value;
+          decision = {
+            outcome: 'won',
+            cohort,
+            paidAmount: amt === '' ? null : Number(amt),
+            paymentStatus: panel.querySelector('#dec-pay').value,
+            decidedAt: saved.decidedAt || new Date().toISOString()
+          };
+        } else if (mode === 'lost') {
+          decision = {
+            outcome: 'lost',
+            lostReason: panel.querySelector('#dec-reason').value,
+            lostNote: panel.querySelector('#dec-note').value.trim(),
+            doorOpen: panel.querySelector('#dec-door').checked,
+            reengageAt: panel.querySelector('#dec-reengage').value || null,
+            decidedAt: saved.decidedAt || new Date().toISOString()
+          };
+        } else {
+          EMC.utils.toast('اختار النتيجة الأول', 'error'); return;
+        }
+        saveBtn.disabled = true; saveBtn.textContent = 'جاري الحفظ…';
+        try {
+          await EMC.contacts.update(id, { decision });
+          if (EMC.events?.log) {
+            await EMC.events.log({ contactId: id, type: 'manual_note', stage: 9, channel: 'manual', data: { action: mode === 'won' ? 'decision_won' : 'decision_lost' } });
+          }
+          EMC.utils.toast('تم حفظ القرار', 'success');
+          setTimeout(() => window.location.reload(), 700);
+        } catch (e) {
+          EMC.utils.toast('خطأ: ' + (e.message || ''), 'error');
+          saveBtn.disabled = false; saveBtn.textContent = 'حفظ القرار';
+        }
+      });
+    }
+
+    render();
+  })();
+  
 
   // ─── [8B] لوحة التفاوض (المرحلة 8) ───
   (async function setupNegotiationPanel() {
@@ -1325,8 +1488,7 @@
 
         <!-- النقل للقرار -->
         <div style="display:flex; gap:8px; flex-wrap:wrap; padding-top:16px; border-top:1px solid var(--emc-line-soft);">
-          <button class="btn btn-accent btn-sm" id="nego-won-btn">✓ تم الإغلاق (Won) — المرحلة 9</button>
-          <button class="btn btn-outline btn-sm" id="nego-lost-btn" style="color:var(--emc-red);">✕ خسارة الفرصة (Lost)</button>
+          <button class="btn btn-primary btn-sm" id="nego-to-decision-btn">📋 انتقل لمرحلة القرار (المرحلة 9)</button>
         </div>
       </div>`;
 
@@ -1462,25 +1624,14 @@
       }
     });
 
-    // ── النقل للمرحلة 9 (Won / Lost) ──
-    document.getElementById('nego-won-btn').addEventListener('click', async () => {
-      if (!confirm(`تأكيد إغلاق صفقة ${c.identity.fullName} كـ "Won" ونقلها للمرحلة 9 (القرار)؟`)) return;
+    // ── النقل للمرحلة 9 (القرار) — بدون تحديد النتيجة هنا ──
+    document.getElementById('nego-to-decision-btn').addEventListener('click', async () => {
+      if (!confirm(`تأكيد إنهاء التفاوض مع ${c.identity.fullName} والانتقال لمرحلة القرار (9)؟\n\nهتسجّل النتيجة (تم الإغلاق / خسارة) جوه مرحلة القرار نفسها.`)) return;
       try {
-        await EMC.contacts.update(id, { negotiation: { ...(c.negotiation || {}), status: 'leaning_yes', outcome: 'won', outcomeAt: new Date().toISOString() } });
-        await EMC.contacts.moveToStage(id, 9, 'إغلاق التفاوض: Won — للقرار');
-        EMC.utils.toast('تم النقل للقرار (Won)', 'success');
+        await EMC.contacts.moveToStage(id, 9, 'إنهاء التفاوض — الانتقال لمرحلة القرار');
+        EMC.utils.toast('تم الانتقال لمرحلة القرار', 'success');
         setTimeout(() => window.location.reload(), 700);
-      } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
-    });
-
-    document.getElementById('nego-lost-btn').addEventListener('click', async () => {
-      if (!confirm(`تأكيد خسارة فرصة ${c.identity.fullName} (Lost) ونقلها للمرحلة 9 (القرار)؟`)) return;
-      try {
-        await EMC.contacts.update(id, { negotiation: { ...(c.negotiation || {}), status: 'leaning_no', outcome: 'lost', outcomeAt: new Date().toISOString() } });
-        await EMC.contacts.moveToStage(id, 9, 'إغلاق التفاوض: Lost — للقرار');
-        EMC.utils.toast('تم النقل للقرار (Lost)', 'default');
-        setTimeout(() => window.location.reload(), 700);
-      } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
+      } catch (e) { EMC.utils.toast('خطأ في الانتقال', 'error'); }
     });
   })();
   
