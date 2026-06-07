@@ -427,6 +427,29 @@ window.EMC.ONBOARDING_TASKS = [
   { key: 'session_confirmed', owner: 'client', icon: '📅', label: 'أكّد موعد أول جلسة', hint: 'العميل أكّد حضوره وموعد أول يوم في الكوهورت.' }
 ];
 
+
+// ═══════════════════════════════════════════════════════════════════
+// [المرحلة 11] قاموس المشاركة والحضور (Participation)
+// ═══════════════════════════════════════════════════════════════════
+
+// عدد أيام الكوهورت (جمعة وسبت × 3 أسابيع)
+window.EMC.COHORT_DAYS = 6;
+
+// حالة الحضور لكل يوم
+window.EMC.ATTENDANCE_STATUS = {
+  present: { label: 'حاضر',   icon: '✓', color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD', weight: 1 },
+  late:    { label: 'متأخر',  icon: '◑', color: '#8C5915', bg: '#FAEEDB', border: '#ECD3A6', weight: 0.5 },
+  absent:  { label: 'غايب',   icon: '✕', color: '#A2202D', bg: '#FBE0E2', border: '#F1B6BB', weight: 0 }
+};
+
+// مؤشر التفاعل لكل يوم (اختياري)
+window.EMC.ENGAGEMENT_LEVEL = {
+  active:    { label: 'نشط',     icon: '🔥', color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD' },
+  normal:    { label: 'عادي',    icon: '•',  color: '#1B3A66', bg: '#E0EBF7', border: '#B5CFE8' },
+  withdrawn: { label: 'منسحب',   icon: '⚠',  color: '#A2202D', bg: '#FBE0E2', border: '#F1B6BB' }
+};
+
+
 // ─── Helpers ───
 window.EMC.utils = {
   getStage(id) {
