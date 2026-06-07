@@ -439,6 +439,10 @@
     <!-- [10B] Onboarding panel — يظهر فقط للمرحلة 10 -->
     <div id="onboarding-panel"></div>
 
+    <!-- [11B] Participation panel — يظهر فقط للمرحلة 11 -->
+    <div id="participation-panel"></div>
+    
+
     <!-- Quick stats -->
     <div class="grid-4" style="margin-bottom: 22px;">
       <div class="stat-card accent-navy">
@@ -1221,6 +1225,150 @@
   })();
 
 
+// ─── [11B] لوحة المشاركة والحضور (المرحلة 11 — Participation) ───
+  (async function setupParticipationPanel() {
+    const panel = document.getElementById('participation-panel');
+    if (!panel) return;
+    if (c.currentStage !== 11) return;
+
+    const DAYS = EMC.COHORT_DAYS || 6;
+    const ATT = EMC.ATTENDANCE_STATUS || {};
+    const ENG = EMC.ENGAGEMENT_LEVEL || {};
+
+    const part = c.participation || {};
+    const records = part.days || {}; // { "1": { attendance: 'present', engagement: 'active', note: '' }, ... }
+
+    // حساب نسبة الحضور (بالأوزان: حاضر=1، متأخر=0.5، غايب=0)
+    let recordedCount = 0, weightSum = 0;
+    for (let d = 1; d <= DAYS; d++) {
+      const rec = records[String(d)];
+      if (rec && rec.attendance) {
+        recordedCount++;
+        const w = ATT[rec.attendance]?.weight ?? 0;
+        weightSum += w;
+      }
+    }
+    const attendancePct = recordedCount ? Math.round((weightSum / recordedCount) * 100) : 0;
+    const allRecorded = recordedCount === DAYS;
+
+    // هل فيه إنذار مبكر؟ (أي غياب أو انسحاب)
+    let hasAlert = false;
+    for (let d = 1; d <= DAYS; d++) {
+      const rec = records[String(d)];
+      if (rec && (rec.attendance === 'absent' || rec.engagement === 'withdrawn')) hasAlert = true;
+    }
+
+    function dayCardHtml(d) {
+      const rec = records[String(d)] || {};
+      const att = rec.attendance ? ATT[rec.attendance] : null;
+      const eng = rec.engagement ? ENG[rec.engagement] : null;
+      return `
+        <div style="border:1px solid ${att ? att.border : 'var(--emc-line)'}; background:${att ? att.bg : '#fff'}; border-radius:12px; padding:14px; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px;">
+            <span style="font-weight:800; color:var(--emc-navy); font-size:14px;">اليوم ${d}</span>
+            ${att ? `<span class="badge" style="background:${att.bg}; color:${att.color}; border-color:${att.border};">${att.icon} ${att.label}</span>` : `<span style="font-size:11.5px; color:var(--emc-faint);">لسه ما اتسجّلش</span>`}
+          </div>
+
+          <!-- الحضور (أساسي) -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--emc-muted); font-weight:700; margin-bottom:6px;">الحضور</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              ${Object.entries(ATT).map(([k, v]) =>
+                `<button class="btn btn-ghost btn-sm part-att" data-day="${d}" data-val="${k}" style="padding:4px 12px; font-size:12px; ${rec.attendance === k ? 'background:'+v.bg+'; color:'+v.color+'; border:1px solid '+v.border+';' : ''}">${v.icon} ${v.label}</button>`
+              ).join('')}
+            </div>
+          </div>
+
+          <!-- التفاعل (اختياري) -->
+          <div>
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--emc-muted); font-weight:700; margin-bottom:6px;">التفاعل <span style="text-transform:none; font-weight:400;">(اختياري)</span></div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              ${Object.entries(ENG).map(([k, v]) =>
+                `<button class="btn btn-ghost btn-sm part-eng" data-day="${d}" data-val="${k}" style="padding:4px 12px; font-size:12px; ${rec.engagement === k ? 'background:'+v.bg+'; color:'+v.color+'; border:1px solid '+v.border+';' : ''}">${v.icon} ${v.label}</button>`
+              ).join('')}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    let daysHtml = '';
+    for (let d = 1; d <= DAYS; d++) daysHtml += dayCardHtml(d);
+
+    panel.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:22px; border-color:var(--emc-navy-soft);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+          <span style="width:4px; height:20px; background:var(--emc-navy-soft); border-radius:2px;"></span>
+          <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">المشاركة والحضور</h3>
+          ${hasAlert ? `<span class="badge" style="background:#FBE0E2; color:#A2202D; border-color:#F1B6BB;">⚠ يحتاج متابعة</span>` : ''}
+        </div>
+
+        <!-- نسبة الحضور -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <span style="font-size:13px; color:var(--emc-ink); font-weight:700;">نسبة الحضور</span>
+            <span style="font-size:14px; font-weight:800; color:${attendancePct >= 80 ? 'var(--emc-success)' : attendancePct >= 50 ? 'var(--emc-navy)' : 'var(--emc-red)'};">${attendancePct}%</span>
+          </div>
+          <div style="height:10px; background:var(--emc-cream); border-radius:6px; overflow:hidden;">
+            <div style="height:100%; width:${attendancePct}%; background:${attendancePct >= 80 ? 'var(--emc-success)' : attendancePct >= 50 ? 'var(--emc-navy-soft)' : 'var(--emc-red)'}; border-radius:6px; transition:width 0.3s;"></div>
+          </div>
+          <div style="font-size:11.5px; color:var(--emc-muted); margin-top:6px;">${recordedCount} من ${DAYS} أيام اتسجّلت</div>
+        </div>
+
+        <!-- شبكة الأيام -->
+        <div style="margin-bottom:18px;">
+          ${daysHtml}
+        </div>
+
+        <!-- زر الانتقال -->
+        <div style="padding-top:16px; border-top:1px solid var(--emc-line-soft);">
+          ${allRecorded
+            ? `<button class="btn btn-accent btn-sm" id="part-advance-btn">📈 انتهى الكوهورت — للمرحلة 12 (التطبيق)</button>`
+            : `<button class="btn btn-outline btn-sm" id="part-advance-btn" style="opacity:0.6;">📈 انتهى الكوهورت — للمرحلة 12</button>
+               <span style="font-size:11.5px; color:var(--emc-muted); margin-inline-start:10px;">سجّل حضور كل الأيام الستة الأول</span>`}
+        </div>
+      </div>`;
+
+    // ── حفظ تسجيل يوم ──
+    async function patchDay(day, field, value) {
+      const newRecords = { ...records };
+      const dayRec = { ...(newRecords[String(day)] || {}) };
+      // toggle: لو نفس القيمة اتضغطت تاني، شيلها
+      if (dayRec[field] === value) delete dayRec[field];
+      else dayRec[field] = value;
+      newRecords[String(day)] = dayRec;
+      const newPart = { ...(c.participation || {}), days: newRecords };
+      await EMC.contacts.update(id, { participation: newPart });
+      c.participation = newPart;
+    }
+
+    panel.addEventListener('click', async (e) => {
+      const attBtn = e.target.closest('.part-att');
+      const engBtn = e.target.closest('.part-eng');
+      if (attBtn) {
+        try { await patchDay(parseInt(attBtn.dataset.day), 'attendance', attBtn.dataset.val); window.location.reload(); }
+        catch (err) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+      }
+      if (engBtn) {
+        try { await patchDay(parseInt(engBtn.dataset.day), 'engagement', engBtn.dataset.val); window.location.reload(); }
+        catch (err) { EMC.utils.toast('خطأ في الحفظ', 'error'); }
+      }
+    });
+
+    // ── الانتقال للمرحلة 12 ──
+    const advBtn = document.getElementById('part-advance-btn');
+    if (advBtn) advBtn.addEventListener('click', async () => {
+      if (!allRecorded) { EMC.utils.toast('سجّل حضور كل الأيام الأول', 'error'); return; }
+      if (!confirm(`تأكيد انتهاء كوهورت ${c.identity.fullName} ونقله للمرحلة 12 (التطبيق)؟`)) return;
+      try {
+        await EMC.contacts.update(id, { participation: { ...(c.participation || {}), attendancePct, completedAt: new Date().toISOString() } });
+        await EMC.contacts.moveToStage(id, 12, 'انتهى الكوهورت — للتطبيق');
+        EMC.utils.toast('تم النقل للتطبيق', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
+    });
+  })();
+  
+  
   // ─── [10B] لوحة الإعداد (المرحلة 10 — Onboarding) ───
   (async function setupOnboardingPanel() {
     const panel = document.getElementById('onboarding-panel');
