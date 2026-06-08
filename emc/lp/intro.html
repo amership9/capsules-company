@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>تعريف رحلتك · Executive Mastery Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<link rel="stylesheet" href="lp-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<style>
+  .in-shell { max-width: 760px; margin: 0 auto; padding: 0 22px 80px; }
+
+  .in-hero {
+    position: relative; overflow: hidden; color: #fff; text-align: center; padding: 60px 24px 50px;
+    background:
+      radial-gradient(900px 360px at 50% -10%, rgba(201,169,97,0.14), transparent 60%),
+      linear-gradient(165deg, #0A1F3C 0%, var(--emc-navy) 55%, #0d2950 100%);
+  }
+  .in-hero::before { content:""; position:absolute; top:-120px; inset-inline-end:-100px; width:340px; height:340px; background: radial-gradient(circle, rgba(201,169,97,0.18), transparent 62%); filter: blur(18px); }
+  .in-hero-inner { position: relative; z-index: 2; max-width: 600px; margin: 0 auto; }
+  .in-eyebrow {
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--emc-gold);
+    font-weight: 800; margin-bottom: 14px; display:inline-flex; align-items:center; gap:8px;
+  }
+  .in-eyebrow::before, .in-eyebrow::after { content:""; width:24px; height:1px; background: rgba(201,169,97,0.5); }
+  .in-hero h1 { font-size: 28px; font-weight: 900; margin: 0 0 16px; line-height: 1.35; }
+  .in-promise { display:inline-block; font-size: 18px; font-weight: 800; padding: 0 4px 6px; position: relative; }
+  .in-promise::after { content:""; position:absolute; bottom:0; left:8%; right:8%; height:3px; border-radius:2px; background: linear-gradient(90deg, transparent, var(--emc-gold), transparent); }
+  .in-sub { font-size: 14px; color: rgba(255,255,255,0.72); line-height: 1.8; max-width: 500px; margin: 16px auto 0; }
+
+  .in-sec-title { display:flex; align-items:center; gap:11px; margin:36px 0 16px; }
+  .in-sec-title .bar { width:4px; height:22px; background:var(--emc-gold); border-radius:2px; }
+  .in-sec-title h2 { margin:0; font-size:19px; font-weight:800; color:var(--emc-navy); }
+
+  .in-idea {
+    margin-top:26px; padding:24px 26px; border-radius:16px; border:1px solid var(--emc-line);
+    background:linear-gradient(160deg,#fff,var(--emc-cream)); box-shadow:0 10px 30px rgba(11,37,69,0.06);
+  }
+  .in-idea p { margin:0; font-size:15px; color:var(--emc-ink); line-height:1.9; }
+  .in-idea strong { color:var(--emc-navy); }
+
+  .in-pillars { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .in-pillar { padding:18px; border:1.5px solid var(--emc-line); border-radius:14px; background:#fff; transition:transform .15s, box-shadow .2s, border-color .2s; }
+  .in-pillar:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(11,37,69,0.07); border-color:var(--emc-navy); }
+  .in-pillar-top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .in-pillar-num { width:30px; height:30px; border-radius:9px; background:var(--emc-navy); color:#fff; display:grid; place-items:center; font-family:"JetBrains Mono",monospace; font-weight:700; font-size:13px; flex-shrink:0; }
+  .in-pillar h4 { margin:0; font-size:15.5px; font-weight:800; color:var(--emc-navy); }
+  .in-pillar p { margin:0; font-size:13px; color:var(--emc-muted); line-height:1.65; }
+
+  .in-days { margin-top:14px; padding:24px; border-radius:16px; color:#fff; text-align:center; background:linear-gradient(135deg,var(--emc-navy),#13325C); }
+  .in-days h3 { margin:0 0 10px; font-size:18px; font-weight:800; }
+  .in-days p { margin:0 auto; font-size:14px; color:rgba(255,255,255,0.82); line-height:1.8; max-width:520px; }
+  .in-days-badges { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+  .in-days-badge { display:inline-flex; align-items:center; gap:7px; padding:8px 14px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16); border-radius:10px; font-size:12.5px; font-weight:600; }
+  .in-days-badge svg { color:var(--emc-gold); flex-shrink:0; }
+
+  .in-prep { margin-top:14px; padding:20px 24px; border:1px dashed var(--emc-line); border-radius:14px; background:var(--emc-cream); }
+  .in-prep h3 { margin:0 0 8px; font-size:16px; font-weight:800; color:var(--emc-navy); }
+  .in-prep p { margin:0; font-size:13.5px; color:var(--emc-ink-2); line-height:1.8; }
+
+  .in-cta-wrap { margin-top:30px; text-align:center; }
+  .in-cta { width:100%; max-width:420px; height:54px; background:var(--emc-gold); color:var(--emc-navy); border:0; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; transition:background .15s; }
+  .in-cta:hover:not(:disabled){ background:#B89538; }
+  .in-cta:disabled{ opacity:.55; cursor:not-allowed; }
+  .in-cta.secondary { background:transparent; border:1.5px solid var(--emc-line); color:var(--emc-navy); }
+  .in-done-note { display:inline-flex; align-items:center; gap:8px; margin-bottom:14px; font-size:13px; font-weight:700; color:var(--emc-success,#2E7D5B); background:#F1F8F4; border:1px solid #BFE0CD; padding:7px 16px; border-radius:99px; }
+
+  .in-success { text-align:center; padding:50px 24px; }
+  .in-success-check { width:76px; height:76px; margin:0 auto 20px; background:#E1F1E8; color:var(--emc-success,#2E7D5B); border-radius:50%; display:grid; place-items:center; animation:inPop .5s cubic-bezier(.16,1,.3,1); }
+  @keyframes inPop {0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+  .in-success h3 { margin:0 0 12px; font-size:23px; font-weight:800; color:var(--emc-navy); }
+  .in-success p { margin:0 auto 22px; font-size:15px; color:var(--emc-ink-2); line-height:1.8; max-width:440px; }
+
+  .in-screen { min-height:70vh; display:grid; place-items:center; padding:40px 24px; text-align:center; }
+  .in-spinner { width:44px; height:44px; border:4px solid var(--emc-line); border-top-color:var(--emc-gold); border-radius:50%; animation:inSpin .8s linear infinite; margin:0 auto 18px; }
+  @keyframes inSpin { to { transform:rotate(360deg);} }
+  .in-screen h3 { color:var(--emc-navy); font-size:21px; font-weight:800; margin:0 0 10px; }
+  .in-screen p { color:var(--emc-muted); font-size:14.5px; line-height:1.7; max-width:420px; margin:0 auto; }
+  .in-screen .icon { width:60px; height:60px; margin:0 auto 18px; color:var(--emc-faint); }
+
+  @media (max-width:560px){
+    .in-hero h1 { font-size:24px; }
+    .in-pillars { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body class="lp-shell" data-landing-page="intro" data-screen-label="LP intro">
+
+<nav class="lp-nav">
+  <div class="lp-nav-brand">
+    <div class="lp-nav-brand-mark">
+      <svg width="100%" height="100%" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="18" width="32" height="7" rx="1" fill="#0B2545"/>
+        <rect x="14" y="31" width="36" height="6" rx="1" fill="#D72638"/>
+        <line x1="18" y1="25" x2="14" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="46" y1="25" x2="50" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="46" y2="25" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
+      <div class="lp-nav-brand-sub">تعريف رحلتك</div>
+    </div>
+  </div>
+  <span style="color: rgba(255,255,255,0.6); font-size: 12px;">قراءة · 10 دقايق</span>
+</nav>
+
+<!-- Loading -->
+<div class="in-screen" id="in-loading">
+  <div><div class="in-spinner"></div><p>جاري فتح صفحة التعريف…</p></div>
+</div>
+
+<!-- Error -->
+<div class="in-screen" id="in-error" style="display:none;">
+  <div>
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <h3>اللينك ده مش شغّال</h3>
+    <p>يبدو إن الرابط ناقص أو قديم. تواصل مع عبدالله على واتساب وهيبعتلك رابط رحلتك الصح.</p>
+  </div>
+</div>
+
+<!-- Content -->
+<div id="in-content" style="display:none;"></div>
+
+<footer class="lp-footer">
+  <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  let contactId = null, token = null, contact = null;
+
+  const loadingEl = document.getElementById('in-loading');
+  const errorEl = document.getElementById('in-error');
+  const contentEl = document.getElementById('in-content');
+
+  const PILLARS = [
+    { n: '01', t: 'الرؤية',   d: 'وضوح إنت رايح فين، والكل في الشركة عارف الوجهة ومتفق عليها.' },
+    { n: '02', t: 'الناس',    d: 'الشخص المناسب في الدور المناسب — ومين مسؤول عن إيه بالظبط.' },
+    { n: '03', t: 'البيانات', d: 'أرقام قليلة أسبوعية بتقولك الحقيقة قبل ما المشكلة تكبر.' },
+    { n: '04', t: 'القضايا',  d: 'طريقة منظّمة تحسم بيها أي مشكلة من جذرها بدل ما تتكرر كل شوية.' },
+    { n: '05', t: 'العمليات', d: 'الطريقة الموحّدة اللي الشغل بيتعمل بيها — مكتوبة ومتّبعة من الكل.' },
+    { n: '06', t: 'الإنجاز',  d: 'الانضباط على تنفيذ الأولويات فعلاً، مش مجرد نوايا في الاجتماعات.' }
+  ];
+
+  function showError() {
+    loadingEl.style.display = 'none';
+    contentEl.style.display = 'none';
+    errorEl.style.display = 'grid';
+  }
+
+  function firstName() {
+    return contact.identity?.firstName || (contact.identity?.fullName || '').split(/\s+/)[0] || 'صديقي';
+  }
+
+  (async function init() {
+    const params = new URLSearchParams(window.location.search);
+    contactId = params.get('id');
+    token = params.get('t');
+
+    if (!contactId || !token) { showError(); return; }
+
+    try { contact = await EMC.contacts.get(contactId); } catch (e) { contact = null; }
+    if (!contact) { showError(); return; }
+
+    if (!contact.portalToken || contact.portalToken !== token) { showError(); return; }
+
+    render();
+  })();
+
+  function render() {
+    loadingEl.style.display = 'none';
+    errorEl.style.display = 'none';
+    contentEl.style.display = 'block';
+
+    const done = !!(contact.onboarding?.tasks?.intro_viewed);
+    const portalLink = `journey.html?id=${contactId}&t=${token}`;
+
+    const pillarsHtml = PILLARS.map(p => `
+      <div class="in-pillar">
+        <div class="in-pillar-top"><span class="in-pillar-num">${p.n}</span><h4>${p.t}</h4></div>
+        <p>${p.d}</p>
+      </div>`).join('');
+
+    const ctaHtml = done
+      ? `<div class="in-done-note">✓ خلصت التعريف قبل كده</div>
+         <div><a href="${portalLink}" class="in-cta secondary" style="display:inline-grid; place-items:center; text-decoration:none;">ارجع لصفحة رحلتك</a></div>`
+      : `<button class="in-cta" id="in-done-btn">تمام، خلّصت التعريف — أنا جاهز ✓</button>`;
+
+    contentEl.innerHTML = `
+      <div style="margin:0 -22px;">
+        <section class="in-hero">
+          <div class="in-hero-inner">
+            <div class="in-eyebrow">تعريف سريع قبل البداية</div>
+            <h1>${firstName()}، 10 دقايق تخلّي أول جلسة تبدأ من فوق</h1>
+            <div class="in-promise">اِبنِ الشركة اللي تمشي من غيرك</div>
+            <p class="in-sub">مش هتتعلم حاجة هنا — ده بس عشان لما تسمع أي مصطلح في أول جلسة، تكون عدّت عليه قبل كده. كده الـ 6 أيام كلها تبقى تطبيق، مش تعريف.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="in-shell">
+        <div class="in-sec-title"><span class="bar"></span><h2>الفكرة الكبيرة</h2></div>
+        <div class="in-idea">
+          <p>شركتك زي آلة متقنة الصُنع: فيه <strong>6 أجزاء</strong> لازم يشتغلوا مع بعض بانتظام عشان الآلة تمشي كويس من غير ما إيدك تكون ماسكة في كل لحظة. لما الـ 6 دول يتظبطوا، الشركة تقدر تمشي من غيرك — وده بالظبط اللي رايحين نشتغل عليه على مدار الـ 6 أيام.</p>
+        </div>
+
+        <div class="in-sec-title"><span class="bar"></span><h2>الـ 6 محاور اللي هنشتغل عليها</h2></div>
+        <div class="in-pillars">${pillarsHtml}</div>
+
+        <div class="in-sec-title"><span class="bar"></span><h2>شكل الـ 6 أيام بتاعتك</h2></div>
+        <div class="in-days">
+          <h3>تطبيق عملي مش محاضرات</h3>
+          <p>على مدار 3 أسابيع متتالية — كل أسبوع يوم جمعة ويوم سبت — بتركّب محور ورا محور في شركتك فعلاً، مش بتسمع نظريات. كل يوم بتطلع منه بحاجة شغّالة.</p>
+          <div class="in-days-badges">
+            <span class="in-days-badge"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>6 أيام · جمعة وسبت × 3 أسابيع</span>
+            <span class="in-days-badge"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>25 ساعة تطبيق</span>
+          </div>
+        </div>
+
+        <div class="in-prep">
+          <h3>قبل أول جلسة — حاجتين بسيطتين</h3>
+          <p>هنطلب منك تجمّع أرقام شركتك الأساسية (الإيراد، عدد الموظفين، أكبر تحدياتك)، وتحدّد مين من فريق القيادة هيشارك معاك. الاتنين دول بيوفّروا علينا أول يومين من البرنامج وبيخلّوا النتيجة أقوى — وهتلاقيهم خطوة بخطوة في صفحة رحلتك.</p>
+        </div>
+
+        <div class="in-cta-wrap">${ctaHtml}</div>
+      </div>`;
+
+    if (!done) {
+      const btn = document.getElementById('in-done-btn');
+      if (btn) btn.addEventListener('click', markDone);
+    }
+  }
+
+  async function markDone() {
+    const btn = document.getElementById('in-done-btn');
+    btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+    const ob = contact.onboarding || {};
+    const tasks = { ...(ob.tasks || {}), intro_viewed: true };
+    try {
+      await EMC.contacts.update(contactId, { onboarding: { ...ob, tasks } });
+      contact.onboarding = { ...ob, tasks };
+      showSuccess();
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'تمام، خلّصت التعريف — أنا جاهز ✓';
+      alert('حصل خطأ في الحفظ، حاول تاني');
+    }
+  }
+
+  function showSuccess() {
+    const portalLink = `journey.html?id=${contactId}&t=${token}`;
+    contentEl.innerHTML = `
+      <div class="in-shell">
+        <div class="in-success">
+          <div class="in-success-check">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h3>ممتاز ✓ إنت جاهز</h3>
+          <p>دلوقتي هتدخل أول جلسة وإنت فاهم إحنا رايحين فين — فالوقت كله يبقى تطبيق. الخطوة الجاية: جهّز أرقام شركتك، هتلاقيها في صفحة رحلتك.</p>
+          <a href="${portalLink}" class="in-cta" style="display:inline-grid; place-items:center; text-decoration:none; max-width:420px;">ارجع لصفحة رحلتك</a>
+        </div>
+      </div>`;
+  }
+})();
+</script>
+
+</body>
+</html>
