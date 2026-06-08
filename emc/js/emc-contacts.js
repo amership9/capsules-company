@@ -7,12 +7,21 @@ window.EMC = window.EMC || {};
 window.EMC.contacts = {
   COLLECTION: 'emc_contacts',
 
+  // ─── توليد توكن البورتال (للوصول الآمن لصفحة journey) ───
+  genPortalToken() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let t = '';
+    for (let i = 0; i < 24; i++) t += chars.charAt(Math.floor(Math.random() * chars.length));
+    return t + Date.now().toString(36);
+  },
+
   // ─── إنشاء جهة اتصال جديدة ───
   async create(data) {
     const blank = this.blankContact();
     const contact = this._deepMerge(blank, data);
     contact.createdAt = new Date().toISOString();
     contact.updatedAt = contact.createdAt;
+    if (!contact.portalToken) contact.portalToken = this.genPortalToken();
     contact.stageHistory = [{
       stage: contact.currentStage || 1,
       enteredAt: contact.createdAt,
@@ -137,6 +146,20 @@ window.EMC.contacts = {
     avgScore = all.length ? Math.round(avgScore / all.length) : 0;
 
     return { total: all.length, byStage, byZone, byTemp, totalOppValue, avgScore };
+  },
+
+  // ─── backfill: زرع portalToken لكل عميل قديم ماعندوش واحد ───
+  async backfillPortalTokens() {
+    const all = await EMC.store.list(this.COLLECTION);
+    let added = 0;
+    for (const c of all) {
+      if (!c.portalToken) {
+        await EMC.store.update(this.COLLECTION, c.id, { portalToken: this.genPortalToken() });
+        added++;
+      }
+    }
+    console.log(`✅ portalToken backfill: ${added} عميل اتزرعلهم توكن (من أصل ${all.length})`);
+    return { total: all.length, added };
   },
 
   // ─── ملف فارغ ───
