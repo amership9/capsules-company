@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>أهلاً بيك · Executive Mastery Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<link rel="stylesheet" href="lp-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<style>
+  .wl-shell { max-width: 720px; margin: 0 auto; padding: 0 22px 80px; }
+
+  .wl-hero {
+    position: relative; overflow: hidden; color:#fff; text-align:center; padding:70px 24px 58px;
+    background:
+      radial-gradient(900px 360px at 50% -10%, rgba(201,169,97,0.16), transparent 60%),
+      linear-gradient(165deg, #0A1F3C 0%, var(--emc-navy) 55%, #0d2950 100%);
+  }
+  .wl-hero::before { content:""; position:absolute; top:-120px; inset-inline-end:-100px; width:340px; height:340px; background:radial-gradient(circle, rgba(201,169,97,0.2), transparent 62%); filter:blur(18px); }
+  .wl-hero-inner { position:relative; z-index:2; max-width:580px; margin:0 auto; }
+  .wl-eyebrow { font-size:12px; letter-spacing:0.16em; text-transform:uppercase; color:var(--emc-gold); font-weight:800; margin-bottom:16px; display:inline-flex; align-items:center; gap:8px; }
+  .wl-eyebrow::before, .wl-eyebrow::after { content:""; width:24px; height:1px; background:rgba(201,169,97,0.5); }
+  .wl-hero h1 { font-size:32px; font-weight:900; margin:0 0 18px; line-height:1.3; }
+  .wl-promise { display:inline-block; font-size:19px; font-weight:800; padding:0 4px 6px; position:relative; }
+  .wl-promise::after { content:""; position:absolute; bottom:0; left:8%; right:8%; height:3px; border-radius:2px; background:linear-gradient(90deg, transparent, var(--emc-gold), transparent); }
+  .wl-cohort-badges { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:26px; }
+  .wl-cohort-badge { display:inline-flex; align-items:center; gap:8px; padding:9px 16px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:11px; font-size:13px; font-weight:600; }
+  .wl-cohort-badge svg { color:var(--emc-gold); flex-shrink:0; }
+
+  .wl-reassure { margin-top:30px; padding:26px 28px; border-radius:16px; border:1px solid var(--emc-line); background:linear-gradient(160deg,#fff,var(--emc-cream)); box-shadow:0 10px 30px rgba(11,37,69,0.06); }
+  .wl-reassure h2 { margin:0 0 12px; font-size:20px; font-weight:800; color:var(--emc-navy); display:flex; align-items:center; gap:10px; }
+  .wl-reassure p { margin:0; font-size:15px; color:var(--emc-ink); line-height:1.9; }
+  .wl-reassure strong { color:var(--emc-navy); }
+
+  .wl-sec-title { display:flex; align-items:center; gap:11px; margin:36px 0 16px; }
+  .wl-sec-title .bar { width:4px; height:22px; background:var(--emc-gold); border-radius:2px; }
+  .wl-sec-title h2 { margin:0; font-size:19px; font-weight:800; color:var(--emc-navy); }
+
+  .wl-phases { display:flex; flex-direction:column; gap:12px; }
+  .wl-phase { display:flex; gap:16px; padding:18px 20px; border:1.5px solid var(--emc-line); border-radius:14px; background:#fff; }
+  .wl-phase-num { width:40px; height:40px; border-radius:11px; background:var(--emc-navy); color:#fff; display:grid; place-items:center; font-family:"JetBrains Mono",monospace; font-weight:700; font-size:15px; flex-shrink:0; }
+  .wl-phase-body h4 { margin:0 0 4px; font-size:15.5px; font-weight:800; color:var(--emc-navy); }
+  .wl-phase-body p { margin:0; font-size:13.5px; color:var(--emc-muted); line-height:1.7; }
+
+  .wl-note { margin-top:14px; padding:26px 28px; border-radius:16px; background:linear-gradient(135deg, var(--emc-navy), #13325C); color:#fff; }
+  .wl-note-head { display:flex; align-items:center; gap:13px; margin-bottom:14px; }
+  .wl-note-avatar { width:48px; height:48px; border-radius:50%; background:rgba(201,169,97,0.2); color:var(--emc-gold); display:grid; place-items:center; font-weight:800; font-size:17px; flex-shrink:0; }
+  .wl-note-head .who { font-size:15px; font-weight:800; }
+  .wl-note-head .role { font-size:12px; color:rgba(255,255,255,0.6); }
+  .wl-note p { margin:0 0 12px; font-size:14.5px; color:rgba(255,255,255,0.88); line-height:1.9; }
+  .wl-note p:last-child { margin-bottom:0; }
+  .wl-note .sign { color:var(--emc-gold); font-weight:700; }
+
+  .wl-cta-wrap { margin-top:30px; text-align:center; }
+  .wl-cta { width:100%; max-width:420px; height:54px; background:var(--emc-gold); color:var(--emc-navy); border:0; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; display:inline-grid; place-items:center; text-decoration:none; }
+
+  .wl-screen { min-height:70vh; display:grid; place-items:center; padding:40px 24px; text-align:center; }
+  .wl-spinner { width:44px; height:44px; border:4px solid var(--emc-line); border-top-color:var(--emc-gold); border-radius:50%; animation:wlSpin .8s linear infinite; margin:0 auto 18px; }
+  @keyframes wlSpin { to { transform:rotate(360deg);} }
+  .wl-screen h3 { color:var(--emc-navy); font-size:21px; font-weight:800; margin:0 0 10px; }
+  .wl-screen p { color:var(--emc-muted); font-size:14.5px; line-height:1.7; max-width:420px; margin:0 auto; }
+  .wl-screen .icon { width:60px; height:60px; margin:0 auto 18px; color:var(--emc-faint); }
+
+  @media (max-width:560px){ .wl-hero h1 { font-size:26px; } }
+</style>
+</head>
+<body class="lp-shell" data-landing-page="welcome" data-screen-label="LP welcome">
+
+<nav class="lp-nav">
+  <div class="lp-nav-brand">
+    <div class="lp-nav-brand-mark">
+      <svg width="100%" height="100%" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="18" width="32" height="7" rx="1" fill="#0B2545"/>
+        <rect x="14" y="31" width="36" height="6" rx="1" fill="#D72638"/>
+        <line x1="18" y1="25" x2="14" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="46" y1="25" x2="50" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="46" y2="25" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
+      <div class="lp-nav-brand-sub">حزمة الترحيب</div>
+    </div>
+  </div>
+  <span id="wl-nav-name" style="color: rgba(255,255,255,0.6); font-size: 12px;"></span>
+</nav>
+
+<!-- Loading -->
+<div class="wl-screen" id="wl-loading">
+  <div><div class="wl-spinner"></div><p>جاري فتح حزمة الترحيب…</p></div>
+</div>
+
+<!-- Error -->
+<div class="wl-screen" id="wl-error" style="display:none;">
+  <div>
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <h3>اللينك ده مش شغّال</h3>
+    <p>يبدو إن الرابط ناقص أو قديم. تواصل مع عبدالله على واتساب وهيبعتلك رابط رحلتك الصح.</p>
+  </div>
+</div>
+
+<!-- Content -->
+<div id="wl-content" style="display:none;"></div>
+
+<footer class="lp-footer">
+  <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  let contactId = null, token = null, contact = null;
+
+  const loadingEl = document.getElementById('wl-loading');
+  const errorEl = document.getElementById('wl-error');
+  const contentEl = document.getElementById('wl-content');
+
+  function showError() {
+    loadingEl.style.display = 'none';
+    contentEl.style.display = 'none';
+    errorEl.style.display = 'grid';
+  }
+
+  function firstName() {
+    return contact.identity?.firstName || (contact.identity?.fullName || '').split(/\s+/)[0] || 'صديقي';
+  }
+
+  (async function init() {
+    const params = new URLSearchParams(window.location.search);
+    contactId = params.get('id');
+    token = params.get('t');
+
+    if (!contactId || !token) { showError(); return; }
+
+    try { contact = await EMC.contacts.get(contactId); } catch (e) { contact = null; }
+    if (!contact) { showError(); return; }
+
+    if (!contact.portalToken || contact.portalToken !== token) { showError(); return; }
+
+    document.getElementById('wl-nav-name').textContent = firstName();
+    render();
+  })();
+
+  function render() {
+    loadingEl.style.display = 'none';
+    errorEl.style.display = 'none';
+    contentEl.style.display = 'block';
+
+    const cohort = contact.decision?.cohort || contact.customer?.cohortId || '';
+    const portalLink = `journey.html?id=${contactId}&t=${token}`;
+
+    contentEl.innerHTML = `
+      <div style="margin:0 -22px;">
+        <section class="wl-hero">
+          <div class="wl-hero-inner">
+            <div class="wl-eyebrow">أهلاً بيك في العائلة</div>
+            <h1>${firstName()}، مكانك اتأكّد 🎉<br/>أهلاً بيك في Executive Mastery Camp</h1>
+            <div class="wl-promise">اِبنِ الشركة اللي تمشي من غيرك</div>
+            <div class="wl-cohort-badges">
+              <span class="wl-cohort-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>6 أيام · جمعة وسبت × 3 أسابيع</span>
+              <span class="wl-cohort-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>25 ساعة تطبيق</span>
+              ${cohort ? `<span class="wl-cohort-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${cohort}</span>` : ''}
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="wl-shell">
+        <div class="wl-reassure">
+          <h2>🎯 قرارك ده صح</h2>
+          <p>أكتر قائد بيدفع في نفسه وفي شركته بيكون عنده لحظة شك بعد القرار — ده طبيعي. بس صدّقني، إنت دلوقتي خدت أصعب خطوة: قررت تشتغل <strong>على</strong> الشركة مش جوّاها بس. من هنا، إحنا معاك خطوة بخطوة لحد ما تشوف شركتك بتمشي بانضباط من غير ما تكون ماسك كل خيط.</p>
+        </div>
+
+        <div class="wl-sec-title"><span class="bar"></span><h2>رحلتك معانا — 3 مراحل</h2></div>
+        <div class="wl-phases">
+          <div class="wl-phase">
+            <div class="wl-phase-num">01</div>
+            <div class="wl-phase-body"><h4>التجهيز — من دلوقتي لأول جلسة</h4><p>خطوات بسيطة تخلّيك توصل أول يوم جاهز تماماً: تعرف إحنا رايحين فين، تجهّز أرقام شركتك، وتحدّد فريقك. كله موجود في صفحة رحلتك.</p></div>
+          </div>
+          <div class="wl-phase">
+            <div class="wl-phase-num">02</div>
+            <div class="wl-phase-body"><h4>الـ 6 أيام — التحوّل العملي</h4><p>جمعة وسبت × 3 أسابيع. بتركّب محور ورا محور في شركتك فعلاً، مش بتسمع نظريات. كل يوم بتطلع منه بحاجة شغّالة.</p></div>
+          </div>
+          <div class="wl-phase">
+            <div class="wl-phase-num">03</div>
+            <div class="wl-phase-body"><h4>التطبيق — بعد البرنامج</h4><p>متابعة منظّمة على مدار شهور عشان اللي طبّقته يثبت ويتحوّل لنتيجة حقيقية. النتيجة هي اللي بتفرق، مش الحضور بس.</p></div>
+          </div>
+        </div>
+
+        <div class="wl-sec-title"><span class="bar"></span><h2>كلمة من عبدالله</h2></div>
+        <div class="wl-note">
+          <div class="wl-note-head">
+            <div class="wl-note-avatar">ع</div>
+            <div><div class="who">عبدالله عامر</div><div class="role">مؤسس Executive Mastery Camp</div></div>
+          </div>
+          <p>أهلاً ${firstName()}، أنا مبسوط إنك معانا في الكوهورت ده. على مدار سنين وأنا بشتغل مع قادة زيّك — ناس بنت شركات حقيقية بس وصلت لسقف، حاسّة إن كل حاجة معتمدة عليها هي شخصياً.</p>
+          <p>اللي هنعمله مع بعض مش كورس تسمعه وتنساه — ده نظام تشغيلي بتركّبه في شركتك بإيدك، وبيفضل شغّال بعد ما نخلّص. كل اللي بطلبه منك حاجة واحدة: ادخل بصدر مفتوح وكن صريح عن وضعك الحقيقي. الباقي عليّا.</p>
+          <p class="sign">مستني أشوفك في أول جلسة — يلا نبدأ. 🚀</p>
+        </div>
+
+        <div class="wl-cta-wrap">
+          <a href="${portalLink}" class="wl-cta">يلا، ابدأ خطواتك →</a>
+        </div>
+      </div>`;
+  }
+})();
+</script>
+
+</body>
+</html>
