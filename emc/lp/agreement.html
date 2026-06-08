@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>اتفاقية التوقعات · Executive Mastery Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<link rel="stylesheet" href="lp-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<style>
+  .ag-shell { max-width: 680px; margin: 0 auto; padding: 0 22px 80px; }
+
+  .ag-hero {
+    text-align:center; padding:52px 24px 36px; color:#fff; position:relative; overflow:hidden;
+    background: linear-gradient(180deg, #0A1F3C 0%, var(--emc-navy) 100%);
+  }
+  .ag-hero::before { content:""; position:absolute; top:-60px; left:-80px; width:280px; height:280px; background:radial-gradient(circle, rgba(201,169,97,0.16), transparent 60%); filter:blur(20px); }
+  .ag-hero-eyebrow { font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--emc-gold); font-weight:700; margin-bottom:10px; position:relative; z-index:1; }
+  .ag-hero h1 { font-size:28px; font-weight:800; margin:0 0 14px; position:relative; z-index:1; line-height:1.32; }
+  .ag-hero p { font-size:14.5px; color:rgba(255,255,255,0.8); max-width:520px; margin:0 auto; line-height:1.75; position:relative; z-index:1; }
+
+  .ag-card { background:#fff; border:1px solid var(--emc-line); border-radius:16px; margin-top:28px; padding:30px 28px; box-shadow:0 8px 24px rgba(11,37,69,0.06); }
+
+  .ag-intro { text-align:center; padding-bottom:22px; margin-bottom:8px; border-bottom:1px solid var(--emc-line); color:var(--emc-muted); font-size:13.5px; line-height:1.75; }
+
+  .ag-clause { display:flex; gap:15px; padding:20px 0; border-bottom:1px solid var(--emc-line-soft); }
+  .ag-clause:last-of-type { border-bottom:0; }
+  .ag-clause-icon { width:44px; height:44px; border-radius:12px; background:var(--emc-cream); display:grid; place-items:center; flex-shrink:0; font-size:21px; }
+  .ag-clause-body h4 { margin:0 0 5px; font-size:15.5px; font-weight:800; color:var(--emc-navy); }
+  .ag-clause-body p { margin:0; font-size:13.5px; color:var(--emc-ink-2); line-height:1.7; }
+
+  .ag-sign { margin-top:26px; padding:22px; background:var(--emc-cream); border:1px solid var(--emc-line); border-radius:14px; }
+  .ag-sign-label { font-size:13.5px; font-weight:700; color:var(--emc-navy); display:block; margin-bottom:10px; }
+  .ag-sign input {
+    width:100%; height:48px; border:1px solid var(--emc-line); border-radius:10px; padding:0 14px;
+    font-size:15px; font-family:inherit; background:#fff; color:var(--emc-ink); transition:border-color .15s, box-shadow .15s;
+  }
+  .ag-sign input:focus { outline:none; border-color:var(--emc-navy); box-shadow:0 0 0 3px rgba(11,37,69,0.08); }
+  .ag-check { display:flex; align-items:flex-start; gap:11px; margin-top:16px; cursor:pointer; }
+  .ag-check input { width:20px; height:20px; margin-top:2px; flex-shrink:0; cursor:pointer; accent-color:var(--emc-navy); }
+  .ag-check span { font-size:13.5px; color:var(--emc-ink); line-height:1.7; }
+  .ag-err { color:var(--emc-red); font-size:11.5px; margin-top:10px; display:none; }
+  .ag-err.show { display:block; }
+
+  .ag-submit { width:100%; height:52px; background:var(--emc-gold); color:var(--emc-navy); border:0; border-radius:10px; font-size:15.5px; font-weight:800; cursor:pointer; transition:background .15s; font-family:inherit; margin-top:22px; }
+  .ag-submit:hover:not(:disabled) { background:#B89538; }
+  .ag-submit:disabled { opacity:.5; cursor:not-allowed; }
+
+  .ag-signed-note { display:inline-flex; align-items:center; gap:8px; margin-bottom:14px; font-size:13px; font-weight:700; color:var(--emc-success,#2E7D5B); background:#F1F8F4; border:1px solid #BFE0CD; padding:8px 16px; border-radius:99px; }
+
+  .ag-success { text-align:center; padding:50px 24px; }
+  .ag-success-check { width:76px; height:76px; margin:0 auto 20px; background:#E1F1E8; color:var(--emc-success,#2E7D5B); border-radius:50%; display:grid; place-items:center; animation:agPop .5s cubic-bezier(.16,1,.3,1); }
+  @keyframes agPop {0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+  .ag-success h3 { margin:0 0 12px; font-size:23px; font-weight:800; color:var(--emc-navy); }
+  .ag-success p { margin:0 auto 22px; font-size:15px; color:var(--emc-ink-2); line-height:1.8; max-width:440px; }
+  .ag-cta { width:100%; max-width:420px; height:54px; background:var(--emc-gold); color:var(--emc-navy); border:0; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; display:inline-grid; place-items:center; text-decoration:none; }
+
+  .ag-screen { min-height:70vh; display:grid; place-items:center; padding:40px 24px; text-align:center; }
+  .ag-spinner { width:44px; height:44px; border:4px solid var(--emc-line); border-top-color:var(--emc-gold); border-radius:50%; animation:agSpin .8s linear infinite; margin:0 auto 18px; }
+  @keyframes agSpin { to { transform:rotate(360deg);} }
+  .ag-screen h3 { color:var(--emc-navy); font-size:21px; font-weight:800; margin:0 0 10px; }
+  .ag-screen p { color:var(--emc-muted); font-size:14.5px; line-height:1.7; max-width:420px; margin:0 auto; }
+  .ag-screen .icon { width:60px; height:60px; margin:0 auto 18px; color:var(--emc-faint); }
+
+  @media (max-width:560px){ .ag-hero h1 { font-size:24px; } }
+</style>
+</head>
+<body class="lp-shell" data-landing-page="agreement" data-screen-label="LP agreement">
+
+<nav class="lp-nav">
+  <div class="lp-nav-brand">
+    <div class="lp-nav-brand-mark">
+      <svg width="100%" height="100%" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="18" width="32" height="7" rx="1" fill="#0B2545"/>
+        <rect x="14" y="31" width="36" height="6" rx="1" fill="#D72638"/>
+        <line x1="18" y1="25" x2="14" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="46" y1="25" x2="50" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="46" y2="25" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
+      <div class="lp-nav-brand-sub">اتفاقية التوقعات</div>
+    </div>
+  </div>
+  <span style="color: rgba(255,255,255,0.6); font-size: 12px;">دقيقتين</span>
+</nav>
+
+<!-- Loading -->
+<div class="ag-screen" id="ag-loading">
+  <div><div class="ag-spinner"></div><p>جاري فتح الاتفاقية…</p></div>
+</div>
+
+<!-- Error -->
+<div class="ag-screen" id="ag-error" style="display:none;">
+  <div>
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <h3>اللينك ده مش شغّال</h3>
+    <p>يبدو إن الرابط ناقص أو قديم. تواصل مع عبدالله على واتساب وهيبعتلك رابط رحلتك الصح.</p>
+  </div>
+</div>
+
+<!-- Content -->
+<div id="ag-content" style="display:none;"></div>
+
+<footer class="lp-footer">
+  <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  let contactId = null, token = null, contact = null;
+
+  const loadingEl = document.getElementById('ag-loading');
+  const errorEl = document.getElementById('ag-error');
+  const contentEl = document.getElementById('ag-content');
+
+  const CLAUSES = [
+    { icon: '📅', t: 'الحضور الكامل', d: 'البرنامج 6 أيام (جمعة وسبت × 3 أسابيع). التزامك بحضور كل يوم أساسي — كل يوم بيبني على اللي قبله، والغياب بيكسر التسلسل.' },
+    { icon: '🛠️', t: 'الالتزام بالتطبيق', d: 'ده برنامج تطبيق مش محاضرات. بين كل يوم والتاني فيه شغل عملي على شركتك — النتيجة الحقيقية بتيجي من التنفيذ مش من الحضور بس.' },
+    { icon: '💬', t: 'المشاركة بصدق', d: 'كل ما تكون صريح أكتر عن وضع شركتك الحقيقي، كل ما المساعدة تكون أدق. المساحة دي آمنة — اللي بيتقال هنا بيخدمك إنت.' },
+    { icon: '🔒', t: 'السرية المتبادلة', d: 'هتسمع تفاصيل شركات قادة تانيين، وهم هيسمعوا عنك. الاحترام إن كل اللي بيتقال في المجموعة يفضل بين أعضاء المجموعة.' }
+  ];
+
+  function showError() {
+    loadingEl.style.display = 'none';
+    contentEl.style.display = 'none';
+    errorEl.style.display = 'grid';
+  }
+
+  function firstName() {
+    return contact.identity?.firstName || (contact.identity?.fullName || '').split(/\s+/)[0] || 'صديقي';
+  }
+
+  (async function init() {
+    const params = new URLSearchParams(window.location.search);
+    contactId = params.get('id');
+    token = params.get('t');
+
+    if (!contactId || !token) { showError(); return; }
+
+    try { contact = await EMC.contacts.get(contactId); } catch (e) { contact = null; }
+    if (!contact) { showError(); return; }
+
+    if (!contact.portalToken || contact.portalToken !== token) { showError(); return; }
+
+    render();
+  })();
+
+  function render() {
+    loadingEl.style.display = 'none';
+    errorEl.style.display = 'none';
+    contentEl.style.display = 'block';
+
+    const ag = contact.onboarding?.agreement || {};
+    const alreadySigned = !!ag.signedAt;
+    const portalLink = `journey.html?id=${contactId}&t=${token}`;
+
+    const clausesHtml = CLAUSES.map(c => `
+      <div class="ag-clause">
+        <div class="ag-clause-icon">${c.icon}</div>
+        <div class="ag-clause-body"><h4>${c.t}</h4><p>${c.d}</p></div>
+      </div>`).join('');
+
+    if (alreadySigned) {
+      contentEl.innerHTML = `
+        <section class="ag-hero">
+          <div class="ag-hero-eyebrow">اتفاقية التوقعات</div>
+          <h1>${firstName()}، التزامك معانا</h1>
+          <p>دي الأسس اللي بنبني عليها الرحلة سوا — عشان الـ 6 أيام تطلع بأقصى قيمة لك ولباقي القادة معاك.</p>
+        </section>
+        <div class="ag-shell">
+          <div class="ag-card">
+            <div style="text-align:center; margin-bottom:18px;">
+              <div class="ag-signed-note">✓ وافقت على الاتفاقية بتاريخ ${EMC.utils.formatDate(ag.signedAt)}</div>
+            </div>
+            ${clausesHtml}
+            <div style="text-align:center; margin-top:24px;">
+              <a href="${portalLink}" class="ag-cta" style="max-width:420px;">ارجع لصفحة رحلتك</a>
+            </div>
+          </div>
+        </div>`;
+      return;
+    }
+
+    contentEl.innerHTML = `
+      <section class="ag-hero">
+        <div class="ag-hero-eyebrow">اتفاقية التوقعات</div>
+        <h1>${firstName()}، قبل ما نبدأ سوا</h1>
+        <p>دي مش ورقة قانونية — هي اتفاق بسيط على اللي بيخلّي الرحلة تنجح. اقراها بتركيز، ولو متفق، أكّد التزامك تحت.</p>
+      </section>
+
+      <div class="ag-shell">
+        <form id="ag-form" class="ag-card" novalidate>
+          <div class="ag-intro">4 التزامات بسيطة — منك ومنّا — بتضمن إن الـ 6 أيام تطلع بأقصى أثر ممكن.</div>
+
+          ${clausesHtml}
+
+          <div class="ag-sign">
+            <label class="ag-sign-label">اكتب اسمك الكامل تأكيداً لموافقتك</label>
+            <input type="text" id="ag-name" placeholder="${contact.identity?.fullName || 'اسمك الكامل'}" value="" />
+            <label class="ag-check">
+              <input type="checkbox" id="ag-agree" />
+              <span>أنا <strong>${firstName()}</strong> قرأت الالتزامات اللي فوق، وموافق عليها، ومستعد أدخل الرحلة بالجدية اللي تستحقها.</span>
+            </label>
+            <div class="ag-err" id="ag-err">من فضلك اكتب اسمك وأكّد موافقتك على الالتزامات.</div>
+          </div>
+
+          <button type="submit" class="ag-submit" id="ag-submit-btn">أوافق وألتزم ✓</button>
+        </form>
+      </div>`;
+
+    bindForm();
+  }
+
+  function bindForm() {
+    const form = document.getElementById('ag-form');
+    document.getElementById('ag-name').addEventListener('input', () => document.getElementById('ag-err').classList.remove('show'));
+    document.getElementById('ag-agree').addEventListener('change', () => document.getElementById('ag-err').classList.remove('show'));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('ag-name').value.trim();
+      const agreed = document.getElementById('ag-agree').checked;
+
+      if (!name || !agreed) {
+        document.getElementById('ag-err').classList.add('show');
+        return;
+      }
+
+      const btn = document.getElementById('ag-submit-btn');
+      btn.disabled = true; btn.textContent = 'جاري التأكيد…';
+
+      const agreement = {
+        signedName: name,
+        agreed: true,
+        signedAt: new Date().toISOString()
+      };
+
+      try {
+        const ob = contact.onboarding || {};
+        const tasks = { ...(ob.tasks || {}), agreement_signed: true };
+        await EMC.contacts.update(contactId, {
+          onboarding: { ...ob, agreement, tasks }
+        });
+        contact.onboarding = { ...ob, agreement, tasks };
+        showSuccess();
+      } catch (err) {
+        btn.disabled = false; btn.textContent = 'أوافق وألتزم ✓';
+        alert('حصل خطأ في الحفظ، حاول تاني');
+      }
+    });
+  }
+
+  function showSuccess() {
+    const portalLink = `journey.html?id=${contactId}&t=${token}`;
+    contentEl.innerHTML = `
+      <div class="ag-shell">
+        <div class="ag-success">
+          <div class="ag-success-check">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h3>تمام ✓ التزامك اتسجّل</h3>
+          <p>إحنا متحمسين نبدأ معاك. فاضل خطوات بسيطة في صفحة رحلتك — كمّلها وإنت جاهز تماماً ليوم البداية.</p>
+          <a href="${portalLink}" class="ag-cta">ارجع لصفحة رحلتك</a>
+        </div>
+      </div>`;
+  }
+})();
+</script>
+
+</body>
+</html>
