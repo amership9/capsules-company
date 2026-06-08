@@ -1,0 +1,442 @@
+id: journey-html
+name: emc/lp/journey.html
+type: text/html
+content: <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>رحلتك · Executive Mastery Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<link rel="stylesheet" href="lp-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<style>
+  :root { --jr-glow: rgba(201,169,97,0.18); }
+
+  .jr-shell { max-width: 760px; margin: 0 auto; padding: 0 22px 80px; }
+
+  /* ─── HERO ─── */
+  .jr-hero {
+    position: relative; overflow: hidden; color: #fff; text-align: center;
+    padding: 64px 24px 56px;
+    background:
+      radial-gradient(900px 360px at 50% -10%, rgba(201,169,97,0.14), transparent 60%),
+      linear-gradient(165deg, #0A1F3C 0%, var(--emc-navy) 55%, #0d2950 100%);
+  }
+  .jr-hero::before {
+    content:""; position:absolute; top:-120px; inset-inline-end:-100px; width:340px; height:340px;
+    background: radial-gradient(circle, var(--jr-glow), transparent 62%); filter: blur(18px);
+  }
+  .jr-hero::after {
+    content:""; position:absolute; bottom:-1px; left:0; right:0; height:60px;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0));
+  }
+  .jr-hero-inner { position: relative; z-index: 2; max-width: 600px; margin: 0 auto; }
+  .jr-eyebrow {
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--emc-gold); font-weight: 800; margin-bottom: 16px;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .jr-eyebrow::before, .jr-eyebrow::after { content:""; width:24px; height:1px; background: rgba(201,169,97,0.5); }
+  .jr-hero h1 { font-size: 31px; font-weight: 900; margin: 0 0 18px; line-height: 1.32; }
+  .jr-promise {
+    display: inline-block; font-size: 19px; font-weight: 800; color: #fff;
+    padding: 0 4px 6px; position: relative; margin-bottom: 8px;
+  }
+  .jr-promise::after {
+    content:""; position:absolute; bottom:0; left:8%; right:8%; height:3px; border-radius:2px;
+    background: linear-gradient(90deg, transparent, var(--emc-gold), transparent);
+  }
+  .jr-subpromise { font-size: 14px; color: rgba(255,255,255,0.72); line-height: 1.7; max-width: 480px; margin: 14px auto 0; }
+
+  .jr-cohort-badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+  .jr-cohort-badge {
+    display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 11px; font-size: 13px; font-weight: 600; backdrop-filter: blur(6px);
+  }
+  .jr-cohort-badge svg { color: var(--emc-gold); flex-shrink: 0; }
+
+  /* ─── REASSURANCE STRIP ─── */
+  .jr-reassure {
+    max-width: 600px; margin: -1px auto 0; padding: 16px 26px;
+    background: var(--emc-navy); color: rgba(255,255,255,0.85); text-align: center;
+    font-size: 13.5px; line-height: 1.7; border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .jr-reassure strong { color: var(--emc-gold); }
+
+  /* ─── READINESS RING ─── */
+  .jr-ring-card {
+    background: #fff; border: 1px solid var(--emc-line); border-radius: 18px;
+    margin-top: 30px; padding: 30px 28px; display: flex; align-items: center; gap: 26px;
+    box-shadow: 0 10px 30px rgba(11,37,69,0.07);
+  }
+  .jr-ring { position: relative; width: 104px; height: 104px; flex-shrink: 0; }
+  .jr-ring svg { transform: rotate(-90deg); }
+  .jr-ring-track { fill: none; stroke: var(--emc-line); stroke-width: 9; }
+  .jr-ring-fill { fill: none; stroke: var(--emc-gold); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .jr-ring-center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+  .jr-ring-num { font-size: 26px; font-weight: 900; color: var(--emc-navy); line-height: 1; }
+  .jr-ring-of { font-size: 11px; color: var(--emc-muted); margin-top: 2px; }
+  .jr-ring-text h3 { margin: 0 0 6px; font-size: 17px; font-weight: 800; color: var(--emc-navy); }
+  .jr-ring-text p { margin: 0; font-size: 13.5px; color: var(--emc-muted); line-height: 1.6; }
+  .jr-ring-done h3 { color: var(--emc-success, #2E7D5B); }
+
+  /* ─── SECTION TITLE ─── */
+  .jr-sec-title { display: flex; align-items: center; gap: 11px; margin: 38px 0 16px; }
+  .jr-sec-title .bar { width: 4px; height: 22px; background: var(--emc-gold); border-radius: 2px; }
+  .jr-sec-title h2 { margin: 0; font-size: 19px; font-weight: 800; color: var(--emc-navy); }
+  .jr-sec-title .count { margin-inline-start: auto; font-size: 12.5px; color: var(--emc-muted); font-weight: 600; }
+
+  /* ─── TASK CARDS ─── */
+  .jr-task {
+    display: flex; align-items: flex-start; gap: 15px; padding: 18px 20px;
+    background: #fff; border: 1.5px solid var(--emc-line); border-radius: 14px;
+    margin-bottom: 12px; cursor: pointer; transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .jr-task:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(11,37,69,0.08); border-color: var(--emc-navy); }
+  .jr-task.done { background: #FBFAF5; border-color: var(--emc-gold); }
+  .jr-task-check {
+    width: 28px; height: 28px; border-radius: 9px; flex-shrink: 0; margin-top: 2px;
+    border: 2px solid var(--emc-line); display: grid; place-items: center;
+    transition: all 0.2s; background: #fff;
+  }
+  .jr-task.done .jr-task-check { background: var(--emc-gold); border-color: var(--emc-gold); }
+  .jr-task-check svg { opacity: 0; transform: scale(0.5); transition: all 0.2s; color: #fff; }
+  .jr-task.done .jr-task-check svg { opacity: 1; transform: scale(1); }
+  .jr-task-icon {
+    width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+    background: var(--emc-cream); display: grid; place-items: center; color: var(--emc-navy);
+  }
+  .jr-task.done .jr-task-icon { background: rgba(201,169,97,0.16); color: #9a7b2e; }
+  .jr-task-body { flex: 1; min-width: 0; }
+  .jr-task-title { font-size: 15.5px; font-weight: 800; color: var(--emc-navy); transition: opacity 0.2s; }
+  .jr-task.done .jr-task-title { opacity: 0.62; }
+  .jr-task-desc { font-size: 13px; color: var(--emc-muted); line-height: 1.6; margin-top: 4px; }
+  .jr-task-meta {
+    display: inline-block; margin-top: 9px; font-size: 12px; font-weight: 700;
+    color: #9a7b2e; background: rgba(201,169,97,0.12); padding: 3px 11px; border-radius: 99px;
+  }
+
+  /* ─── ADMIN STRIP (read-only reassurance) ─── */
+  .jr-admin-strip {
+    margin-top: 16px; padding: 16px 20px; background: var(--emc-cream);
+    border: 1px dashed var(--emc-line); border-radius: 14px;
+  }
+  .jr-admin-strip-h { font-size: 13px; font-weight: 700; color: var(--emc-ink-2); margin-bottom: 12px; display:flex; align-items:center; gap:8px; }
+  .jr-admin-items { display: flex; flex-wrap: wrap; gap: 8px; }
+  .jr-admin-item {
+    display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px;
+    padding: 6px 13px; border-radius: 99px; background: #fff; border: 1px solid var(--emc-line); color: var(--emc-muted);
+  }
+  .jr-admin-item.done { color: var(--emc-success, #2E7D5B); border-color: #BFE0CD; background: #F1F8F4; }
+  .jr-admin-item .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--emc-line); }
+  .jr-admin-item.done .dot { background: var(--emc-success, #2E7D5B); }
+
+  /* ─── JOURNEY MAP ─── */
+  .jr-map { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 4px; }
+  .jr-phase {
+    padding: 18px 16px; border-radius: 14px; border: 1.5px solid var(--emc-line); background: #fff; text-align: center;
+    position: relative;
+  }
+  .jr-phase.active { border-color: var(--emc-navy); background: linear-gradient(160deg, #fff, var(--emc-cream)); box-shadow: 0 8px 20px rgba(11,37,69,0.08); }
+  .jr-phase-tag {
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    font-size: 10.5px; font-weight: 800; letter-spacing: 0.05em; padding: 3px 12px; border-radius: 99px;
+    background: var(--emc-gold); color: var(--emc-navy); white-space: nowrap;
+  }
+  .jr-phase-num { font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: 700; color: var(--emc-muted); }
+  .jr-phase h4 { margin: 8px 0 6px; font-size: 14.5px; font-weight: 800; color: var(--emc-navy); }
+  .jr-phase p { margin: 0; font-size: 12px; color: var(--emc-muted); line-height: 1.55; }
+
+  /* ─── GENERIC STATE CARD (non-stage-10) ─── */
+  .jr-state-card {
+    background: #fff; border: 1px solid var(--emc-line); border-radius: 18px;
+    margin-top: 30px; padding: 40px 30px; text-align: center; box-shadow: 0 10px 30px rgba(11,37,69,0.06);
+  }
+  .jr-state-icon { width: 64px; height: 64px; margin: 0 auto 18px; border-radius: 16px; background: var(--emc-cream); display: grid; place-items: center; color: var(--emc-navy); }
+  .jr-state-card h3 { margin: 0 0 10px; font-size: 21px; font-weight: 800; color: var(--emc-navy); }
+  .jr-state-card p { margin: 0 auto; font-size: 14.5px; color: var(--emc-muted); line-height: 1.7; max-width: 440px; }
+  .jr-state-stage { display: inline-block; margin-top: 16px; padding: 7px 16px; border-radius: 99px; background: var(--emc-cream); border: 1px solid var(--emc-line); font-size: 13px; font-weight: 700; color: var(--emc-navy); }
+
+  /* ─── LOADING / ERROR ─── */
+  .jr-screen { min-height: 70vh; display: grid; place-items: center; padding: 40px 24px; text-align: center; }
+  .jr-spinner { width: 44px; height: 44px; border: 4px solid var(--emc-line); border-top-color: var(--emc-gold); border-radius: 50%; animation: jrSpin 0.8s linear infinite; margin: 0 auto 18px; }
+  @keyframes jrSpin { to { transform: rotate(360deg); } }
+  .jr-screen h3 { color: var(--emc-navy); font-size: 21px; font-weight: 800; margin: 0 0 10px; }
+  .jr-screen p { color: var(--emc-muted); font-size: 14.5px; line-height: 1.7; max-width: 420px; margin: 0 auto; }
+  .jr-screen .icon { width: 60px; height: 60px; margin: 0 auto 18px; color: var(--emc-faint); }
+
+  @media (max-width: 560px) {
+    .jr-hero h1 { font-size: 25px; }
+    .jr-ring-card { flex-direction: column; text-align: center; }
+    .jr-map { grid-template-columns: 1fr; }
+    .jr-sec-title .count { display: none; }
+  }
+</style>
+</head>
+<body class="lp-shell" data-landing-page="journey" data-screen-label="LP journey">
+
+<nav class="lp-nav">
+  <div class="lp-nav-brand">
+    <div class="lp-nav-brand-mark">
+      <svg width="100%" height="100%" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="18" width="32" height="7" rx="1" fill="#0B2545"/>
+        <rect x="14" y="31" width="36" height="6" rx="1" fill="#D72638"/>
+        <line x1="18" y1="25" x2="14" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="46" y1="25" x2="50" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="46" y2="25" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
+      <div class="lp-nav-brand-sub">رحلتك</div>
+    </div>
+  </div>
+  <span id="jr-nav-name" style="color: rgba(255,255,255,0.6); font-size: 12px;"></span>
+</nav>
+
+<!-- Loading -->
+<div class="jr-screen" id="jr-loading">
+  <div>
+    <div class="jr-spinner"></div>
+    <p>جاري فتح رحلتك…</p>
+  </div>
+</div>
+
+<!-- Error -->
+<div class="jr-screen" id="jr-error" style="display:none;">
+  <div>
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <h3>اللينك ده مش شغّال</h3>
+    <p>يبدو إن الرابط ناقص أو قديم. تواصل مع عبدالله على واتساب وهيبعتلك رابط رحلتك الصح.</p>
+  </div>
+</div>
+
+<!-- Content -->
+<div id="jr-content" style="display:none;"></div>
+
+<footer class="lp-footer">
+  <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  let contactId = null, token = null, contact = null;
+
+  const loadingEl = document.getElementById('jr-loading');
+  const errorEl = document.getElementById('jr-error');
+  const contentEl = document.getElementById('jr-content');
+
+  function showError() {
+    loadingEl.style.display = 'none';
+    contentEl.style.display = 'none';
+    errorEl.style.display = 'grid';
+  }
+
+  function firstName() {
+    return contact.identity?.firstName || (contact.identity?.fullName || '').split(/\s+/)[0] || 'صديقي';
+  }
+
+  // ─── init ───
+  (async function init() {
+    const params = new URLSearchParams(window.location.search);
+    contactId = params.get('id');
+    token = params.get('t');
+
+    if (!contactId || !token) { showError(); return; }
+
+    try { contact = await EMC.contacts.get(contactId); } catch (e) { contact = null; }
+    if (!contact) { showError(); return; }
+
+    // التحقق من التوكن — لو مش مطابق، ترفض الفتح
+    if (!contact.portalToken || contact.portalToken !== token) { showError(); return; }
+
+    document.getElementById('jr-nav-name').textContent = firstName();
+    render();
+  })();
+
+  // ─── router حسب المرحلة ───
+  function render() {
+    loadingEl.style.display = 'none';
+    errorEl.style.display = 'none';
+    contentEl.style.display = 'block';
+
+    const stage = contact.currentStage;
+    let body = heroHtml();
+    if (stage === 10) body += onboardingHtml();
+    else if (stage < 10) body += preStartHtml();
+    else body += activeStageHtml();
+
+    contentEl.innerHTML = `<div class="jr-shell">${body}</div>`;
+    if (stage === 10) bindOnboarding();
+  }
+
+  // ─── HERO ───
+  function heroHtml() {
+    const cohort = contact.decision?.cohort || contact.customer?.cohortId || '';
+    return `
+      <div style="margin:0 -22px;">
+        <section class="jr-hero">
+          <div class="jr-hero-inner">
+            <div class="jr-eyebrow">أهلاً بيك في رحلتك</div>
+            <h1>${firstName()}، أهلاً بيك في<br/>Executive Mastery Camp</h1>
+            <div class="jr-promise">اِبنِ الشركة اللي تمشي من غيرك</div>
+            <p class="jr-subpromise">قرارك إنك تستثمر في نفسك وفي شركتك ده أهم خطوة. من دلوقتي لحد أول جلسة، إحنا معاك خطوة بخطوة عشان توصل وإنت جاهز تماماً.</p>
+            <div class="jr-cohort-badges">
+              <span class="jr-cohort-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>6 أيام · جمعة وسبت × 3 أسابيع</span>
+              <span class="jr-cohort-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>25 ساعة تحوّل عملي</span>
+              ${cohort ? `<span class="jr-cohort-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${cohort}</span>` : ''}
+            </div>
+          </div>
+        </section>
+        <div class="jr-reassure">دفعتك وصلت وتم تأكيد مكانك ✓ — <strong>عبدالله بيجهّز رحلتك شخصياً.</strong></div>
+      </div>`;
+  }
+
+  // ─── ONBOARDING (stage 10) ───
+  const CLIENT_META = {
+    intro_viewed:      { desc: 'دقايق معدودة تخلّيك تدخل أول جلسة وإنت فاهم إحنا رايحين فين — فالوقت كله يبقى تطبيق مش تعريف.', meta: 'المادة في طريقها ليك' },
+    numbers_collected: { desc: 'جهّز أرقام شركتك الأساسية: الإيراد الحالي، عدد الموظفين، وأكبر 3 تحديات. ده بيوفّر علينا أول يومين من البرنامج.', meta: 'نموذج بسيط جاي قريب' },
+    team_identified:   { desc: 'حدّد مين من فريق القيادة هيشارك معاك في الرحلة — مشاركتهم بتضاعف النتيجة.', meta: '' },
+    session_confirmed: { desc: 'أكّد إنك حاجز الموعد في أجندتك وجاهز ليوم البداية.', meta: '' }
+  };
+
+  function onboardingHtml() {
+    const tasks = (EMC.ONBOARDING_TASKS || []).filter(t => t.owner === 'client');
+    const adminTasks = (EMC.ONBOARDING_TASKS || []).filter(t => t.owner === 'admin');
+    const done = contact.onboarding?.tasks || {};
+    const total = tasks.length;
+    const completed = tasks.filter(t => done[t.key]).length;
+    const allDone = completed === total && total > 0;
+
+    // ring math
+    const R = 47, C = 2 * Math.PI * R;
+    const offset = C * (1 - (total ? completed / total : 0));
+
+    const ringText = allDone
+      ? `<div class="jr-ring-text jr-ring-done"><h3>جهّزت كل اللي عليك ✓</h3><p>عبدالله بيكمّل اللمسات الأخيرة، وهتبدأ رحلتك في موعدها بإذن الله.</p></div>`
+      : `<div class="jr-ring-text"><h3>جاهزيتك للبداية</h3><p>كل خطوة بتخلّصها بتقرّبك من بداية قوية. خلّص الأربع نقط دي قبل أول جلسة.</p></div>`;
+
+    const taskCards = tasks.map(t => {
+      const isDone = !!done[t.key];
+      const m = CLIENT_META[t.key] || { desc: t.hint, meta: '' };
+      let metaLine = '';
+      if (t.key === 'session_confirmed') {
+        const cohort = contact.decision?.cohort || '';
+        if (cohort) metaLine = cohort;
+        else if (m.meta) metaLine = m.meta;
+      } else if (m.meta) {
+        metaLine = m.meta;
+      }
+      return `
+        <div class="jr-task ${isDone ? 'done' : ''}" data-task="${t.key}">
+          <div class="jr-task-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="jr-task-icon"><span style="font-size:20px;">${t.icon}</span></div>
+          <div class="jr-task-body">
+            <div class="jr-task-title">${t.label}</div>
+            <div class="jr-task-desc">${m.desc}</div>
+            ${metaLine ? `<span class="jr-task-meta">${metaLine}</span>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    const adminItems = adminTasks.map(t => {
+      const isDone = !!done[t.key];
+      return `<span class="jr-admin-item ${isDone ? 'done' : ''}"><span class="dot"></span>${t.label}</span>`;
+    }).join('');
+
+    return `
+      <div class="jr-ring-card">
+        <div class="jr-ring">
+          <svg width="104" height="104" viewBox="0 0 104 104">
+            <circle class="jr-ring-track" cx="52" cy="52" r="${R}"/>
+            <circle class="jr-ring-fill" cx="52" cy="52" r="${R}" stroke-dasharray="${C}" stroke-dashoffset="${offset}"/>
+          </svg>
+          <div class="jr-ring-center"><div class="jr-ring-num">${completed}/${total}</div><div class="jr-ring-of">جاهز</div></div>
+        </div>
+        ${ringText}
+      </div>
+
+      <div class="jr-sec-title"><span class="bar"></span><h2>خطواتك قبل البداية</h2><span class="count">${completed} من ${total}</span></div>
+      <div id="jr-tasks">${taskCards}</div>
+
+      <div class="jr-admin-strip">
+        <div class="jr-admin-strip-h">⚙️ وعبدالله بيجهّز من ناحيته:</div>
+        <div class="jr-admin-items">${adminItems}</div>
+      </div>
+
+      <div class="jr-sec-title"><span class="bar"></span><h2>رحلتك معانا</h2></div>
+      <div class="jr-map">
+        <div class="jr-phase active"><span class="jr-phase-tag">إنت هنا</span><div class="jr-phase-num">01</div><h4>التجهيز</h4><p>من دلوقتي لأول جلسة — تجهّز وتوصل جاهز.</p></div>
+        <div class="jr-phase"><div class="jr-phase-num">02</div><h4>الـ 6 أيام</h4><p>جمعة وسبت × 3 أسابيع من التحوّل العملي.</p></div>
+        <div class="jr-phase"><div class="jr-phase-num">03</div><h4>التطبيق</h4><p>متابعة منظّمة بعد البرنامج لحد ما تشوف النتيجة.</p></div>
+      </div>`;
+  }
+
+  function bindOnboarding() {
+    document.querySelectorAll('#jr-tasks .jr-task').forEach(el => {
+      el.addEventListener('click', () => toggleTask(el.dataset.task));
+    });
+  }
+
+  async function toggleTask(key) {
+    const ob = contact.onboarding || {};
+    const done = { ...(ob.tasks || {}) };
+    if (done[key]) delete done[key]; else done[key] = true;
+    const newOb = { ...ob, tasks: done };
+
+    // تحديث متفائل فوري (يحس بالسرعة)
+    contact.onboarding = newOb;
+    render();
+
+    try {
+      await EMC.contacts.update(contactId, { onboarding: newOb });
+    } catch (e) {
+      // رجّع لو فشل الحفظ
+      const revert = { ...(newOb.tasks || {}) };
+      if (revert[key]) delete revert[key]; else revert[key] = true;
+      contact.onboarding = { ...newOb, tasks: revert };
+      render();
+      alert('حصل خطأ في الحفظ، حاول تاني');
+    }
+  }
+
+  // ─── PRE-START (stages 1–9) ───
+  function preStartHtml() {
+    return `
+      <div class="jr-state-card">
+        <div class="jr-state-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+        <h3>رحلتك على وشك تبدأ</h3>
+        <p>إحنا بنجهّز كل التفاصيل. أول ما يتأكد مكانك في الكوهورت، الصفحة دي هتتحوّل لبيتك في الرحلة كلها. تابع رسايل عبدالله على الواتساب.</p>
+      </div>`;
+  }
+
+  // ─── ACTIVE (stages 11–14) ───
+  function activeStageHtml() {
+    const stage = EMC.utils.getStage(contact.currentStage);
+    return `
+      <div class="jr-state-card">
+        <div class="jr-state-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <h3>رحلتك شغّالة 🚀</h3>
+        <p>إنت دلوقتي في مرحلة متقدمة من رحلتك معانا. تجربتك الكاملة في الصفحة دي بتتطوّر باستمرار — وقريب هتلاقي هنا كل تفاصيل مرحلتك الحالية.</p>
+        <span class="jr-state-stage">مرحلتك: ${stage ? stage.name : '—'}</span>
+      </div>`;
+  }
+})();
+</script>
+
+</body>
+</html>
