@@ -424,7 +424,8 @@ window.EMC.ONBOARDING_TASKS = [
   { key: 'intro_viewed',      owner: 'client', icon: '🎬', label: 'شاهد مادة التعريف', hint: 'العميل اطّلع على مادة التعريف الأساسية قبل أول جلسة.' },
   { key: 'numbers_collected', owner: 'client', icon: '📊', label: 'جمع أرقام شركته', hint: 'العميل جمّع الأرقام الأساسية: الإيراد، عدد الموظفين، أكبر تحديات.' },
   { key: 'team_identified',   owner: 'client', icon: '👥', label: 'حدّد فريق القيادة المشارك', hint: 'العميل حدّد مين من فريقه هيشارك في الرحلة.' },
-  { key: 'session_confirmed', owner: 'client', icon: '📅', label: 'أكّد موعد أول جلسة', hint: 'العميل أكّد حضوره وموعد أول يوم في الكوهورت.' }
+  { key: 'session_confirmed', owner: 'client', icon: '📅', label: 'أكّد موعد أول جلسة', hint: 'العميل أكّد حضوره وموعد أول يوم في الكوهورت.' },
+  { key: 'agreement_signed',  owner: 'client', icon: '🤝', label: 'وافق على اتفاقية التوقعات', hint: 'العميل قرأ ووافق على التزامات البرنامج (الحضور، التطبيق، السرية).' }
 ];
 
 
