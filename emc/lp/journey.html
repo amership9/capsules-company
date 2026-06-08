@@ -367,7 +367,18 @@
       return `<span class="jr-admin-item ${isDone ? 'done' : ''}"><span class="dot"></span>${t.label}</span>`;
     }).join('');
 
+    const welcomeLink = `welcome.html?id=${contactId}&t=${token}`;
+
     return `
+      <a href="${welcomeLink}" style="display:flex; align-items:center; gap:15px; margin-top:30px; padding:18px 20px; background:linear-gradient(135deg,var(--emc-navy),#13325C); border-radius:16px; text-decoration:none; box-shadow:0 10px 28px rgba(11,37,69,0.12);">
+        <div style="width:48px; height:48px; border-radius:13px; background:rgba(201,169,97,0.18); display:grid; place-items:center; flex-shrink:0; font-size:23px;">🎁</div>
+        <div style="flex:1; min-width:0;">
+          <div style="color:#fff; font-size:16px; font-weight:800;">حزمة الترحيب بتاعتك</div>
+          <div style="color:rgba(255,255,255,0.72); font-size:13px; line-height:1.5; margin-top:3px;">ابدأ من هنا — كل اللي محتاج تعرفه عن رحلتك في صفحة واحدة.</div>
+        </div>
+        <span style="color:var(--emc-gold); font-size:22px; flex-shrink:0;">←</span>
+      </a>
+
       <div class="jr-ring-card">
         <div class="jr-ring">
           <svg width="104" height="104" viewBox="0 0 104 104">
