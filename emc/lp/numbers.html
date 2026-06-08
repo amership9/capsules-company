@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>أرقام شركتك · Executive Mastery Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<link rel="stylesheet" href="lp-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<style>
+  .nm-shell { max-width: 680px; margin: 0 auto; padding: 0 22px 80px; }
+
+  .nm-hero {
+    text-align:center; padding:52px 24px 36px; color:#fff; position:relative; overflow:hidden;
+    background: linear-gradient(180deg, #0A1F3C 0%, var(--emc-navy) 100%);
+  }
+  .nm-hero::before { content:""; position:absolute; top:-60px; left:-80px; width:280px; height:280px; background:radial-gradient(circle, rgba(201,169,97,0.16), transparent 60%); filter:blur(20px); }
+  .nm-hero-eyebrow { font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--emc-gold); font-weight:700; margin-bottom:10px; position:relative; z-index:1; }
+  .nm-hero h1 { font-size:28px; font-weight:800; margin:0 0 14px; position:relative; z-index:1; line-height:1.32; }
+  .nm-hero p { font-size:14.5px; color:rgba(255,255,255,0.8); max-width:520px; margin:0 auto; line-height:1.75; position:relative; z-index:1; }
+
+  .nm-card { background:#fff; border:1px solid var(--emc-line); border-radius:16px; margin-top:28px; padding:30px 28px; box-shadow:0 8px 24px rgba(11,37,69,0.06); }
+
+  .nm-group { margin-bottom:30px; }
+  .nm-group:last-of-type { margin-bottom:0; }
+  .nm-group-title { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .nm-group-num { width:28px; height:28px; border-radius:8px; background:var(--emc-navy); color:#fff; display:grid; place-items:center; font-family:"JetBrains Mono",monospace; font-weight:700; font-size:12px; flex-shrink:0; }
+  .nm-group-title h3 { margin:0; font-size:16.5px; font-weight:800; color:var(--emc-navy); }
+  .nm-group-sub { font-size:12.5px; color:var(--emc-muted); margin:0 0 18px 38px; line-height:1.6; }
+
+  .nm-q { margin-bottom:18px; }
+  .nm-q:last-child { margin-bottom:0; }
+  .nm-q-label { font-size:14px; font-weight:700; color:var(--emc-ink); display:block; margin-bottom:8px; }
+  .nm-q-label .opt { font-weight:500; color:var(--emc-faint); font-size:12px; }
+  .nm-q input, .nm-q select, .nm-q textarea {
+    width:100%; border:1px solid var(--emc-line); border-radius:10px; padding:12px 14px;
+    font-size:14.5px; font-family:inherit; background:#fff; color:var(--emc-ink); transition:border-color .15s, box-shadow .15s; line-height:1.6;
+  }
+  .nm-q input, .nm-q select { height:46px; }
+  .nm-q textarea { min-height:72px; resize:vertical; }
+  .nm-q input:focus, .nm-q select:focus, .nm-q textarea:focus { outline:none; border-color:var(--emc-navy); box-shadow:0 0 0 3px rgba(11,37,69,0.08); }
+  .nm-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .nm-q .err { color:var(--emc-red); font-size:11.5px; margin-top:6px; display:none; }
+  .nm-q .err.show { display:block; }
+
+  .nm-challenges { display:flex; flex-direction:column; gap:10px; }
+  .nm-challenge { display:flex; align-items:center; gap:10px; }
+  .nm-challenge-num { width:24px; height:24px; border-radius:50%; background:var(--emc-cream); color:var(--emc-navy); display:grid; place-items:center; font-weight:800; font-size:12px; flex-shrink:0; }
+  .nm-challenge input { flex:1; }
+
+  .nm-submit { width:100%; height:52px; background:var(--emc-gold); color:var(--emc-navy); border:0; border-radius:10px; font-size:15.5px; font-weight:800; cursor:pointer; transition:background .15s; font-family:inherit; margin-top:26px; }
+  .nm-submit:hover:not(:disabled) { background:#B89538; }
+  .nm-submit:disabled { opacity:.5; cursor:not-allowed; }
+  .nm-privacy { text-align:center; margin-top:14px; font-size:11.5px; color:var(--emc-faint); }
+
+  .nm-success { text-align:center; padding:50px 24px; }
+  .nm-success-check { width:76px; height:76px; margin:0 auto 20px; background:#E1F1E8; color:var(--emc-success,#2E7D5B); border-radius:50%; display:grid; place-items:center; animation:nmPop .5s cubic-bezier(.16,1,.3,1); }
+  @keyframes nmPop {0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+  .nm-success h3 { margin:0 0 12px; font-size:23px; font-weight:800; color:var(--emc-navy); }
+  .nm-success p { margin:0 auto 22px; font-size:15px; color:var(--emc-ink-2); line-height:1.8; max-width:440px; }
+  .nm-cta { width:100%; max-width:420px; height:54px; background:var(--emc-gold); color:var(--emc-navy); border:0; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; display:inline-grid; place-items:center; text-decoration:none; }
+
+  .nm-screen { min-height:70vh; display:grid; place-items:center; padding:40px 24px; text-align:center; }
+  .nm-spinner { width:44px; height:44px; border:4px solid var(--emc-line); border-top-color:var(--emc-gold); border-radius:50%; animation:nmSpin .8s linear infinite; margin:0 auto 18px; }
+  @keyframes nmSpin { to { transform:rotate(360deg);} }
+  .nm-screen h3 { color:var(--emc-navy); font-size:21px; font-weight:800; margin:0 0 10px; }
+  .nm-screen p { color:var(--emc-muted); font-size:14.5px; line-height:1.7; max-width:420px; margin:0 auto; }
+  .nm-screen .icon { width:60px; height:60px; margin:0 auto 18px; color:var(--emc-faint); }
+
+  @media (max-width:560px){
+    .nm-hero h1 { font-size:24px; }
+    .nm-row { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body class="lp-shell" data-landing-page="numbers" data-screen-label="LP numbers">
+
+<nav class="lp-nav">
+  <div class="lp-nav-brand">
+    <div class="lp-nav-brand-mark">
+      <svg width="100%" height="100%" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="18" width="32" height="7" rx="1" fill="#0B2545"/>
+        <rect x="14" y="31" width="36" height="6" rx="1" fill="#D72638"/>
+        <line x1="18" y1="25" x2="14" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="46" y1="25" x2="50" y2="50" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="46" y2="25" stroke="#0B2545" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lp-nav-brand-text">EXECUTIVE MASTERY</div>
+      <div class="lp-nav-brand-sub">أرقام شركتك</div>
+    </div>
+  </div>
+  <span style="color: rgba(255,255,255,0.6); font-size: 12px;">5 دقايق</span>
+</nav>
+
+<!-- Loading -->
+<div class="nm-screen" id="nm-loading">
+  <div><div class="nm-spinner"></div><p>جاري فتح النموذج…</p></div>
+</div>
+
+<!-- Error -->
+<div class="nm-screen" id="nm-error" style="display:none;">
+  <div>
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <h3>اللينك ده مش شغّال</h3>
+    <p>يبدو إن الرابط ناقص أو قديم. تواصل مع عبدالله على واتساب وهيبعتلك رابط رحلتك الصح.</p>
+  </div>
+</div>
+
+<!-- Content -->
+<div id="nm-content" style="display:none;"></div>
+
+<footer class="lp-footer">
+  <div>EMC · Executive Mastery Camp · جميع الحقوق محفوظة 2026</div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  let contactId = null, token = null, contact = null;
+
+  const loadingEl = document.getElementById('nm-loading');
+  const errorEl = document.getElementById('nm-error');
+  const contentEl = document.getElementById('nm-content');
+
+  function showError() {
+    loadingEl.style.display = 'none';
+    contentEl.style.display = 'none';
+    errorEl.style.display = 'grid';
+  }
+
+  function firstName() {
+    return contact.identity?.firstName || (contact.identity?.fullName || '').split(/\s+/)[0] || 'صديقي';
+  }
+
+  (async function init() {
+    const params = new URLSearchParams(window.location.search);
+    contactId = params.get('id');
+    token = params.get('t');
+
+    if (!contactId || !token) { showError(); return; }
+
+    try { contact = await EMC.contacts.get(contactId); } catch (e) { contact = null; }
+    if (!contact) { showError(); return; }
+
+    if (!contact.portalToken || contact.portalToken !== token) { showError(); return; }
+
+    render();
+  })();
+
+  function render() {
+    loadingEl.style.display = 'none';
+    errorEl.style.display = 'none';
+    contentEl.style.display = 'block';
+
+    const saved = contact.onboarding?.companyNumbers || {};
+    const ch = saved.challenges || [];
+
+    const sizeOpts = Object.entries(EMC.COMPANY_SIZES || {})
+      .map(([k, v]) => `<option value="${k}" ${saved.companySize === k ? 'selected' : ''}>${v}</option>`).join('');
+    const revOpts = Object.entries(EMC.REVENUE_RANGES || {})
+      .map(([k, v]) => `<option value="${k}" ${saved.revenueRange === k ? 'selected' : ''}>${v}</option>`).join('');
+
+    contentEl.innerHTML = `
+      <section class="nm-hero">
+        <div class="nm-hero-eyebrow">تجهيز ما قبل البرنامج</div>
+        <h1>${firstName()}، جهّز أرقام شركتك</h1>
+        <p>الأرقام دي مش امتحان — هي نقطة البداية اللي بنبني عليها سوا. لما تيجي مجهّزها، بنوفّر أول يومين من البرنامج وبندخل على التطبيق على طول بدل ما نضيّع وقت في "تعالى نفهم شركتك".</p>
+      </section>
+
+      <div class="nm-shell">
+        <form id="nm-form" class="nm-card" novalidate>
+
+          <!-- 1) الصورة الحالية -->
+          <div class="nm-group">
+            <div class="nm-group-title"><span class="nm-group-num">1</span><h3>الصورة الحالية</h3></div>
+            <p class="nm-group-sub">نظرة سريعة على حجم الشركة دلوقتي.</p>
+            <div class="nm-row">
+              <div class="nm-q">
+                <label class="nm-q-label">عدد الموظفين</label>
+                <select id="nm-size"><option value="">— اختار —</option>${sizeOpts}</select>
+              </div>
+              <div class="nm-q">
+                <label class="nm-q-label">نطاق الإيراد السنوي <span class="opt">(تقريبي)</span></label>
+                <select id="nm-rev"><option value="">— اختار —</option>${revOpts}</select>
+              </div>
+            </div>
+            <div class="nm-q">
+              <label class="nm-q-label">بتشتغل كام ساعة في الأسبوع تقريباً؟ <span class="opt">(اختياري)</span></label>
+              <input type="number" id="nm-hours" min="20" max="100" placeholder="مثلاً: 60" value="${saved.workHours || ''}" />
+            </div>
+          </div>
+
+          <!-- 2) فريق القيادة -->
+          <div class="nm-group">
+            <div class="nm-group-title"><span class="nm-group-num">2</span><h3>فريق القيادة المشارك</h3></div>
+            <p class="nm-group-sub">مين الأشخاص الأساسيين اللي بيساعدوك في إدارة الشركة، وهيشاركوا معاك في الرحلة.</p>
+            <div class="nm-q">
+              <label class="nm-q-label">كام شخص في فريق قيادتك؟ <span class="opt">(غيرك إنت)</span></label>
+              <input type="number" id="nm-team-size" min="0" max="50" placeholder="مثلاً: 3" value="${saved.teamSize ?? ''}" />
+            </div>
+            <div class="nm-q">
+              <label class="nm-q-label">أسماء/أدوار اللي هيشاركوا معاك <span class="opt">(اختياري)</span></label>
+              <textarea id="nm-team" placeholder="مثلاً: شريكي المؤسس — أحمد / مديرة العمليات — منى / المدير المالي — كريم">${saved.teamMembers || ''}</textarea>
+            </div>
+          </div>
+
+          <!-- 3) أكبر التحديات -->
+          <div class="nm-group">
+            <div class="nm-group-title"><span class="nm-group-num">3</span><h3>أكبر 3 تحديات دلوقتي</h3></div>
+            <p class="nm-group-sub">رتّبهم من الأهم للأقل — التحدي الأول هو اللي هنركّز عليه من أول يوم.</p>
+            <div class="nm-challenges">
+              <div class="nm-challenge"><span class="nm-challenge-num">1</span><input type="text" id="nm-ch1" placeholder="أكبر تحدي بيقلقك دلوقتي" value="${(ch[0] || '').replace(/"/g, '&quot;')}" /></div>
+              <div class="nm-challenge"><span class="nm-challenge-num">2</span><input type="text" id="nm-ch2" placeholder="التحدي التاني" value="${(ch[1] || '').replace(/"/g, '&quot;')}" /></div>
+              <div class="nm-challenge"><span class="nm-challenge-num">3</span><input type="text" id="nm-ch3" placeholder="التحدي التالت" value="${(ch[2] || '').replace(/"/g, '&quot;')}" /></div>
+            </div>
+            <div class="nm-q" style="margin-top:8px;">
+              <div class="err" id="nm-err">من فضلك اكتب أكبر تحدي واحد على الأقل</div>
+            </div>
+          </div>
+
+          <button type="submit" class="nm-submit" id="nm-submit-btn">جاهز ✓ احفظ أرقامي</button>
+          <div class="nm-privacy">🔒 الأرقام دي بتروح لعبدالله مباشرة، ومحمية تماماً.</div>
+        </form>
+      </div>`;
+
+    bindForm();
+  }
+
+  function bindForm() {
+    const form = document.getElementById('nm-form');
+    document.getElementById('nm-ch1').addEventListener('input', () => {
+      document.getElementById('nm-err').classList.remove('show');
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const challenges = [
+        document.getElementById('nm-ch1').value.trim(),
+        document.getElementById('nm-ch2').value.trim(),
+        document.getElementById('nm-ch3').value.trim()
+      ].filter(Boolean);
+
+      if (!challenges.length) {
+        document.getElementById('nm-err').classList.add('show');
+        document.getElementById('nm-ch1').focus();
+        return;
+      }
+
+      const btn = document.getElementById('nm-submit-btn');
+      btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+
+      const hours = parseInt(document.getElementById('nm-hours').value);
+      const teamSize = parseInt(document.getElementById('nm-team-size').value);
+
+      const companyNumbers = {
+        companySize: document.getElementById('nm-size').value || '',
+        revenueRange: document.getElementById('nm-rev').value || '',
+        workHours: (hours >= 20 && hours <= 100) ? hours : null,
+        teamSize: (teamSize >= 0 && teamSize <= 50) ? teamSize : null,
+        teamMembers: document.getElementById('nm-team').value.trim(),
+        challenges,
+        submittedAt: new Date().toISOString()
+      };
+
+      try {
+        const ob = contact.onboarding || {};
+        const tasks = { ...(ob.tasks || {}), numbers_collected: true };
+        await EMC.contacts.update(contactId, {
+          onboarding: { ...ob, companyNumbers, tasks }
+        });
+        contact.onboarding = { ...ob, companyNumbers, tasks };
+        showSuccess();
+      } catch (err) {
+        btn.disabled = false; btn.textContent = 'جاهز ✓ احفظ أرقامي';
+        alert('حصل خطأ في الحفظ، حاول تاني');
+      }
+    });
+  }
+
+  function showSuccess() {
+    const portalLink = `journey.html?id=${contactId}&t=${token}`;
+    contentEl.innerHTML = `
+      <div class="nm-shell">
+        <div class="nm-success">
+          <div class="nm-success-check">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h3>تمام ✓ أرقامك وصلت</h3>
+          <p>عبدالله هيراجعها قبل البرنامج، فأول جلسة تبدأ من نقطة متقدمة. فاضل خطوات بسيطة في صفحة رحلتك — كمّلها وإنت جاهز تماماً.</p>
+          <a href="${portalLink}" class="nm-cta">ارجع لصفحة رحلتك</a>
+        </div>
+      </div>`;
+  }
+})();
+</script>
+
+</body>
+</html>
