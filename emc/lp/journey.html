@@ -327,6 +327,8 @@
       ? `<div class="jr-ring-text jr-ring-done"><h3>جهّزت كل اللي عليك ✓</h3><p>عبدالله بيكمّل اللمسات الأخيرة، وهتبدأ رحلتك في موعدها بإذن الله.</p></div>`
       : `<div class="jr-ring-text"><h3>جاهزيتك للبداية</h3><p>كل خطوة بتخلّصها بتقرّبك من بداية قوية. خلّص الأربع نقط دي قبل أول جلسة.</p></div>`;
 
+    const linkMap = { intro_viewed: `intro.html?id=${contactId}&t=${token}` };
+
     const taskCards = tasks.map(t => {
       const isDone = !!done[t.key];
       const m = CLIENT_META[t.key] || { desc: t.hint, meta: '' };
@@ -338,16 +340,22 @@
       } else if (m.meta) {
         metaLine = m.meta;
       }
-      return `
-        <div class="jr-task ${isDone ? 'done' : ''}" data-task="${t.key}">
+
+      const inner = `
           <div class="jr-task-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
           <div class="jr-task-icon"><span style="font-size:20px;">${t.icon}</span></div>
           <div class="jr-task-body">
-            <div class="jr-task-title">${t.label}</div>
+            <div class="jr-task-title">${t.label}${linkMap[t.key] ? ' <span style="font-size:12px; color:#9a7b2e;">↗</span>' : ''}</div>
             <div class="jr-task-desc">${m.desc}</div>
             ${metaLine ? `<span class="jr-task-meta">${metaLine}</span>` : ''}
-          </div>
-        </div>`;
+          </div>`;
+
+      // مهمة لها صفحة مخصّصة (زي التعريف) → لينك يفتحها بدل toggle
+      if (linkMap[t.key]) {
+        return `<a href="${linkMap[t.key]}" class="jr-task ${isDone ? 'done' : ''}" data-link="1" style="text-decoration:none;">${inner}</a>`;
+      }
+      // باقي المهام → toggle بالدوس
+      return `<div class="jr-task ${isDone ? 'done' : ''}" data-task="${t.key}">${inner}</div>`;
     }).join('');
 
     const adminItems = adminTasks.map(t => {
@@ -385,6 +393,8 @@
 
   function bindOnboarding() {
     document.querySelectorAll('#jr-tasks .jr-task').forEach(el => {
+      // البطاقات اللي لها لينك (data-link) بتفتح الصفحة — مش toggle
+      if (el.dataset.link) return;
       el.addEventListener('click', () => toggleTask(el.dataset.task));
     });
   }
