@@ -246,6 +246,11 @@
         </div>
       </div>
       <div class="field">
+        <label class="field-label">الشريحة المستهدفة</label>
+        <select class="select" name="segmentId"><option value="">— غير محددة —</option></select>
+      </div>
+      
+      <div class="field">
         <label class="field-label">الوسوم <span class="hint">(افصل بينها بفاصلة)</span></label>
         <input class="input" name="tags" placeholder="مثلاً: c_level, manufacturing, high_intent" />
       </div>
@@ -2704,7 +2709,7 @@
     if (!modal) return;
     const form = document.getElementById('context-form');
 
-    // عبّي المصادر
+   // عبّي المصادر
     const sel = form.querySelector('[name="source"]');
     Object.entries(EMC.SOURCES).forEach(([k, v]) => {
       const o = document.createElement('option');
@@ -2712,10 +2717,24 @@
       sel.appendChild(o);
     });
 
+    // عبّي الشرايح من emc_segments
+    const segSel = form.querySelector('[name="segmentId"]');
+    (async () => {
+      try {
+        const segs = await EMC.segments.list();
+        (segs || []).forEach(s => {
+          const o = document.createElement('option');
+          o.value = s.id; o.textContent = s.name;
+          segSel.appendChild(o);
+        });
+      } catch (e) { /* لو الشرايح مش متاحة، تفضل القائمة فيها "غير محددة" بس */ }
+    })();
+
     function openModal() {
       const ctx = c.context || {};
       form.querySelector('[name="source"]').value = ctx.source || '';
       form.querySelector('[name="sourceDetails"]').value = ctx.sourceDetails || '';
+      form.querySelector('[name="segmentId"]').value = ctx.segmentId || '';
       form.querySelector('[name="tags"]').value = (ctx.tags || []).join('، ');
       form.querySelector('[name="notes"]').value = ctx.notes || '';
       modal.style.display = 'flex';
@@ -2740,6 +2759,7 @@
           ...(c.context || {}),
           source: form.querySelector('[name="source"]').value,
           sourceDetails: form.querySelector('[name="sourceDetails"]').value.trim(),
+          segmentId: form.querySelector('[name="segmentId"]').value,
           tags,
           notes: form.querySelector('[name="notes"]').value.trim()
         };
