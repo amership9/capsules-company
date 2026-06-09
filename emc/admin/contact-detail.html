@@ -424,6 +424,9 @@
       </div>
     </div>
 
+    <!-- Portal link card — يظهر من المرحلة 10 لـ 14 -->
+    <div id="portal-card"></div>
+
     <!-- [6B] Discovery panel — يظهر فقط للمرحلة 5 أو 6 -->
     <div id="discovery-panel"></div>
 
@@ -1865,6 +1868,85 @@
         EMC.utils.toast('تم النقل للتطبيق', 'success');
         setTimeout(() => window.location.reload(), 700);
       } catch (e) { EMC.utils.toast('خطأ في النقل', 'error'); }
+    });
+  })();
+
+
+  // ─── بطاقة بورتال العميل (تظهر من المرحلة 10 لـ 14) ───
+  (async function setupPortalCard() {
+    const panel = document.getElementById('portal-card');
+    if (!panel) return;
+    if (c.currentStage < 10) return;            // البورتال بيشتغل من الإعداد وطالع
+    if (!c.portalToken) return;                 // أمان: لو مفيش توكن لأي سبب، ما نعرضش لينك مكسور
+
+    const APP_BASE = 'https://amership9.github.io/capsules-company/emc';
+    const portalUrl = `${APP_BASE}/lp/journey.html?id=${id}&t=${c.portalToken}`;
+
+    // اسم المُرسِل من الإعدادات (أو عبدالله افتراضياً)
+    const pcSettings = await EMC.utils.getSettings();
+    const senderName = (pcSettings.contactName || '').trim() || 'عبدالله';
+
+    // اسم العميل الأول + رقم الواتساب
+    const firstName = c.identity?.firstName || (c.identity?.fullName || '').split(/\s+/)[0] || '';
+    const digits = (c.channels?.whatsapp || c.channels?.mobile || '').replace(/\D/g, '');
+    const waNum = digits ? (digits.startsWith('20') ? digits : (digits.startsWith('0') ? '2' + digits : '2' + digits)) : '';
+
+    // الرسالة الترحيبية الموحّدة (احترافية)
+    const msgText =
+      `أهلاً ${firstName}،\n\n` +
+      `يسعدنا انضمامك إلى Executive Mastery Camp. جهّزنا لك صفحة رحلتك الشخصية — منها تتابع كل خطواتك من الآن وحتى أول جلسة، وكل ما تحتاجه للوصول مستعدًا تمامًا:\n\n` +
+      `${portalUrl}\n\n` +
+      `الصفحة دي بيتك معانا طوال الرحلة، ارجعلها في أي وقت.\n\n` +
+      `في انتظارك،\n${senderName}\nExecutive Mastery Camp`;
+
+    const waLink = waNum ? `https://wa.me/${waNum}?text=${encodeURIComponent(msgText)}` : '';
+
+    panel.innerHTML = `
+      <div class="card card-pad" style="margin-bottom:22px; border-color:var(--emc-gold);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <span style="width:4px; height:20px; background:var(--emc-gold); border-radius:2px;"></span>
+          <h3 style="margin:0; font-size:16px; color:var(--emc-navy); font-weight:700;">بورتال العميل</h3>
+          <span class="badge" style="background:#FBFAF5; color:#9a7b2e; border-color:#ECD3A6;">صفحة رحلة العميل</span>
+        </div>
+
+        <div style="font-size:12.5px; color:var(--emc-muted); line-height:1.6; margin-bottom:12px;">
+          ده لينك صفحة الرحلة الشخصية للعميل (محمي بتوكن). ابعتهوله على واتساب، وهو بيفتحه على طول من غير باسوورد.
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:center; background:var(--emc-cream); border:1px solid var(--emc-line); border-radius:10px; padding:10px 14px; margin-bottom:14px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--emc-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--emc-ink-2); word-break:break-all; line-height:1.5;" id="portal-url-text">${portalUrl}</span>
+        </div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          ${waLink
+            ? `<a href="${waLink}" target="_blank" class="btn btn-accent btn-sm">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-inline-end:4px;"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5l.3-.4c.1-.2 0-.3-.1-.5L9.6 7c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2 0 1.3.9 2.5 1.1 2.7.1.2 1.8 2.8 4.4 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.6.1.5-.1 1.6-.6 1.8-1.3.2-.7.2-1.2.1-1.3 0-.1-.2-.2-.5-.3zM12 2C6.5 2 2 6.5 2 12c0 1.7.4 3.4 1.3 4.9L2 22l5.2-1.4c1.4.8 3.1 1.2 4.8 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
+                ابعت على واتساب
+              </a>`
+            : `<span style="font-size:11.5px; color:var(--emc-red); padding:6px 0;">⚠ مفيش رقم واتساب للعميل — استخدم زر النسخ وابعت اللينك يدوياً</span>`}
+          <button class="btn btn-outline btn-sm" id="portal-copy-btn">📋 نسخ اللينك</button>
+          <a href="${portalUrl}" target="_blank" class="btn btn-ghost btn-sm">↗ معاينة</a>
+        </div>
+      </div>`;
+
+    // زر النسخ
+    const copyBtn = document.getElementById('portal-copy-btn');
+    if (copyBtn) copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(portalUrl);
+        copyBtn.textContent = '✓ تم النسخ';
+        EMC.utils.toast('تم نسخ اللينك', 'success');
+        setTimeout(() => { copyBtn.textContent = '📋 نسخ اللينك'; }, 2000);
+      } catch (e) {
+        // fallback لو الكليبورد مش متاح
+        const r = document.createRange();
+        r.selectNode(document.getElementById('portal-url-text'));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(r);
+        try { document.execCommand('copy'); EMC.utils.toast('تم نسخ اللينك', 'success'); } catch (_) { EMC.utils.toast('انسخ اللينك يدوياً', 'default'); }
+        window.getSelection().removeAllRanges();
+      }
     });
   })();
   
