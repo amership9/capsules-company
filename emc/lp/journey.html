@@ -233,6 +233,52 @@
     .pa-ses { flex-direction: column; gap: 4px; }
     .pa-ses-time { min-width: 0; }
   }
+
+  /* ─── IMPLEMENTATION (stage 12) ─── */
+  .im-hero {
+    position: relative; overflow: hidden; color:#fff; text-align:center; padding:54px 24px 44px;
+    background: radial-gradient(800px 320px at 50% -10%, rgba(201,169,97,0.14), transparent 60%), linear-gradient(165deg, #0A1F3C 0%, var(--emc-navy) 55%, #0d2950 100%);
+  }
+  .im-hero-inner { position:relative; z-index:2; max-width:580px; margin:0 auto; }
+  .im-eyebrow { font-size:12px; letter-spacing:0.16em; text-transform:uppercase; color:var(--emc-gold); font-weight:800; margin-bottom:14px; }
+  .im-hero h1 { font-size:27px; font-weight:900; margin:0 0 10px; line-height:1.32; }
+  .im-hero p { font-size:14px; color:rgba(255,255,255,0.74); line-height:1.7; max-width:480px; margin:0 auto; }
+  .im-progress-wrap { max-width:420px; margin:22px auto 0; }
+  .im-progress-row { display:flex; align-items:center; justify-content:space-between; font-size:12.5px; color:rgba(255,255,255,0.8); margin-bottom:8px; }
+  .im-progress-bar { height:9px; background:rgba(255,255,255,0.14); border-radius:99px; overflow:hidden; }
+  .im-progress-bar > div { height:100%; background:var(--emc-gold); border-radius:99px; transition:width .6s cubic-bezier(.16,1,.3,1); }
+
+  .im-tool {
+    display:flex; align-items:flex-start; gap:14px; padding:16px 18px; background:#fff;
+    border:1.5px solid var(--emc-line); border-radius:14px; margin-bottom:11px; cursor:pointer;
+    transition:transform .15s, box-shadow .2s, border-color .2s, background .2s;
+  }
+  .im-tool:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(11,37,69,0.08); border-color:var(--emc-navy); }
+  .im-tool.done { background:#FBFAF5; border-color:var(--emc-gold); }
+  .im-tool-check { width:27px; height:27px; border-radius:9px; flex-shrink:0; margin-top:1px; border:2px solid var(--emc-line); display:grid; place-items:center; background:#fff; transition:all .2s; }
+  .im-tool.done .im-tool-check { background:var(--emc-gold); border-color:var(--emc-gold); }
+  .im-tool-check svg { opacity:0; transform:scale(.5); transition:all .2s; color:#fff; }
+  .im-tool.done .im-tool-check svg { opacity:1; transform:scale(1); }
+  .im-tool-icon { width:42px; height:42px; border-radius:11px; flex-shrink:0; background:var(--emc-cream); display:grid; place-items:center; font-size:20px; }
+  .im-tool.done .im-tool-icon { background:rgba(201,169,97,0.16); }
+  .im-tool-body { flex:1; min-width:0; }
+  .im-tool-title { font-size:15px; font-weight:800; color:var(--emc-navy); transition:opacity .2s; }
+  .im-tool.done .im-tool-title { opacity:0.6; }
+  .im-tool-desc { font-size:12.5px; color:var(--emc-muted); line-height:1.6; margin-top:3px; }
+
+  .im-checkin { display:flex; align-items:center; gap:13px; padding:13px 16px; background:#fff; border:1px solid var(--emc-line); border-radius:12px; margin-bottom:9px; }
+  .im-checkin.done { background:#F1F8F4; border-color:#BFE0CD; }
+  .im-checkin-dot { width:30px; height:30px; border-radius:50%; flex-shrink:0; display:grid; place-items:center; background:var(--emc-cream); color:var(--emc-muted); }
+  .im-checkin.done .im-checkin-dot { background:var(--emc-success,#2E7D5B); color:#fff; }
+  .im-checkin-body { flex:1; min-width:0; }
+  .im-checkin-title { font-size:13.5px; font-weight:700; color:var(--emc-navy); }
+  .im-checkin.done .im-checkin-title { color:var(--emc-success,#2E7D5B); }
+  .im-checkin-when { font-size:11.5px; color:var(--emc-muted); margin-top:1px; }
+  .im-checkin-state { font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; flex-shrink:0; }
+
+  .im-coach-note { margin-top:14px; padding:16px 18px; border-radius:14px; background:linear-gradient(135deg,var(--emc-navy),#13325C); color:#fff; }
+  .im-coach-note .lbl { font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--emc-gold); font-weight:800; margin-bottom:6px; display:flex; align-items:center; gap:7px; }
+  .im-coach-note p { margin:0; font-size:13.5px; line-height:1.8; color:rgba(255,255,255,0.9); }
 </style>
 </head>
 <body class="lp-shell" data-landing-page="journey" data-screen-label="LP journey">
@@ -328,12 +374,14 @@
     let body = '';
     if (stage === 10) body = heroHtml() + onboardingHtml();
     else if (stage === 11) body = participationHtml();
+    else if (stage === 12) body = implementationHtml();
     else if (stage < 10) body = heroHtml() + preStartHtml();
     else body = heroHtml() + activeStageHtml();
 
     contentEl.innerHTML = `<div class="jr-shell">${body}</div>`;
     if (stage === 10) bindOnboarding();
     if (stage === 11) bindParticipation();
+    if (stage === 12) bindImplementation();
   }
 
   // ─── HERO ───
@@ -609,6 +657,115 @@
         head.closest('.pa-day').classList.toggle('open');
       });
     });
+  }
+
+  // ─── IMPLEMENTATION (stage 12) — إقرار الأدوات + متابعة الـ90 يوم ───
+  const TOOL_CLIENT_DESC = {
+    accountability: 'الأدوار واضحة في شركتك — كل واحد عارف هو مسؤول عن إيه بالظبط.',
+    weekly_meeting:  'بقى عندك اجتماع قيادة منتظم وثابت كل أسبوع — مش لما الحاجة تولّع.',
+    scorecard:       'بتتابع أرقامك الأساسية كل أسبوع وبتشوف الصورة قبل ما المشكلة تكبر.',
+    priorities:      'حدّدت أولويات الـ 90 يوم بوضوح، وبتشتغل عليها فعلاً.',
+    issues:          'بقى عندك طريقة منظّمة تحسم بيها المشاكل من جذرها بدل ما تتكرر.',
+    vision:          'رؤية شركتك موثّقة وواضحة، والفريق كله عارف الوجهة.'
+  };
+
+  function implementationHtml() {
+    const TOOLS = EMC.IMPLEMENTATION_TOOLS || [];
+    const DEFAULT_CHECKINS = EMC.DEFAULT_CHECKINS || [];
+    const impl = contact.implementation || {};
+    const toolsDone = impl.tools || {};
+    const customCheckins = Array.isArray(impl.customCheckins) ? impl.customCheckins : [];
+    const allCheckins = [...DEFAULT_CHECKINS, ...customCheckins];
+    const checkinData = impl.checkins || {};
+
+    const doneCount = TOOLS.filter(t => toolsDone[t.key]).length;
+    const pct = TOOLS.length ? Math.round((doneCount / TOOLS.length) * 100) : 0;
+
+    const toolsHtml = TOOLS.map(t => {
+      const isDone = !!toolsDone[t.key];
+      const desc = TOOL_CLIENT_DESC[t.key] || t.hint;
+      return `
+        <div class="im-tool ${isDone ? 'done' : ''}" data-tool="${t.key}">
+          <div class="im-tool-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="im-tool-icon"><span>${t.icon}</span></div>
+          <div class="im-tool-body">
+            <div class="im-tool-title">${t.label}</div>
+            <div class="im-tool-desc">${desc}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    const checkinsHtml = allCheckins.map(ci => {
+      const done = !!checkinData[ci.key]?.done;
+      const stateBadge = done
+        ? `<span class="im-checkin-state" style="background:#E1F1E8; color:#1E5C42; border:1px solid #BFE0CD;">تمّت ✓</span>`
+        : `<span class="im-checkin-state" style="background:var(--emc-cream); color:var(--emc-muted); border:1px solid var(--emc-line);">قادمة</span>`;
+      return `
+        <div class="im-checkin ${done ? 'done' : ''}">
+          <div class="im-checkin-dot">
+            ${done
+              ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+              : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>'}
+          </div>
+          <div class="im-checkin-body">
+            <div class="im-checkin-title">${ci.label}</div>
+            <div class="im-checkin-when">${ci.timing || ''}</div>
+          </div>
+          ${stateBadge}
+        </div>`;
+    }).join('');
+
+    return `
+      <div style="margin:0 -22px;">
+        <section class="im-hero">
+          <div class="im-hero-inner">
+            <div class="im-eyebrow">مرحلة التطبيق</div>
+            <h1>${firstName()}، دلوقتي الجزء اللي بيفرق فعلاً</h1>
+            <p>البرنامج خلص، بس الرحلة لسه. هنا بتثبّت اللي تعلمته في شركتك على مدار 90 يوم. علّم كل أداة بتطبّقها فعلاً — ده بيوريك تقدّمك، وعبدالله بيتابعك خطوة بخطوة.</p>
+            <div class="im-progress-wrap">
+              <div class="im-progress-row"><span>أدوات طبّقتها</span><span>${doneCount} من ${TOOLS.length}</span></div>
+              <div class="im-progress-bar"><div style="width:${pct}%;"></div></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="jr-sec-title" style="margin-top:30px;"><span class="bar"></span><h2>الأدوات اللي بتطبّقها</h2><span class="count">علّم اللي ركّبته فعلاً</span></div>
+      <div id="im-tools">${toolsHtml}</div>
+
+      <div class="jr-sec-title"><span class="bar"></span><h2>نقاط المتابعة معاك</h2></div>
+      <div id="im-checkins">${checkinsHtml}</div>
+      <div class="im-coach-note">
+        <div class="lbl">🤝 إنت مش لوحدك</div>
+        <p>عبدالله هيكون معاك في نقاط المتابعة دي على مدار الرحلة — نشوف سوا إيه اللي اشتغل، ونعدّي أي عقبة بتقابلك في التطبيق. النقط دي بيحدّدها ويتابعها عبدالله، وإنت بتشوفها هنا.</p>
+      </div>`;
+  }
+
+  function bindImplementation() {
+    document.querySelectorAll('#im-tools .im-tool').forEach(el => {
+      el.addEventListener('click', () => toggleTool(el.dataset.tool));
+    });
+  }
+
+  async function toggleTool(key) {
+    const impl = contact.implementation || {};
+    const tools = { ...(impl.tools || {}) };
+    if (tools[key]) delete tools[key]; else tools[key] = true;
+    const newImpl = { ...impl, tools };
+
+    // تحديث متفائل فوري
+    contact.implementation = newImpl;
+    render();
+
+    try {
+      await EMC.contacts.update(contactId, { implementation: newImpl });
+    } catch (e) {
+      const revert = { ...(newImpl.tools || {}) };
+      if (revert[key]) delete revert[key]; else revert[key] = true;
+      contact.implementation = { ...newImpl, tools: revert };
+      render();
+      alert('حصل خطأ في الحفظ، حاول تاني');
+    }
   }
 })();
 </script>
