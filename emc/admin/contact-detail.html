@@ -179,6 +179,52 @@
     </div>
   </div>
 </div>
+
+  <!-- Channels edit modal -->
+<div class="emc-modal-overlay" id="channels-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 600px; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.3);">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--emc-line);">
+      <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">تعديل قنوات التواصل</h3>
+      <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;">الإيميل · الموبايل · واتساب · القناة المفضلة</div>
+    </div>
+    <div style="padding: 22px 24px; overflow-y: auto; flex: 1;" id="channels-form">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">البريد الأساسي</label>
+          <input class="input" type="email" name="primaryEmail" placeholder="name@example.com" />
+        </div>
+        <div class="field">
+          <label class="field-label">الموبايل</label>
+          <input class="input" name="mobile" placeholder="+201001234567" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">واتساب</label>
+          <input class="input" name="whatsapp" placeholder="+201001234567" />
+        </div>
+        <div class="field">
+          <label class="field-label">LinkedIn</label>
+          <input class="input" name="linkedinUrl" placeholder="linkedin.com/in/..." />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">القناة المفضلة</label>
+          <select class="select" name="preferredChannel"><option value="">— غير محدد —</option></select>
+        </div>
+        <div class="field">
+          <label class="field-label">أفضل توقيت للتواصل</label>
+          <input class="input" name="bestContactTime" placeholder="مثلاً: صباحاً / بعد الـ 5 مساءً" />
+        </div>
+      </div>
+    </div>
+    <div style="padding: 14px 24px; border-top: 1px solid var(--emc-line); display: flex; justify-content: flex-end; gap: 8px; background: var(--emc-cream);">
+      <button class="btn btn-ghost btn-sm" id="channels-cancel">إلغاء</button>
+      <button class="btn btn-primary btn-sm" id="channels-save">حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
   
 <!-- [5C] Opportunity edit modal -->
 <div class="emc-modal-overlay" id="opp-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
@@ -2616,6 +2662,65 @@
     });
   })();
 
+  // ─── محرر قنوات التواصل ───
+  (function setupChannelsEditor() {
+    const modal = document.getElementById('channels-modal');
+    if (!modal) return;
+    const form = document.getElementById('channels-form');
+
+    // عبّي القناة المفضلة
+    const sel = form.querySelector('[name="preferredChannel"]');
+    Object.entries(EMC.PREFERRED_CHANNELS).forEach(([k, v]) => {
+      const o = document.createElement('option');
+      o.value = k; o.textContent = v;
+      sel.appendChild(o);
+    });
+
+    function openModal() {
+      const ch = c.channels || {};
+      form.querySelector('[name="primaryEmail"]').value = ch.primaryEmail || '';
+      form.querySelector('[name="mobile"]').value = ch.mobile || '';
+      form.querySelector('[name="whatsapp"]').value = ch.whatsapp || '';
+      form.querySelector('[name="linkedinUrl"]').value = ch.linkedinUrl || '';
+      form.querySelector('[name="preferredChannel"]').value = ch.preferredChannel || '';
+      form.querySelector('[name="bestContactTime"]').value = ch.bestContactTime || '';
+      modal.style.display = 'flex';
+    }
+    function closeModal() { modal.style.display = 'none'; }
+
+    panelsEl.addEventListener('click', (e) => {
+      if (e.target.closest('#edit-channels-btn')) openModal();
+    });
+    document.getElementById('channels-cancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    document.getElementById('channels-save').addEventListener('click', async () => {
+      const email = form.querySelector('[name="primaryEmail"]').value.trim();
+      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        EMC.utils.toast('الإيميل مش صحيح', 'error'); return;
+      }
+      const btn = document.getElementById('channels-save');
+      btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+      try {
+        const updated = {
+          ...(c.channels || {}),
+          primaryEmail: email,
+          mobile: form.querySelector('[name="mobile"]').value.trim(),
+          whatsapp: form.querySelector('[name="whatsapp"]').value.trim(),
+          linkedinUrl: form.querySelector('[name="linkedinUrl"]').value.trim(),
+          preferredChannel: form.querySelector('[name="preferredChannel"]').value,
+          bestContactTime: form.querySelector('[name="bestContactTime"]').value.trim()
+        };
+        await EMC.contacts.update(id, { channels: updated });
+        EMC.utils.toast('تم تحديث القنوات', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (err) {
+        EMC.utils.toast('خطأ: ' + (err.message || 'فشل الحفظ'), 'error');
+        btn.disabled = false; btn.textContent = 'حفظ التعديلات';
+      }
+    });
+  })();
+  
 
   // ─── محرر الهوية الأساسية ───
   (function setupIdentityEditor() {
@@ -2818,6 +2923,9 @@
           ${fieldDisplay('لغة التواصل', c.identity.preferredLanguage === 'ar' ? 'العربية' : 'الإنجليزية')}
         </div>`;
       case 'channels': return `
+        <div style="display:flex; justify-content:flex-end; margin: -6px 0 14px;">
+          <button class="btn btn-outline btn-sm" id="edit-channels-btn">✎ تعديل القنوات</button>
+        </div>
         <div class="grid-2">
           ${fieldDisplay('البريد الأساسي', c.channels.primaryEmail)}
           ${fieldDisplay('الموبايل', c.channels.mobile)}
