@@ -2834,18 +2834,31 @@
         </div>
         ${c.outcomes.testimonialContent ? `<div class="h-divide"></div><div class="field-display"><div class="key">الشهادة</div><div class="val" style="font-style: italic; padding: 14px 18px; background: var(--emc-cream); border-radius: 8px; border-inline-start: 3px solid var(--emc-gold);">"${c.outcomes.testimonialContent}"</div></div>` : ''}` :
         `<div class="empty"><h3>لم يتم تسجيل نتائج بعد</h3>يتم تعبئة هذا القسم بعد الانتهاء من البرنامج</div>`;
-      case 'advocacy': return c.advocacy.referralsCount > 0 ? `
+      case 'advocacy': {
+        const advRefsCount = c.advocacy?.referralsCount || 0;
+        const advContribs = c.advocacy?.contributions || {};
+        const advContribKeys = Object.keys(advContribs).filter(k => advContribs[k]);
+        const hasActivity = advRefsCount > 0 || advContribKeys.length > 0;
+        if (!hasActivity) {
+          return `<div class="empty"><h3>لم يبدأ السفارة بعد</h3>يتفعّل بعد أول إحالة أو مساهمة</div>`;
+        }
+        const contribDefs = EMC.ADVOCATE_CONTRIBUTIONS || [];
+        const contribLabel = (key) => {
+          const def = contribDefs.find(d => d.key === key);
+          return def ? `${def.icon} ${def.label}` : key;
+        };
+        return `
         <div class="grid-3">
-          <div class="stat-card accent-red"><div class="stat-label">إحالات إجمالاً</div><div class="stat-value">${c.advocacy.referralsCount}</div></div>
-          <div class="stat-card accent-success"><div class="stat-label">تحوّلت لعملاء</div><div class="stat-value">${c.advocacy.successfulReferrals}</div></div>
-          <div class="stat-card accent-gold"><div class="stat-label">قيمة الإحالات</div><div class="stat-value" style="font-size: 20px;">${EMC.utils.formatCurrency(c.advocacy.referralsValue)}</div></div>
+          <div class="stat-card accent-red"><div class="stat-label">إحالات إجمالاً</div><div class="stat-value">${advRefsCount}</div></div>
+          <div class="stat-card accent-success"><div class="stat-label">تحوّلت لعملاء</div><div class="stat-value">${c.advocacy?.successfulReferrals || 0}</div></div>
+          <div class="stat-card accent-gold"><div class="stat-label">قيمة الإحالات</div><div class="stat-value" style="font-size: 20px;">${EMC.utils.formatCurrency(c.advocacy?.referralsValue || 0)}</div></div>
         </div>
         <div class="h-divide"></div>
         <div class="field-display">
-          <div class="key">المساهمات في المحتوى</div>
-          <div class="val">${(c.advocacy.contentContributions || []).length ? (c.advocacy.contentContributions || []).map(x => `<span class="badge" style="margin: 0 4px 4px 0;">${x}</span>`).join('') : '<span class="empty">لا توجد</span>'}</div>
-        </div>` :
-        `<div class="empty"><h3>لم يبدأ السفارة بعد</h3>يتفعّل بعد أول إحالة أو مساهمة</div>`;
+          <div class="key">المساهمات الأخرى</div>
+          <div class="val">${advContribKeys.length ? advContribKeys.map(k => `<span class="badge" style="margin: 0 4px 4px 0;">${contribLabel(k)}</span>`).join('') : '<span class="empty">لا توجد</span>'}</div>
+        </div>`;
+      }
       default: return '';
     }
   }
