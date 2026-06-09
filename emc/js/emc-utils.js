@@ -54,11 +54,11 @@ window.EMC.EOS_ROLES = {
 };
 
 window.EMC.EOS_FAMILIARITY = {
-  never_heard: 'لم يسمع عن EOS',
-  heard_only: 'سمع لكن لم يقرأ',
-  read_traction: 'قرأ Traction',
-  partial_implementation: 'يطبق جزئياً',
-  full_implementation: 'يطبق بالكامل ومحتاج تطوير'
+  never_heard: 'أول مرة أسمع عنه',
+  heard_only: 'سمعت عنه بس ما قرأتش',
+  read_traction: 'قرأت عنه',
+  partial_implementation: 'بطبّق منه حاجات',
+  full_implementation: 'بطبّقه وعايز أطوّره'
 };
 
 window.EMC.COMPANY_STAGES = {
