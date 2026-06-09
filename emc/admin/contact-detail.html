@@ -265,6 +265,54 @@
     </div>
   </div>
 </div>
+
+  <!-- EOS Profile edit modal -->
+<div class="emc-modal-overlay" id="eos-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 600px; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.3);">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--emc-line);">
+      <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">تعديل الملف الخاص بـ EOS</h3>
+      <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;">الدور · الإلمام · السقف · المكوّن · نقاط الألم</div>
+    </div>
+    <div style="padding: 22px 24px; overflow-y: auto; flex: 1;" id="eos-form">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">الدور الحالي</label>
+          <select class="select" name="currentRole"><option value="">— غير محدد —</option></select>
+        </div>
+        <div class="field">
+          <label class="field-label">درجة الإلمام بـ EOS</label>
+          <select class="select" name="eosFamiliarity"><option value="">— غير محدد —</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">مرحلة الشركة</label>
+          <select class="select" name="companyStage"><option value="">— غير محدد —</option></select>
+        </div>
+        <div class="field">
+          <label class="field-label">السقف اللي بيصطدم بيه</label>
+          <select class="select" name="ceiling"><option value="">— غير محدد —</option></select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">المكوّن الأساسي اللي محتاج تركيز</label>
+        <select class="select" name="primaryComponent"><option value="">— غير محدد —</option></select>
+      </div>
+      <div class="field">
+        <label class="field-label">نقاط الألم <span class="hint">(افصل بينها بفاصلة)</span></label>
+        <input class="input" name="pains" placeholder="مثلاً: تفكك فريق القيادة، بطء اتخاذ القرار" />
+      </div>
+      <div class="field" style="margin-bottom: 0;">
+        <label class="field-label">أهداف الـ 12 شهر القادمة</label>
+        <textarea class="textarea" name="goals12Months" placeholder="إيه اللي عايز يحققه خلال سنة…" style="min-height: 90px;"></textarea>
+      </div>
+    </div>
+    <div style="padding: 14px 24px; border-top: 1px solid var(--emc-line); display: flex; justify-content: flex-end; gap: 8px; background: var(--emc-cream);">
+      <button class="btn btn-ghost btn-sm" id="eos-cancel">إلغاء</button>
+      <button class="btn btn-primary btn-sm" id="eos-save">حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
   
 <!-- [5C] Opportunity edit modal -->
 <div class="emc-modal-overlay" id="opp-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
@@ -2702,7 +2750,74 @@
     });
   })();
 
+// ─── محرر ملف EOS ───
+  (function setupEosEditor() {
+    const modal = document.getElementById('eos-modal');
+    if (!modal) return;
+    const form = document.getElementById('eos-form');
 
+    const fillSel = (name, dict) => {
+      const sel = form.querySelector(`[name="${name}"]`);
+      if (!sel) return;
+      Object.entries(dict).forEach(([k, v]) => {
+        const o = document.createElement('option');
+        o.value = k; o.textContent = v;
+        sel.appendChild(o);
+      });
+    };
+    fillSel('currentRole', EMC.EOS_ROLES);
+    fillSel('eosFamiliarity', EMC.EOS_FAMILIARITY);
+    fillSel('companyStage', EMC.COMPANY_STAGES);
+    fillSel('ceiling', EMC.CEILINGS);
+    fillSel('primaryComponent', EMC.EOS_COMPONENTS);
+
+    function openModal() {
+      const eos = c.eosProfile || {};
+      form.querySelector('[name="currentRole"]').value = eos.currentRole || '';
+      form.querySelector('[name="eosFamiliarity"]').value = eos.eosFamiliarity || '';
+      form.querySelector('[name="companyStage"]').value = eos.companyStage || '';
+      form.querySelector('[name="ceiling"]').value = eos.ceiling || '';
+      form.querySelector('[name="primaryComponent"]').value = eos.primaryComponent || '';
+      form.querySelector('[name="pains"]').value = (eos.pains || []).join('، ');
+      form.querySelector('[name="goals12Months"]').value = eos.goals12Months || '';
+      modal.style.display = 'flex';
+    }
+    function closeModal() { modal.style.display = 'none'; }
+
+    panelsEl.addEventListener('click', (e) => {
+      if (e.target.closest('#edit-eos-btn')) openModal();
+    });
+    document.getElementById('eos-cancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    document.getElementById('eos-save').addEventListener('click', async () => {
+      const btn = document.getElementById('eos-save');
+      btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+      try {
+        // نقاط الألم: نص مفصول بفاصلة (عربية أو إنجليزية) → array نظيفة
+        const painsRaw = form.querySelector('[name="pains"]').value;
+        const pains = painsRaw.split(/[,،]/).map(p => p.trim()).filter(Boolean);
+
+        const updated = {
+          ...(c.eosProfile || {}),
+          currentRole: form.querySelector('[name="currentRole"]').value,
+          eosFamiliarity: form.querySelector('[name="eosFamiliarity"]').value,
+          companyStage: form.querySelector('[name="companyStage"]').value,
+          ceiling: form.querySelector('[name="ceiling"]').value,
+          primaryComponent: form.querySelector('[name="primaryComponent"]').value,
+          pains,
+          goals12Months: form.querySelector('[name="goals12Months"]').value.trim()
+        };
+        await EMC.contacts.update(id, { eosProfile: updated });
+        EMC.utils.toast('تم تحديث ملف EOS', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (err) {
+        EMC.utils.toast('خطأ: ' + (err.message || 'فشل الحفظ'), 'error');
+        btn.disabled = false; btn.textContent = 'حفظ التعديلات';
+      }
+    });
+  })();
+  
   // ─── محرر السياق ───
   (function setupContextEditor() {
     const modal = document.getElementById('context-modal');
@@ -3075,6 +3190,9 @@
         </div>
         ${renderLandingJourney(landingTPs)}`;
       case 'eosProfile': return `
+        <div style="display:flex; justify-content:flex-end; margin: -6px 0 14px;">
+          <button class="btn btn-outline btn-sm" id="edit-eos-btn">✎ تعديل ملف EOS</button>
+        </div>
         <div class="grid-2">
           ${fieldDisplay('الدور الحالي', EMC.EOS_ROLES[c.eosProfile.currentRole])}
           ${fieldDisplay('درجة الإلمام بـ EOS', EMC.EOS_FAMILIARITY[c.eosProfile.eosFamiliarity])}
