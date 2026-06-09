@@ -116,6 +116,70 @@
 
 <div id="emc-shell-root"></div>
 
+
+  <!-- Identity edit modal -->
+<div class="emc-modal-overlay" id="identity-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 600px; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.3);">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--emc-line);">
+      <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">تعديل الهوية الأساسية</h3>
+      <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;">الاسم · المنصب · الشركة · بياناتها</div>
+    </div>
+    <div style="padding: 22px 24px; overflow-y: auto; flex: 1;" id="identity-form">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">الاسم الكامل <span class="req">*</span></label>
+          <input class="input" name="fullName" placeholder="الاسم الكامل" />
+        </div>
+        <div class="field">
+          <label class="field-label">المنصب</label>
+          <input class="input" name="title" placeholder="مثلاً: المؤسس والرئيس التنفيذي" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">اسم الشركة</label>
+        <input class="input" name="companyName" placeholder="اسم الشركة" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">الصناعة</label>
+          <select class="select" name="industry"><option value="">— غير محدد —</option></select>
+        </div>
+        <div class="field">
+          <label class="field-label">حجم الشركة</label>
+          <select class="select" name="companySize"><option value="">— غير محدد —</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">نطاق الإيراد</label>
+          <select class="select" name="revenueRange"><option value="">— غير محدد —</option></select>
+        </div>
+        <div class="field">
+          <label class="field-label">سنوات في السوق</label>
+          <select class="select" name="yearsInBusiness"><option value="">— غير محدد —</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">المدينة</label>
+          <input class="input" name="city" placeholder="مثلاً: القاهرة" />
+        </div>
+        <div class="field">
+          <label class="field-label">لغة التواصل</label>
+          <select class="select" name="preferredLanguage">
+            <option value="ar">العربية</option>
+            <option value="en">الإنجليزية</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div style="padding: 14px 24px; border-top: 1px solid var(--emc-line); display: flex; justify-content: flex-end; gap: 8px; background: var(--emc-cream);">
+      <button class="btn btn-ghost btn-sm" id="identity-cancel">إلغاء</button>
+      <button class="btn btn-primary btn-sm" id="identity-save">حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
+  
 <!-- [5C] Opportunity edit modal -->
 <div class="emc-modal-overlay" id="opp-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
   <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 560px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.3);">
@@ -2551,6 +2615,81 @@
       } catch (e) { EMC.utils.toast('خطأ في الانتقال', 'error'); }
     });
   })();
+
+
+  // ─── محرر الهوية الأساسية ───
+  (function setupIdentityEditor() {
+    const modal = document.getElementById('identity-modal');
+    if (!modal) return;
+    const form = document.getElementById('identity-form');
+
+    const fillSel = (name, dict) => {
+      const sel = form.querySelector(`[name="${name}"]`);
+      if (!sel) return;
+      Object.entries(dict).forEach(([k, v]) => {
+        const o = document.createElement('option');
+        o.value = k; o.textContent = v;
+        sel.appendChild(o);
+      });
+    };
+    fillSel('industry', EMC.INDUSTRIES);
+    fillSel('companySize', EMC.COMPANY_SIZES);
+    fillSel('revenueRange', EMC.REVENUE_RANGES);
+    fillSel('yearsInBusiness', EMC.YEARS_IN_BUSINESS);
+
+    function openModal() {
+      const idn = c.identity || {};
+      form.querySelector('[name="fullName"]').value = idn.fullName || '';
+      form.querySelector('[name="title"]').value = idn.title || '';
+      form.querySelector('[name="companyName"]').value = idn.companyName || '';
+      form.querySelector('[name="industry"]').value = idn.industry || '';
+      form.querySelector('[name="companySize"]').value = idn.companySize || '';
+      form.querySelector('[name="revenueRange"]').value = idn.revenueRange || '';
+      form.querySelector('[name="yearsInBusiness"]').value = idn.yearsInBusiness || '';
+      form.querySelector('[name="city"]').value = idn.city || '';
+      form.querySelector('[name="preferredLanguage"]').value = idn.preferredLanguage || 'ar';
+      modal.style.display = 'flex';
+    }
+    function closeModal() { modal.style.display = 'none'; }
+
+    panelsEl.addEventListener('click', (e) => {
+      if (e.target.closest('#edit-identity-btn')) openModal();
+    });
+    document.getElementById('identity-cancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    document.getElementById('identity-save').addEventListener('click', async () => {
+      const fullName = form.querySelector('[name="fullName"]').value.trim();
+      if (!fullName) { EMC.utils.toast('الاسم الكامل مطلوب', 'error'); return; }
+
+      const btn = document.getElementById('identity-save');
+      btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+      try {
+        // حافظ على firstName/lastName متّسقين مع fullName
+        const parts = fullName.split(/\s+/);
+        const updated = {
+          ...(c.identity || {}),
+          fullName,
+          firstName: parts[0] || '',
+          lastName: parts.slice(1).join(' '),
+          title: form.querySelector('[name="title"]').value.trim(),
+          companyName: form.querySelector('[name="companyName"]').value.trim(),
+          industry: form.querySelector('[name="industry"]').value,
+          companySize: form.querySelector('[name="companySize"]').value,
+          revenueRange: form.querySelector('[name="revenueRange"]').value,
+          yearsInBusiness: form.querySelector('[name="yearsInBusiness"]').value,
+          city: form.querySelector('[name="city"]').value.trim(),
+          preferredLanguage: form.querySelector('[name="preferredLanguage"]').value
+        };
+        await EMC.contacts.update(id, { identity: updated });
+        EMC.utils.toast('تم تحديث الهوية', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (err) {
+        EMC.utils.toast('خطأ: ' + (err.message || 'فشل الحفظ'), 'error');
+        btn.disabled = false; btn.textContent = 'حفظ التعديلات';
+      }
+    });
+  })();
   
   // ─── [5C] محرر بيانات الفرصة ───
   (function setupOppEditor() {
@@ -2664,6 +2803,9 @@
   function renderLayer(code, c, segment, landingTPs) {
     switch (code) {
       case 'identity': return `
+        <div style="display:flex; justify-content:flex-end; margin: -6px 0 14px;">
+          <button class="btn btn-outline btn-sm" id="edit-identity-btn">✎ تعديل الهوية</button>
+        </div>
         <div class="grid-3">
           ${fieldDisplay('الاسم الكامل', c.identity.fullName)}
           ${fieldDisplay('المنصب', c.identity.title)}
