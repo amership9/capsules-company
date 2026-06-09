@@ -240,7 +240,8 @@
           const ceilingsArr = Array.isArray(formData.ceilings) ? formData.ceilings : [];
           // primaryCeiling = أول واحد في الـ array (للعرض السريع)، والباقي يدخل في pains
           const primaryCeiling = ceilingsArr[0] || '';
-          const additionalPains = ceilingsArr.slice(1);
+          // ترجم مفاتيح السقوف الإضافية لأسماء عربية قبل ما تدخل pains
+          const additionalPains = ceilingsArr.slice(1).map(k => (EMC.CEILINGS && EMC.CEILINGS[k]) ? EMC.CEILINGS[k] : k);
 
           const eosProfileData = {
             eosFamiliarity: formData.eosFamiliarity || '',
