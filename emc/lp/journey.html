@@ -325,6 +325,51 @@
   .al-tst-done .q { font-size:14px; color:var(--emc-ink); line-height:1.8; font-style:italic; }
   .al-tst-done .meta { font-size:12px; color:var(--emc-success,#2E7D5B); font-weight:700; margin-top:10px; display:flex; align-items:center; gap:6px; }
   .al-thanks { margin-top:6px; padding:14px 16px; background:var(--emc-cream); border-radius:11px; font-size:13px; color:var(--emc-ink-2); line-height:1.7; }
+
+  /* ─── ADVOCATE (stage 14) ─── */
+  .av-hero {
+    position: relative; overflow: hidden; color:#fff; text-align:center; padding:58px 24px 46px;
+    background: radial-gradient(800px 320px at 50% -10%, rgba(201,169,97,0.2), transparent 60%), linear-gradient(165deg, #0A1F3C 0%, var(--emc-navy) 55%, #0d2950 100%);
+  }
+  .av-hero-inner { position:relative; z-index:2; max-width:580px; margin:0 auto; }
+  .av-level { display:inline-flex; align-items:center; gap:8px; padding:8px 18px; border-radius:99px; font-size:13px; font-weight:800; margin-bottom:16px; }
+  .av-hero h1 { font-size:28px; font-weight:900; margin:0 0 10px; line-height:1.32; }
+  .av-hero p { font-size:14px; color:rgba(255,255,255,0.74); line-height:1.7; max-width:480px; margin:0 auto; }
+
+  .av-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:30px; }
+  .av-stat { background:#fff; border:1.5px solid var(--emc-line); border-radius:15px; padding:20px 12px; text-align:center; }
+  .av-stat .num { font-size:28px; font-weight:900; line-height:1; }
+  .av-stat .lbl { font-size:11.5px; color:var(--emc-muted); margin-top:6px; font-weight:600; }
+
+  .av-card { background:#fff; border:1.5px solid var(--emc-line); border-radius:16px; padding:24px; margin-bottom:14px; }
+  .av-card-h { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .av-card-h .ico { width:38px; height:38px; border-radius:11px; background:var(--emc-cream); display:grid; place-items:center; font-size:19px; flex-shrink:0; }
+  .av-card-h h3 { margin:0; font-size:16.5px; font-weight:800; color:var(--emc-navy); }
+  .av-card-sub { font-size:13px; color:var(--emc-muted); line-height:1.65; margin:0 0 18px 48px; }
+
+  .av-ref { display:flex; align-items:center; gap:13px; padding:14px 16px; background:#fff; border:1px solid var(--emc-line); border-radius:12px; margin-bottom:10px; }
+  .av-ref-ico { width:38px; height:38px; border-radius:10px; flex-shrink:0; display:grid; place-items:center; font-weight:800; font-size:15px; }
+  .av-ref-body { flex:1; min-width:0; }
+  .av-ref-name { font-size:14px; font-weight:700; color:var(--emc-navy); }
+  .av-ref-note { font-size:12px; color:var(--emc-muted); margin-top:2px; line-height:1.5; }
+  .av-ref-state { font-size:11px; font-weight:700; padding:3px 11px; border-radius:99px; flex-shrink:0; }
+  .av-ref-empty { text-align:center; padding:24px 16px; background:var(--emc-cream); border:1px dashed var(--emc-line); border-radius:12px; font-size:13px; color:var(--emc-muted); line-height:1.7; }
+
+  .av-refer-form { display:none; margin-top:14px; padding:18px; background:var(--emc-cream); border-radius:13px; }
+  .av-refer-form.open { display:block; }
+  .av-refer-form input, .av-refer-form textarea {
+    width:100%; border:1px solid var(--emc-line); border-radius:10px; padding:11px 14px; font-size:14px;
+    font-family:inherit; background:#fff; color:var(--emc-ink); margin-bottom:10px; transition:border-color .15s, box-shadow .15s;
+  }
+  .av-refer-form textarea { min-height:64px; resize:vertical; line-height:1.6; margin-bottom:0; }
+  .av-refer-form input:focus, .av-refer-form textarea:focus { outline:none; border-color:var(--emc-navy); box-shadow:0 0 0 3px rgba(11,37,69,0.08); }
+  .av-btn { height:48px; padding:0 26px; background:var(--emc-gold); color:var(--emc-navy); border:0; border-radius:11px; font-size:15px; font-weight:800; cursor:pointer; font-family:inherit; transition:background .15s; }
+  .av-btn:hover:not(:disabled) { background:#B89538; }
+  .av-btn:disabled { opacity:.5; cursor:not-allowed; }
+  .av-btn-ghost { background:transparent; border:1.5px solid var(--emc-line); color:var(--emc-navy); }
+  .av-contribs { display:flex; flex-wrap:wrap; gap:8px; }
+  .av-contrib { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; padding:8px 14px; border-radius:99px; background:#fff; border:1px solid var(--emc-line); color:var(--emc-muted); }
+  .av-contrib.on { background:#F1F8F4; border-color:#BFE0CD; color:var(--emc-success,#2E7D5B); }
 </style>
 </head>
 <body class="lp-shell" data-landing-page="journey" data-screen-label="LP journey">
@@ -422,6 +467,7 @@
     else if (stage === 11) body = participationHtml();
     else if (stage === 12) body = implementationHtml();
     else if (stage === 13) body = alumniHtml();
+    else if (stage === 14) body = advocateHtml();
     else if (stage < 10) body = heroHtml() + preStartHtml();
     else body = heroHtml() + activeStageHtml();
 
@@ -430,6 +476,7 @@
     if (stage === 11) bindParticipation();
     if (stage === 12) bindImplementation();
     if (stage === 13) bindAlumni();
+    if (stage === 14) bindAdvocate();
   }
 
   // ─── HERO ───
@@ -939,6 +986,146 @@
     } catch (e) {
       contact.outcomes = out;
       btn.disabled = false; btn.textContent = 'ابعت شهادتي';
+      alert('حصل خطأ في الحفظ، حاول تاني');
+    }
+  }
+
+  // ─── ADVOCATE (stage 14) — لوحة الإحالات + إحالة جديدة ───
+  function advocateHtml() {
+    const LEVELS = EMC.ADVOCATE_LEVELS || {};
+    const RST = EMC.REFERRAL_STATUS || {};
+    const CONTRIBS = EMC.ADVOCATE_CONTRIBUTIONS || [];
+    const adv = contact.advocacy || {};
+    const referrals = Array.isArray(adv.referrals) ? adv.referrals : [];
+    const contribsDone = adv.contributions || {};
+
+    const levelKey = EMC.computeAdvocateLevel(referrals);
+    const lvl = LEVELS[levelKey] || LEVELS.satisfied;
+
+    const totalRef = referrals.length;
+    const convertedRef = referrals.filter(r => r.status === 'converted').length;
+    const fmtEGP = (n) => (n == null || n === '' || n === 0) ? '0' : Number(n).toLocaleString('en-US');
+    const totalValue = referrals.reduce((s, r) => s + (Number(r.value) || 0), 0);
+
+    // قائمة الإحالات (للعرض — العميل بيشوف تقدّمها)
+    let refsHtml;
+    if (referrals.length) {
+      refsHtml = referrals.map(r => {
+        const st = RST[r.status || 'logged'] || RST.logged;
+        const initial = (r.name || '؟').trim().charAt(0);
+        return `
+          <div class="av-ref">
+            <div class="av-ref-ico" style="background:${st.bg}; color:${st.color};">${initial}</div>
+            <div class="av-ref-body">
+              <div class="av-ref-name">${r.name || 'إحالة'}</div>
+              ${r.note ? `<div class="av-ref-note">${r.note}</div>` : ''}
+            </div>
+            <span class="av-ref-state" style="background:${st.bg}; color:${st.color}; border:1px solid ${st.border};">${st.label}</span>
+          </div>`;
+      }).join('');
+    } else {
+      refsHtml = `<div class="av-ref-empty">لسه ما أحلتش حد — أول إحالة بتبدأ دائرة جديدة. مين تعرفه ممكن يستفيد زيّك؟</div>`;
+    }
+
+    // المساهمات (للعرض — بيحدّدها عبدالله من لوحته)
+    const contribsHtml = CONTRIBS.map(ct => {
+      const on = !!contribsDone[ct.key];
+      return `<span class="av-contrib ${on ? 'on' : ''}">${ct.icon} ${ct.label} ${on ? '✓' : ''}</span>`;
+    }).join('');
+
+    return `
+      <div style="margin:0 -22px;">
+        <section class="av-hero">
+          <div class="av-hero-inner">
+            <div class="av-level" style="background:${lvl.bg}; color:${lvl.color}; border:1px solid ${lvl.border};">${lvl.icon} ${lvl.label}</div>
+            <h1>${firstName()}، إنت بقيت سفير EMC</h1>
+            <p>وصلت لأبعد مرحلة في الرحلة. القادة اللي بتحوّلهم بياخدوا نفس الطريق اللي غيّر شركتك — وده أكبر أثر ممكن تسيبه.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="av-stats">
+        <div class="av-stat"><div class="num" style="color:var(--emc-navy);">${totalRef}</div><div class="lbl">قائد أحلته</div></div>
+        <div class="av-stat"><div class="num" style="color:var(--emc-success,#2E7D5B);">${convertedRef}</div><div class="lbl">انضم فعلاً</div></div>
+        <div class="av-stat"><div class="num" style="color:#9a7b2e; font-size:21px; padding-top:5px;">${fmtEGP(totalValue)}</div><div class="lbl">قيمة إحالاتك (ج.م)</div></div>
+      </div>
+
+      <div class="jr-sec-title" style="margin-top:30px;"><span class="bar"></span><h2>القادة اللي أحلتهم</h2></div>
+      <div class="av-card">
+        <div class="av-card-h"><span class="ico">🤝</span><h3>إحالاتك</h3></div>
+        <p class="av-card-sub">كل قائد بتحوّله، عبدالله بيتابعه شخصياً. إنت تشوف تقدّمه هنا خطوة بخطوة.</p>
+        <div id="av-refs">${refsHtml}</div>
+
+        <div style="margin-top:16px;">
+          <button class="av-btn" id="av-add-btn">＋ أحيل قائد جديد</button>
+        </div>
+        <div class="av-refer-form" id="av-form">
+          <input type="text" id="av-name" placeholder="اسم القائد اللي بتحيله" />
+          <textarea id="av-note" placeholder="ملاحظة بسيطة (اختياري) — مثلاً: صاحب شركة تصنيع، عنده نفس التحدي اللي كان عندي"></textarea>
+          <div style="display:flex; gap:10px; margin-top:12px;">
+            <button class="av-btn" id="av-save-btn">ابعت الإحالة</button>
+            <button class="av-btn av-btn-ghost" id="av-cancel-btn">إلغاء</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="jr-sec-title"><span class="bar"></span><h2>مساهماتك معانا</h2></div>
+      <div class="av-card">
+        <div class="av-card-h"><span class="ico">⭐</span><h3>بصمتك في المجتمع</h3></div>
+        <p class="av-card-sub">طرق تانية بتأثّر بيها — عبدالله بيسجّلها لما تحصل. شكراً على كل مساهمة.</p>
+        <div class="av-contribs">${contribsHtml}</div>
+      </div>`;
+  }
+
+  function bindAdvocate() {
+    const addBtn = document.getElementById('av-add-btn');
+    const form = document.getElementById('av-form');
+    const cancelBtn = document.getElementById('av-cancel-btn');
+    const saveBtn = document.getElementById('av-save-btn');
+
+    if (addBtn) addBtn.addEventListener('click', () => {
+      form.classList.add('open');
+      addBtn.style.display = 'none';
+      document.getElementById('av-name').focus();
+    });
+    if (cancelBtn) cancelBtn.addEventListener('click', () => {
+      form.classList.remove('open');
+      addBtn.style.display = '';
+      document.getElementById('av-name').value = '';
+      document.getElementById('av-note').value = '';
+    });
+    if (saveBtn) saveBtn.addEventListener('click', submitReferral);
+  }
+
+  async function submitReferral() {
+    const name = (document.getElementById('av-name').value || '').trim();
+    const note = (document.getElementById('av-note').value || '').trim();
+    if (!name) { alert('اكتب اسم القائد اللي بتحيله 🙏'); document.getElementById('av-name').focus(); return; }
+
+    const btn = document.getElementById('av-save-btn');
+    btn.disabled = true; btn.textContent = 'جاري الإرسال…';
+
+    const adv = contact.advocacy || {};
+    const referrals = Array.isArray(adv.referrals) ? [...adv.referrals] : [];
+    referrals.push({ name, note, status: 'logged', value: 0, loggedAt: new Date().toISOString(), source: 'portal' });
+
+    // أعد حساب نفس العدّادات اللي لوحة الأدمن بتحسبها (تطابق تام)
+    const newAdv = {
+      ...adv,
+      referrals,
+      advocateLevel: EMC.computeAdvocateLevel(referrals),
+      referralsCount: referrals.length,
+      successfulReferrals: referrals.filter(r => r.status === 'converted').length,
+      referralsValue: referrals.reduce((s, r) => s + (Number(r.value) || 0), 0)
+    };
+    contact.advocacy = newAdv;
+
+    try {
+      await EMC.contacts.update(contactId, { advocacy: newAdv });
+      render();
+    } catch (e) {
+      contact.advocacy = adv;
+      btn.disabled = false; btn.textContent = 'ابعت الإحالة';
       alert('حصل خطأ في الحفظ، حاول تاني');
     }
   }
