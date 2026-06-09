@@ -225,6 +225,41 @@
     </div>
   </div>
 </div>
+
+
+  <!-- Context edit modal -->
+<div class="emc-modal-overlay" id="context-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: #fff; border-radius: 14px; width: 100%; max-width: 600px; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.3);">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--emc-line);">
+      <h3 style="margin: 0; font-size: 17px; color: var(--emc-navy); font-weight: 700;">تعديل السياق</h3>
+      <div style="font-size: 12.5px; color: var(--emc-muted); margin-top: 2px;">المصدر · الوسوم · الملاحظات</div>
+    </div>
+    <div style="padding: 22px 24px; overflow-y: auto; flex: 1;" id="context-form">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">المصدر</label>
+          <select class="select" name="source"><option value="">— غير محدد —</option></select>
+        </div>
+        <div class="field">
+          <label class="field-label">تفاصيل المصدر</label>
+          <input class="input" name="sourceDetails" placeholder="مثلاً: إحالة من د. هشام / حملة مايو" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">الوسوم <span class="hint">(افصل بينها بفاصلة)</span></label>
+        <input class="input" name="tags" placeholder="مثلاً: c_level, manufacturing, high_intent" />
+      </div>
+      <div class="field" style="margin-bottom: 0;">
+        <label class="field-label">ملاحظات</label>
+        <textarea class="textarea" name="notes" placeholder="أي ملاحظات عن العميل أو السياق…" style="min-height: 100px;"></textarea>
+      </div>
+    </div>
+    <div style="padding: 14px 24px; border-top: 1px solid var(--emc-line); display: flex; justify-content: flex-end; gap: 8px; background: var(--emc-cream);">
+      <button class="btn btn-ghost btn-sm" id="context-cancel">إلغاء</button>
+      <button class="btn btn-primary btn-sm" id="context-save">حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
   
 <!-- [5C] Opportunity edit modal -->
 <div class="emc-modal-overlay" id="opp-modal" style="position: fixed; inset: 0; background: rgba(11, 23, 48, 0.55); backdrop-filter: blur(4px); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px;">
@@ -2662,6 +2697,62 @@
     });
   })();
 
+
+  // ─── محرر السياق ───
+  (function setupContextEditor() {
+    const modal = document.getElementById('context-modal');
+    if (!modal) return;
+    const form = document.getElementById('context-form');
+
+    // عبّي المصادر
+    const sel = form.querySelector('[name="source"]');
+    Object.entries(EMC.SOURCES).forEach(([k, v]) => {
+      const o = document.createElement('option');
+      o.value = k; o.textContent = v;
+      sel.appendChild(o);
+    });
+
+    function openModal() {
+      const ctx = c.context || {};
+      form.querySelector('[name="source"]').value = ctx.source || '';
+      form.querySelector('[name="sourceDetails"]').value = ctx.sourceDetails || '';
+      form.querySelector('[name="tags"]').value = (ctx.tags || []).join('، ');
+      form.querySelector('[name="notes"]').value = ctx.notes || '';
+      modal.style.display = 'flex';
+    }
+    function closeModal() { modal.style.display = 'none'; }
+
+    panelsEl.addEventListener('click', (e) => {
+      if (e.target.closest('#edit-context-btn')) openModal();
+    });
+    document.getElementById('context-cancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    document.getElementById('context-save').addEventListener('click', async () => {
+      const btn = document.getElementById('context-save');
+      btn.disabled = true; btn.textContent = 'جاري الحفظ…';
+      try {
+        // الوسوم: نص مفصول بفاصلة (عربية أو إنجليزية) → array نظيفة
+        const tagsRaw = form.querySelector('[name="tags"]').value;
+        const tags = tagsRaw.split(/[,،]/).map(t => t.trim()).filter(Boolean);
+
+        const updated = {
+          ...(c.context || {}),
+          source: form.querySelector('[name="source"]').value,
+          sourceDetails: form.querySelector('[name="sourceDetails"]').value.trim(),
+          tags,
+          notes: form.querySelector('[name="notes"]').value.trim()
+        };
+        await EMC.contacts.update(id, { context: updated });
+        EMC.utils.toast('تم تحديث السياق', 'success');
+        setTimeout(() => window.location.reload(), 700);
+      } catch (err) {
+        EMC.utils.toast('خطأ: ' + (err.message || 'فشل الحفظ'), 'error');
+        btn.disabled = false; btn.textContent = 'حفظ التعديلات';
+      }
+    });
+  })();
+  
   // ─── محرر قنوات التواصل ───
   (function setupChannelsEditor() {
     const modal = document.getElementById('channels-modal');
@@ -2935,6 +3026,9 @@
           ${fieldDisplay('أفضل توقيت', c.channels.bestContactTime)}
         </div>`;
       case 'context': return `
+        <div style="display:flex; justify-content:flex-end; margin: -6px 0 14px;">
+          <button class="btn btn-outline btn-sm" id="edit-context-btn">✎ تعديل السياق</button>
+        </div>
         <div class="grid-2">
           ${fieldDisplay('المصدر', EMC.SOURCES[c.context.source])}
           ${fieldDisplay('تفاصيل المصدر', c.context.sourceDetails)}
