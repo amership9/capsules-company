@@ -1,0 +1,100 @@
+/* ============================================================================
+   Reignite — التربة (قراءة الأنظمة)
+   soil.css — نظام بصري مكمّل لـ styles.css (يُحمّل بعده).
+   النجمة: مثلث التربة (ثلاث ركايز) — شكله بيكشف النوع.
+============================================================================ */
+
+:root {
+  --belong:   #7FC4A0;   /* الانتماء — أخضر تربة/جذور */
+  --belong-soft:#a8e0c2;
+  --soil-rich: #6fae89;
+  --soil-dry:  #c98a5a;
+}
+
+/* شارة الأداة في الشريط العلوي (تفرقها عن الاحتراق) */
+.brand .mark.soil { background: linear-gradient(135deg, var(--belong), var(--sky)); }
+.pill-tag { display:inline-flex; align-items:center; gap:6px; padding:4px 11px; border-radius:99px;
+  font-size:12px; font-weight:700; background:rgba(127,196,160,.14); color:var(--belong-soft);
+  border:1px solid rgba(127,196,160,.35); }
+
+/* زرار "مش منطبق" تحت خيارات الليكرت */
+.na-btn { margin-top:10px; background:transparent; border:1px dashed var(--line); color:var(--mute-2);
+  border-radius:10px; padding:11px 16px; cursor:pointer; font-family:'Tajawal'; font-weight:700; font-size:14px;
+  width:100%; transition:.15s; }
+.na-btn:hover { border-color:var(--sky); color:var(--sky); }
+.na-btn.sel { border-style:solid; border-color:var(--belong); color:var(--belong); background:rgba(127,196,160,.08); }
+
+/* ---------- بطاقة مثلث التربة ---------- */
+.soil-tri-card {
+  background: radial-gradient(420px 300px at 50% 30%, rgba(127,196,160,.10), transparent 70%),
+              linear-gradient(180deg, rgba(22,48,92,.5), rgba(11,27,59,.5));
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; text-align:center;
+}
+.soil-tri-card svg { width:100%; max-width:420px; height:auto; display:block; margin:0 auto; }
+.soil-tri-cap { color: var(--mute); font-size: 14px; margin-top: 10px; line-height:1.6; }
+
+/* ---------- شبكة الركايز الثلاث ---------- */
+.pillar-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:6px; }
+@media (max-width:680px){ .pillar-grid{ grid-template-columns:1fr; } }
+.pillar-stat { border:1px solid var(--line); border-radius:14px; padding:16px; position:relative; overflow:hidden;
+  background:rgba(6,15,36,.45); }
+.pillar-stat::before { content:''; position:absolute; inset:0 auto 0 0; width:4px; }
+.pillar-stat.T::before { background:var(--sky); }
+.pillar-stat.H::before { background:var(--gold); }
+.pillar-stat.N::before { background:var(--belong); }
+.pillar-stat .pk { font-size:13px; color:var(--mute-2); }
+.pillar-stat .pq { font-size:12px; color:var(--mute-2); margin-top:2px; opacity:.85; }
+.pillar-stat .pv { font-family:'Reem Kufi'; font-size:30px; margin-top:8px; }
+.pillar-stat.T .pv{ color:var(--sky);} .pillar-stat.H .pv{ color:var(--gold);} .pillar-stat.N .pv{ color:var(--belong);}
+.pillar-stat .pmini { height:7px; background:var(--navy-700); border-radius:99px; margin-top:10px; overflow:hidden; }
+.pillar-stat .pmini i { display:block; height:100%; border-radius:99px; }
+.pillar-stat.T .pmini i{ background:var(--sky);} .pillar-stat.H .pmini i{ background:var(--gold);} .pillar-stat.N .pmini i{ background:var(--belong);}
+.pillar-stat .weak { position:absolute; top:12px; left:12px; font-size:11px; color:var(--ember-soft); font-weight:700; }
+
+/* ---------- الكروسووك (تأكيد/تعارض) ---------- */
+.crosswalk { border-radius:16px; padding:20px; margin-top:6px; border:1px solid var(--line); }
+.crosswalk.confirm { background:rgba(127,196,160,.07); border-color:rgba(127,196,160,.4); }
+.crosswalk.conflict{ background:rgba(232,98,61,.08); border-color:rgba(232,98,61,.42); }
+.crosswalk.soft    { background:rgba(127,179,213,.06); border-color:rgba(127,179,213,.28); }
+.cw-row { display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; }
+.cw-chip { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:140px;
+  border:1px solid var(--line); border-radius:14px; padding:14px 18px; background:rgba(6,15,36,.4); }
+.cw-chip .lbl { font-size:12px; color:var(--mute-2); }
+.cw-chip .val { font-family:'Reem Kufi'; font-size:20px; }
+.cw-link { width:54px; height:54px; border-radius:50%; display:grid; place-items:center; font-size:24px; font-weight:800;
+  flex:0 0 auto; }
+.cw-link.confirm { background:rgba(127,196,160,.15); color:var(--belong); border:2px solid var(--belong); }
+.cw-link.conflict{ background:rgba(232,98,61,.15); color:var(--ember-soft); border:2px solid var(--ember); }
+.cw-link.soft    { background:rgba(127,179,213,.12); color:var(--sky); border:2px dashed var(--sky); }
+.cw-text { margin-top:14px; font-size:14.5px; line-height:1.7; color:var(--white); text-align:center; }
+
+/* ---------- ترمومتر البقاء ---------- */
+.therm-wrap { margin-top:6px; }
+.therm-track { position:relative; height:22px; border-radius:99px; overflow:hidden;
+  background:linear-gradient(90deg, var(--ember) 0%, #E0A458 45%, var(--sky) 100%); opacity:.32; }
+.therm-marker { position:absolute; top:-6px; width:4px; height:34px; background:var(--white); border-radius:99px;
+  box-shadow:0 0 0 3px rgba(6,15,36,.6); transform:translateX(2px); }
+.therm-scale { display:flex; justify-content:space-between; color:var(--mute-2); font-size:12px; margin-top:10px; }
+.therm-band { display:inline-flex; padding:4px 12px; border-radius:99px; font-size:13px; font-weight:700; margin-top:10px; }
+.therm-band.stable { background:rgba(127,179,213,.14); color:var(--sky); border:1px solid rgba(127,179,213,.35); }
+.therm-band.shaky  { background:rgba(224,164,88,.14); color:#E0A458; border:1px solid rgba(224,164,88,.4); }
+.therm-band.bleed  { background:rgba(232,98,61,.14); color:var(--ember-soft); border:1px solid rgba(232,98,61,.4); }
+
+/* ---------- التوطين بالقسم ---------- */
+.dept-row { display:grid; grid-template-columns:1.4fr repeat(3,1fr) 70px; gap:8px; align-items:center;
+  padding:11px 12px; border-bottom:1px solid var(--line); font-size:13.5px; }
+.dept-row.head { color:var(--gold); font-weight:700; border-bottom:1px solid var(--gold); }
+.dept-cell { text-align:center; font-weight:700; border-radius:8px; padding:5px 0; }
+.dept-locked { color:var(--mute-2); font-style:italic; grid-column:2 / -1; text-align:center; }
+.dept-name { font-weight:700; }
+@media (max-width:680px){ .dept-row{ grid-template-columns:1fr; gap:4px; text-align:center; } .dept-row.head{ display:none; } }
+
+/* خلية ملونة حسب الدرجة */
+.heat-hi { background:rgba(127,196,160,.18); color:var(--belong-soft); }
+.heat-mid{ background:rgba(224,164,88,.16); color:#E0A458; }
+.heat-lo { background:rgba(232,98,61,.16); color:var(--ember-soft); }
+
+/* أسطورة الألوان */
+.soil-legend { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:14px; }
+.soil-legend span { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--mute); }
+.soil-legend i { width:12px; height:12px; border-radius:3px; display:inline-block; }
