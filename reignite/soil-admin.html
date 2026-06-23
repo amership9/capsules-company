@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أدمن التربة — Reignite</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/soil.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="mark soil">ت</div>
+    <div><div class="name">التربة</div><div class="sub">لوحة الأدمن — قراءة الأنظمة</div></div>
+  </div>
+  <a class="tiny" href="soil-index.html">← الاستبيان</a>
+</div>
+
+<div class="wrap wrap-wide">
+
+  <div class="card fade" id="gate">
+    <div class="eyebrow">دخول الأدمن</div>
+    <h1 style="font-size:26px">لوحة التربة</h1>
+    <p class="muted" style="margin-top:8px">اكتب كود الأدمن عشان تشوف بروفايل التربة المجمّع والكروسووك مع الاحتراق.</p>
+    <div class="field">
+      <label>كود الأدمن</label>
+      <input type="text" id="passInput" placeholder="••••••••" autocomplete="off">
+    </div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-gold" id="gateBtn">دخول ←</button>
+      <span class="tiny" id="gateMsg"></span>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="card">
+      <div class="btn-row" style="justify-content:space-between">
+        <div class="field" style="margin:0;flex:1;min-width:220px">
+          <label>كود الدفعة / الشركة</label>
+          <input type="text" id="cohortInput" value="english-capsules">
+        </div>
+        <div class="btn-row" style="align-items:flex-end">
+          <button class="btn btn-gold" id="loadBtn">تحميل ↻</button>
+          <button class="btn btn-ghost" id="genLinkBtn">رابط الدفعة ↗</button>
+          <button class="btn btn-ghost" id="csvBtn">تصدير CSV</button>
+        </div>
+      </div>
+      <div class="tiny" id="loadMsg" style="margin-top:10px">—</div>
+      <div id="linkBox" class="hidden" style="margin-top:14px">
+        <div id="linkText" style="background:var(--navy-900);border:1px solid var(--line);border-radius:10px;padding:13px 14px;word-break:break-all;font-size:14px"></div>
+        <div class="btn-row" style="margin-top:10px"><button class="btn btn-ghost" id="copyLinkBtn">نسخ الرابط</button><span class="tiny" id="linkMsg"></span></div>
+      </div>
+    </div>
+
+    <div id="content"></div>
+  </div>
+
+  <footer class="disclaimer">
+    التحليل مجهّل — نسب وفئات لا أسماء. مفيش تفصيل لأي إدارة أو فئة أقل من ٥ أفراد. التربة تكمّل الاحتراق، ولا تحلّ محلّه.
+  </footer>
+</div>
+
+<script type="module" src="js/soil-admin.js"></script>
+</body>
+</html>
