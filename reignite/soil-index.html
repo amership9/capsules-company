@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التربة — Reignite</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/soil.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="mark soil">ت</div>
+    <div>
+      <div class="name">التربة</div>
+      <div class="sub">قراءة الأنظمة على المحاور التلاتة</div>
+    </div>
+  </div>
+  <a class="tiny" href="soil-admin.html">دخول الأدمن ←</a>
+</div>
+
+<div class="wrap">
+
+  <!-- لودر استئناف من رابط فيه كود -->
+  <div class="card fade hidden" id="resumeLoader" style="text-align:center">
+    <div class="spinner"></div>
+    <p class="muted">بنفتح رحلتك...</p>
+  </div>
+
+  <div class="card fade" id="mainCard">
+    <span class="pill-tag">🌱 طبقة التربة</span>
+    <h1 style="font-size:32px;margin-top:12px">الأنظمة بتغذّي الناس ولا بتخنقهم؟</h1>
+    <p class="lead" style="margin-top:14px">
+      ده مش تقييم ليك ولا لمديرك. ده قراءة <b style="color:var(--belong-soft)">للتربة</b> اللي بتشتغل فيها —
+      الأنظمة والظروف اللي بتغذّي تماسك الشركة، وحيويتها، وانتماء ناسها. إجاباتك بتساعدنا نعرف
+      <b style="color:var(--gold)">منين</b> بالظبط نبدأ التغيير.
+    </p>
+
+    <div class="note note-info" style="margin-top:18px">
+      إجاباتك <b>مجهّلة ومجمّعة</b>. بنشوف النسب على مستوى الشركة والإدارة بس — مش الأسماء.
+      ومفيش أي تفصيل بيظهر لأي إدارة أو فئة أقل من ٥ أفراد. الصدق هو اللي بيخلّي القراءة تنفع.
+    </div>
+
+    <div class="field">
+      <label>اكتب اسم وهمي يخصك (للسرية)</label>
+      <input type="text" id="alias" placeholder="مثال: نسر، قمر، رقم 7..." maxlength="40">
+    </div>
+
+    <div class="field">
+      <label>كود الدفعة / الشركة</label>
+      <input type="text" id="cohort" placeholder="مثال: english-capsules" value="english-capsules">
+      <div class="tiny" style="margin-top:6px">الكود ده بيجمّع كل إجابات نفس الجلسة مع بعض في شاشة الأدمن.</div>
+    </div>
+
+    <div class="field">
+      <label id="catLabel"></label>
+      <div class="opts" id="catOpts"></div>
+    </div>
+
+    <div class="field">
+      <label id="deptLabel"></label>
+      <select id="deptSelect"></select>
+      <div class="tiny" style="margin-top:6px">بيساعدنا نعرف أنهي إدارة تربتها محتاجة دعم — من غير ما نكشف حد.</div>
+    </div>
+
+    <div class="btn-row" style="margin-top:26px">
+      <button class="btn btn-gold" id="startBtn" disabled>ابدأ القراءة ←</button>
+      <span class="tiny" id="hint">اختار موقعك وإدارتك عشان تبدأ</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <details>
+      <summary style="cursor:pointer;color:var(--mute-2);font-size:13px">بدأت قبل كده وعندك كود؟ افتح رحلتك بالكود</summary>
+      <div style="margin-top:14px">
+        <div class="field" style="margin-top:0">
+          <label>كود الاستكمال</label>
+          <input type="text" id="resumeCode" placeholder="مثال: S-7K2M-9X4P" autocomplete="off">
+        </div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-ghost" id="resumeBtn">افتح رحلتي ←</button>
+          <span class="tiny" id="resumeMsg"></span>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <footer class="disclaimer">
+    التربة تكمّل «منحني الاحتراق»: الاحتراق بيقرا الروح، والتربة بتقرا الأنظمة اللي الروح طالعة منها. الإطار مبني على «منظور الفؤاد».
+  </footer>
+</div>
+
+<script type="module">
+  import { SOIL_INTRO_FIELDS } from './js/soil-config-items.js';
+  import { db, doc, getDoc, COLLECTION_SOIL_DRAFTS } from './js/soil-config.js';
+
+  const catField = SOIL_INTRO_FIELDS.category;
+  const deptField = SOIL_INTRO_FIELDS.department;
+
+  const catOpts = document.getElementById('catOpts');
+  const deptSelect = document.getElementById('deptSelect');
+  const startBtn = document.getElementById('startBtn');
+  const aliasEl = document.getElementById('alias');
+  const cohortEl = document.getElementById('cohort');
+  const hint = document.getElementById('hint');
+  let catIdx = null;
+
+  document.getElementById('catLabel').textContent = catField.text;
+  document.getElementById('deptLabel').textContent = deptField.text;
+
+  /* كود الدفعة من الرابط لو موجود */
+  const params = new URLSearchParams(location.search);
+  const urlCohort = params.get('cohort');
+  if (urlCohort) { cohortEl.value = urlCohort; cohortEl.setAttribute('readonly','readonly'); cohortEl.style.opacity='0.85'; }
+
+  /* خيارات الفئة */
+  catField.options.forEach((o, i) => {
+    const el = document.createElement('div');
+    el.className = 'opt';
+    el.innerHTML = `<span class="dot"></span><span>${o.label}</span>`;
+    el.onclick = () => { catIdx = i; [...catOpts.children].forEach(c=>c.classList.remove('sel')); el.classList.add('sel'); validate(); };
+    catOpts.appendChild(el);
+  });
+
+  /* خيارات القسم */
+  const ph = document.createElement('option'); ph.value=''; ph.textContent='— اختار إدارتك —'; ph.disabled=true; ph.selected=true;
+  deptSelect.appendChild(ph);
+  deptField.options.forEach(d => { const o=document.createElement('option'); o.value=d; o.textContent=d; deptSelect.appendChild(o); });
+  deptSelect.addEventListener('change', validate);
+
+  function validate() {
+    const ok = catIdx != null && deptSelect.value && cohortEl.value.trim().length > 0;
+    startBtn.disabled = !ok;
+    hint.textContent = ok ? 'جاهز — يلا نبدأ' : 'اختار موقعك وإدارتك واكتب كود الدفعة';
+  }
+  cohortEl.addEventListener('input', validate);
+
+  function genResumeCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const block = () => Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+    return `S-${block()}-${block()}`;
+  }
+
+  startBtn.onclick = () => {
+    const code = genResumeCode();
+    const session = {
+      resumeCode: code,
+      alias: aliasEl.value.trim() || 'مجهول',
+      cohort: cohortEl.value.trim(),
+      category: catField.options[catIdx].tag,
+      categoryLabel: catField.options[catIdx].label,
+      department: deptSelect.value,
+      answers: { S0_cat: catField.options[catIdx].tag, S0_dept: deptSelect.value },
+      idx: 0
+    };
+    sessionStorage.setItem('soil_session', JSON.stringify(session));
+    location.href = 'soil-assessment.html?c=' + encodeURIComponent(code);
+  };
+
+  async function openByCode(rawCode, { silent=false } = {}) {
+    const code = (rawCode || '').trim().toUpperCase();
+    if (!code) { if(!silent) document.getElementById('resumeMsg').textContent='الصق الكود الأول'; return false; }
+    try {
+      const snap = await getDoc(doc(db, COLLECTION_SOIL_DRAFTS, code));
+      if (!snap.exists()) { if(!silent) document.getElementById('resumeMsg').textContent='مفيش رحلة بالكود ده — اتأكد من الحروف.'; return false; }
+      const data = snap.data();
+      const session = {
+        resumeCode: code, alias: data.alias || 'مجهول', cohort: data.cohort,
+        category: data.category, categoryLabel: data.categoryLabel, department: data.department,
+        answers: data.answers || {}, idx: Number.isInteger(data.idx) ? data.idx : 0
+      };
+      sessionStorage.setItem('soil_session', JSON.stringify(session));
+      location.href = 'soil-assessment.html?c=' + encodeURIComponent(code);
+      return true;
+    } catch (e) { console.error(e); if(!silent) document.getElementById('resumeMsg').textContent='تعذّر الاتصال — جرّب تاني.'; return false; }
+  }
+
+  document.getElementById('resumeBtn').onclick = () => openByCode(document.getElementById('resumeCode').value);
+
+  (async function autoResume() {
+    const urlCode = params.get('c') || params.get('code');
+    if (!urlCode) return;
+    document.getElementById('mainCard').classList.add('hidden');
+    document.getElementById('resumeLoader').classList.remove('hidden');
+    const ok = await openByCode(urlCode, { silent:true });
+    if (!ok) { document.getElementById('resumeLoader').classList.add('hidden'); document.getElementById('mainCard').classList.remove('hidden'); }
+  })();
+</script>
+</body>
+</html>
