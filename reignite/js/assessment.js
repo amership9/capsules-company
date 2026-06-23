@@ -159,24 +159,26 @@ function render() {
   const q = curQ();
   card.classList.remove('fade'); void card.offsetWidth; card.classList.add('fade');
   card.innerHTML = '';
-
   const num = document.createElement('div');
   num.className = 'qnum';
   num.textContent = `المحور ${q.axis} · ${q.axisName}`;
   card.appendChild(num);
-
   const t = document.createElement('div');
   t.className = 'qtext';
   t.textContent = q.text;
   card.appendChild(t);
-
+  if (q.intro) {
+    const intro = document.createElement('div');
+    intro.className = 'qintro';
+    intro.textContent = q.intro;
+    card.insertBefore(intro, t);
+  }
   if (q.hint) {
     const h = document.createElement('div');
     h.className = 'qhint';
     h.textContent = q.hint;
     card.appendChild(h);
   }
-
   if (q.type === 'choice') {
     card.appendChild(choiceBlock(q.options, answers[q.id], (i) => { answers[q.id] = i; updateNav(); }));
   }
@@ -190,7 +192,6 @@ function render() {
     let cur = (answers[q.id] && typeof answers[q.id] === 'object') ? answers[q.id] : { value: null, text: '' };
     answers[q.id] = cur;
     const mainIsChoice = !!q.options;
-
     if (mainIsChoice) {
       card.appendChild(choiceBlock(q.options, cur.value, (i) => {
         cur.value = i;
@@ -200,11 +201,9 @@ function render() {
     } else {
       card.appendChild(textareaBlock(q.textPlaceholder, cur.text, (v) => { cur.text = v; updateNav(); }));
     }
-
     const fu = q.followUp;
     const show = fu.showWhen === 'always'
       || (fu.showWhen === 'index!=0' && cur.value != null && cur.value !== 0);
-
     if (show) {
       const sub = document.createElement('div');
       sub.className = 'field'; sub.style.marginTop = '20px';
@@ -219,7 +218,6 @@ function render() {
       }
     }
   }
-
   updateNav();
 }
 
