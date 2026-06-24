@@ -92,7 +92,7 @@ export const SOIL_ITEMS = [
     id: 'S1', pillar: 'T', pillarName: 'التماسك', section: '1.1', sectionName: 'وضوح الأنظمة والأدوار',
     type: 'likert', reverse: false, allowNA: false,
     intro: 'نبدأ من الأرضية — وضوح اللي إنت واقف عليه.',
-    text: 'الهيكل التنظيمي والأدوار في الشركة واضحة ليّا، وعارف مين بيعمل إيه.'
+    text: 'الهيكل التنظيمي والأدوار في الشركة واضحة ليّا، وعارف مين بيعمل إيه. فكّر بواقعية مش كتصور عام'
   },
   {
     id: 'S2', pillar: 'T', pillarName: 'التماسك', section: '1.1', sectionName: 'وضوح الأنظمة والأدوار',
@@ -237,7 +237,7 @@ export const SOIL_ITEMS = [
     id: 'S22', pillar: 'H', pillarName: 'الحيوية', section: '2.3', sectionName: 'دعم المبادرة والتجديد',
     type: 'likert', reverse: false, allowNA: false,
     intro: 'وإنت شخصياً مسموحلك تجرّب؟',
-    text: 'بيتديلي صلاحية ومساحة إني أفكّر وأشتغل بطرق مبتكرة عشان أنجز شغلي.'
+    text: 'بيتم اعطائي صلاحية ومساحة إني أفكّر وأشتغل بطرق مبتكرة عشان أنجز شغلي.'
   },
   {
     id: 'S23', pillar: 'H', pillarName: 'الحيوية', section: '2.3', sectionName: 'دعم المبادرة والتجديد',
@@ -339,7 +339,7 @@ export const SOIL_ITEMS = [
     id: 'S36', pillar: 'R', pillarName: 'ترمومتر', section: '4.1', sectionName: 'نية البقاء والترشيح',
     type: 'likert', reverse: false, allowNA: false,
     intro: 'وآخر سؤالين — مش عن النظام، عن إحساسك الشخصي ناحية الشركة.',
-    text: 'أنا ناوي أكمّل مع الشركة على المدى الطويل، وحاسس إنها المكان اللي يستاهل أفضل فيه.'
+    text: 'أنا ناوي أكمّل مع الشركة على المدى الطويل، وحاسس إنها المكان اللي يستاهل أكمّل فيه.'
   },
   {
     id: 'S37', pillar: 'R', pillarName: 'ترمومتر', section: '4.1', sectionName: 'نية البقاء والترشيح',
