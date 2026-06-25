@@ -422,15 +422,23 @@ export function computeSoil(answers) {
   const retentionBand = retention == null ? '—'
     : retention >= 70 ? 'مستقر' : retention >= 45 ? 'مهتزّ' : 'نزيف محتمل';
 
-  /* بصمة التربة — توقيع كل نوع احتراق على مستوى الفرد (تُجمَّع للأدمن) */
+ /* تجميع تعليقات البنود (نص حر — لا يدخل أي حساب) */
+  const comments = {};
+  SOIL_ITEMS.forEach(it => {
+    const c = a[it.id + '_c'];
+    if (c && String(c).trim().length > 1) comments[it.id] = String(c).trim();
+  });
+   
+   /* بصمة التربة — توقيع كل نوع احتراق على مستوى الفرد (تُجمَّع للأدمن) */
   const soilFingerprint = fingerprintOf(pillars);
 
+   
   return {
     category, department,
     pillars, pillarNames, sections,
     weakestPillar, weakestPillarName, weakestSection,
     retention, retentionBand,
-    soilFingerprint
+    soilFingerprint, comments
   };
 }
 
