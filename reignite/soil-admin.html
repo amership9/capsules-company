@@ -19,10 +19,11 @@
 
 <div class="wrap wrap-wide">
 
+  <!-- بوابة الدخول -->
   <div class="card fade" id="gate">
     <div class="eyebrow">دخول الأدمن</div>
     <h1 style="font-size:26px">لوحة التربة</h1>
-    <p class="muted" style="margin-top:8px">اكتب كود الأدمن عشان تشوف بروفايل التربة المجمّع والكروسووك مع الاحتراق.</p>
+    <p class="muted" style="margin-top:8px">اكتب كود الأدمن عشان تشوف بروفايل التربة المجمّع، الكروسووك مع الاحتراق، والتوطين بالإدارة.</p>
     <div class="field">
       <label>كود الأدمن</label>
       <input type="text" id="passInput" placeholder="••••••••" autocomplete="off">
@@ -33,6 +34,7 @@
     </div>
   </div>
 
+  <!-- التطبيق -->
   <div id="app" class="hidden">
     <div class="card">
       <div class="btn-row" style="justify-content:space-between">
@@ -42,6 +44,7 @@
         </div>
         <div class="btn-row" style="align-items:flex-end">
           <button class="btn btn-gold" id="loadBtn">تحميل ↻</button>
+          <button class="btn btn-ghost" id="mirrorBtn">شاشة العرض ⛶</button>
           <button class="btn btn-ghost" id="genLinkBtn">رابط الدفعة ↗</button>
           <button class="btn btn-ghost" id="csvBtn">تصدير CSV</button>
         </div>
@@ -59,6 +62,16 @@
   <footer class="disclaimer">
     التحليل مجهّل — نسب وفئات لا أسماء. مفيش تفصيل لأي إدارة أو فئة أقل من ٥ أفراد. التربة تكمّل الاحتراق، ولا تحلّ محلّه.
   </footer>
+</div>
+
+<!-- شاشة العرض (Overlay) للقاء -->
+<div id="mirrorOverlay" class="hidden" style="position:fixed;inset:0;z-index:50;background:var(--navy-900);overflow:auto;padding:30px">
+  <div style="max-width:1000px;margin:0 auto">
+    <div class="btn-row" style="justify-content:flex-end">
+      <button class="btn btn-ghost" id="mirrorClose">إغلاق ✕</button>
+    </div>
+    <div id="mirrorBody"></div>
+  </div>
 </div>
 
 <script type="module" src="js/soil-admin.js"></script>
