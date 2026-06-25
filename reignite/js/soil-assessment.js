@@ -73,7 +73,7 @@ function updateNav() {
   bar.style.width = Math.round((done / TOTAL) * 100) + '%';
   counter.textContent = `البند ${idx + 1} من ${TOTAL}`;
   pillarName.textContent = `ركيزة ${curItem().pillarName} · ${curItem().sectionName}`;
-  nextBtn.textContent = idx === TOTAL - 1 ? 'أرسل إجابتك الآن ✦' : 'التالي ←';
+  nextBtn.textContent = idx === TOTAL - 1 ? 'أوشكت الإنهاء يالا ✦' : 'التالي ←';
   prevBtn.textContent = idx === 0 ? '→ رجوع للبداية' : '← السابق';
   cacheLocal(); persistSoon();
 }
