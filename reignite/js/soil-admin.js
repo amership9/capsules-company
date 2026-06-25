@@ -204,7 +204,14 @@ function itemDist(rs, it) {
   }).join('');
   const naRow = na ? `<div class="tiny" style="margin-top:8px">مش منطبق: ${na} (${Math.round((na/total)*100)}%) — مستبعدة من المتوسط</div>` : '';
   const avgRow = avg != null ? `<div class="tiny" style="margin-top:6px">متوسط الصحة (بعد قلب المعكوس): <b style="color:${avg>=66?'var(--belong-soft)':avg>=45?'#E0A458':'var(--ember-soft)'}">${avg}</b> · ${scored} رد محسوب</div>` : '';
-  return `<div class="bars">${bars}</div>${naRow}${avgRow}`;
+  const comments = rs.map(r => r.results?.comments?.[it.id]).filter(t => t && t.trim().length > 1);
+  const cBlock = comments.length
+    ? `<div class="tiny" style="margin:12px 0 6px;color:var(--gold)">تعليقات الناس (${comments.length}):</div>` +
+      comments.slice(0, 10).map(t => `<div class="quote" style="margin-top:6px">${t}</div>`).join('') +
+      (comments.length > 10 ? `<div class="tiny" style="margin-top:6px">+ ${comments.length - 10} تعليق آخر</div>` : '')
+    : '';
+  return `<div class="bars">${bars}</div>${naRow}${avgRow}${cBlock}`;
+   
 }
 
 function wireItemFilter() {
