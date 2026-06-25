@@ -22,6 +22,47 @@ const answers = (session && session.answers) ? session.answers : {};
 let idx = (session && Number.isInteger(session.idx)) ? session.idx : 0;
 if (idx < 0 || idx >= TOTAL) idx = 0;
 
+/* لو الرحلة دي اتسلّمت قبل كده، نقفل التعديل ونوريه رسالة بدل الأسئلة */
+(function guardIfSubmitted() {
+  let done = false;
+  try {
+    done = (session && session.submitted === true) ||
+           localStorage.getItem('soil_done_' + session.resumeCode) === '1';
+  } catch (e) {}
+  if (!done) return;
+
+  document.addEventListener('DOMContentLoaded', showLocked);
+  // لو الـDOM جاهز خلاص
+  if (document.readyState !== 'loading') showLocked();
+
+  function showLocked() {
+    const card = document.getElementById('qcard');
+    const codeBar = document.getElementById('codeBar');
+    const bar = document.getElementById('bar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    if (codeBar) codeBar.style.display = 'none';
+    if (bar && bar.parentElement) bar.parentElement.style.display = 'none';
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (card) {
+      card.innerHTML = `
+        <div style="text-align:center;padding:10px">
+          <div style="font-size:48px;margin-bottom:8px">✓</div>
+          <h2 style="font-family:'Reem Kufi';font-size:24px;margin-bottom:10px">إجابتك اتسجّلت خلاص</h2>
+          <p class="muted" style="max-width:480px;margin:0 auto 18px">
+            إنت خلّصت القراءة دي قبل كده وإجابتك اتسجّلت في المجموع المجهّل.
+            مش محتاج تعدّل — صوتك وصل. لو عايز تشوف صفحة الشكر تاني، اضغط تحت.
+          </p>
+          <a class="btn btn-gold" href="soil-results.html">شوف صفحة الشكر ←</a>
+          <div style="margin-top:14px"><a class="tiny" href="soil-index.html">للبداية</a></div>
+        </div>`;
+    }
+  }
+  // نوقف باقي تشغيل الصفحة (مش هنرسم أسئلة)
+  throw new Error('soil: submitted — locked');
+})();
+
 /* تثبيت الكود في الرابط */
 (function ensureCodeInUrl() {
   try {
@@ -162,11 +203,19 @@ async function finish() {
   const payload = {
     alias: session.alias || 'مجهول', cohort: session.cohort,
     category: session.category, categoryLabel: session.categoryLabel, department: session.department,
-    answers, results, createdAt: serverTimestamp()
+    answers, results, submittedAt: serverTimestamp()
   };
   try {
-    await addDoc(collection(db, COLLECTION_SOIL), payload);
+    /* setDoc بـID ثابت = كود الاستكمال → نسخة واحدة لكل شخص.
+       لو عدّل وأعاد الإرسال، بيكتب فوق نفس الدوكيومنت بدل ما يعمل نسخة جديدة. */
+    await setDoc(doc(db, COLLECTION_SOIL, session.resumeCode), payload, { merge: true });
     sessionStorage.removeItem('soil_save_error');
+    /* نعلّم محلياً إن الرحلة دي اتسلّمت — نقفل التعديل لو رجع */
+    try {
+      session.submitted = true;
+      sessionStorage.setItem('soil_session', JSON.stringify(session));
+      localStorage.setItem('soil_done_' + session.resumeCode, '1');
+    } catch (e) {}
     try { await deleteDoc(doc(db, COLLECTION_SOIL_DRAFTS, session.resumeCode)); } catch (e) {}
   } catch (e) {
     console.error('Soil: فشل الحفظ النهائي', e);
