@@ -124,7 +124,20 @@ function render() {
     card.appendChild(naBtn);
   }
 
-  function paintSelection() {
+// صندوق التعليق الاختياري
+  const cWrap = document.createElement('div');
+  cWrap.className = 'field'; cWrap.style.marginTop = '18px';
+  const cLab = document.createElement('label');
+  cLab.style.fontWeight = '700';
+  cLab.textContent = 'عايز تشرح اختيارك؟ (اختياري)';
+  const cTa = document.createElement('textarea');
+  cTa.placeholder = 'لو فيه حاجة في بالك تبرّر بيها إجابتك، اكتبها هنا...';
+  cTa.value = answers[it.id + '_c'] || '';
+  cTa.oninput = () => { answers[it.id + '_c'] = cTa.value; cacheLocal(); persistSoon(); };
+  cWrap.appendChild(cLab); cWrap.appendChild(cTa);
+  card.appendChild(cWrap);
+   
+   function paintSelection() {
     [...opts.children].forEach((c, i) => c.classList.toggle('sel', answers[it.id] === i));
     if (naBtn) naBtn.classList.toggle('sel', answers[it.id] === 5);
   }
