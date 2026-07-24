@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar-EG" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تقييم نظام التسويق عندك — Executive Mastery Camp</title>
+<meta name="description" content="٦ مجالات، كل واحد بيتقيّم من ١٠٠٪. مش تقييم للحملات — تقييم للنظام اللي الحملات بتطلع منه.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Archivo:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#003060;--deep:#001F3F;--red:#E74646;--slate:#547394;--gold:#C9A227;--ok:#2E8B57;--warn:#E08A2E;
+--ar:'Cairo','Segoe UI',Tahoma,sans-serif;--lat:'Archivo','Cairo',sans-serif}
+*{box-sizing:border-box}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:var(--ar);background:var(--deep);color:#fff;line-height:1.75;-webkit-font-smoothing:antialiased}
+.shell{max-width:880px;margin:0 auto;padding:0 18px 70px}
+.top{display:flex;padding:20px 0 8px}
+.mark{font-family:var(--lat);font-weight:800;font-size:13px;letter-spacing:.14em;line-height:1.15}
+.mark span{display:block;font-size:9px;color:#9DBBDA;letter-spacing:.32em}
+.rule{width:40px;height:0;border-top:3px solid var(--red);position:relative;margin:0 0 16px}
+.rule::after{content:"";position:absolute;right:0;top:3px;width:12px;height:12px;border-right:3px solid var(--red);border-bottom:3px solid var(--red);transform:skewX(-18deg)}
+.bar{height:4px;background:rgba(255,255,255,.14);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--red);width:0;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.meta{display:flex;justify-content:space-between;font-size:12.5px;color:#9DBBDA;margin-top:8px;font-family:var(--lat);letter-spacing:.1em}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:clamp(22px,4vw,40px);margin-top:22px}
+h1{font-size:clamp(25px,4.8vw,40px);font-weight:900;letter-spacing:-.8px;margin:0 0 14px;line-height:1.28}
+h2{font-size:clamp(20px,3.2vw,27px);font-weight:900;margin:0 0 4px;line-height:1.4}
+p.lead{color:#CFE0F1;font-size:clamp(15px,1.8vw,18px);margin:0 0 8px}
+.eyebrow{font-family:var(--lat);font-size:11.5px;font-weight:800;letter-spacing:.24em;color:var(--red);margin-bottom:10px}
+.hint{font-size:14px;color:#8FAECD;margin:0 0 4px}
+
+/* statement rows */
+.stmts{margin-top:26px}
+.st{padding:18px 0;border-top:1px solid rgba(255,255,255,.12)}
+.st:first-child{border-top:0;padding-top:6px}
+.st p{margin:0 0 12px;font-size:16px;line-height:1.65}
+.scale{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sc{font-family:var(--ar);font-size:13.5px;color:#CFE0F1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:11px 6px;cursor:pointer;text-align:center;transition:all .14s;line-height:1.35}
+.sc:hover{border-color:var(--red);background:rgba(231,70,70,.14)}
+.sc:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.sc.sel{background:var(--red);border-color:var(--red);color:#fff;font-weight:700}
+@media(max-width:520px){.scale{grid-template-columns:repeat(2,1fr)}}
+
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:26px;gap:12px;flex-wrap:wrap}
+.back{background:none;border:0;color:#9DBBDA;font-family:var(--ar);font-size:15px;cursor:pointer;padding:8px 0}
+.back:hover{color:#fff}
+.btn{border:0;font-family:var(--ar);font-weight:700;font-size:16px;padding:14px 28px;border-radius:5px;cursor:pointer;text-decoration:none;display:inline-block;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.btn[disabled]{opacity:.4;cursor:not-allowed;transform:none}
+.red{background:var(--red);color:#fff}.red:not([disabled]):hover{background:#d13636}
+.note{font-size:13.5px;color:#8FAECD;margin-top:16px}
+.hidden{display:none}
+
+/* result */
+.verdict{text-align:center;padding:4px 0 22px;border-bottom:1px solid rgba(255,255,255,.14)}
+.big{font-family:var(--lat);font-size:clamp(58px,14vw,96px);font-weight:800;line-height:1;letter-spacing:-4px}
+.big small{font-size:.26em;color:#7f9fc0;letter-spacing:0}
+.badge{display:inline-block;font-size:14px;font-weight:700;padding:7px 18px;border-radius:99px;margin-top:12px}
+.dims{margin:28px 0 4px}
+.dim{margin-bottom:18px}
+.dim .lbl{display:flex;justify-content:space-between;font-size:15px;margin-bottom:7px;gap:10px;align-items:baseline}
+.dim .lbl b{font-weight:700}
+.dim .lbl span{color:#9DBBDA;font-family:var(--lat);font-size:14px;font-weight:800}
+.track{height:11px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden}
+.track i{display:block;height:100%;width:0;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.dim.weak{border-inline-start:3px solid var(--red);padding-inline-start:12px;margin-inline-start:-15px}
+.panel{background:rgba(255,255,255,.06);border-radius:8px;padding:22px;margin-top:20px}
+.panel h3{margin:0 0 10px;font-size:19px}
+.panel p{margin:0 0 10px;color:#CFE0F1;font-size:15.5px}
+.panel p:last-child{margin-bottom:0}
+.panel ol{margin:6px 0 0;padding-inline-start:20px;color:#CFE0F1;font-size:15.5px}
+.panel ol li{margin-bottom:7px}
+.step1{background:rgba(201,162,39,.14);border-inline-start:3px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:14px}
+.step1 b{display:block;margin-bottom:6px}
+.next{background:var(--red);border-radius:8px;padding:26px;margin-top:22px}
+.next h3{margin:0 0 8px;font-size:21px}
+.next p{margin:0 0 18px;font-size:15.5px;color:#FFE6E6}
+.next .btn{background:#fff;color:var(--navy)}
+.share{border:1px dashed rgba(255,255,255,.28);border-radius:8px;padding:20px;margin-top:20px;font-size:15px;color:#CFE0F1}
+.foot{text-align:center;color:#7f9fc0;font-size:13px;margin-top:34px}
+.foot a{color:#9DBBDA}
+.wa{position:fixed;inset-inline-start:16px;bottom:16px;z-index:80;background:#25D366;color:#fff;border-radius:50px;padding:12px 20px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.3);font-size:15px}
+.wa:hover{background:#1eb85a}
+.fade{animation:f .32s ease}
+@keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+<!-- EMC lead capture (fail-safe) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="emc-capture.js"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="top"><div class="mark">EXECUTIVE MASTERY<span>CAMP</span></div></div>
+
+  <div id="intro" class="card fade">
+    <div class="rule"></div>
+    <div class="eyebrow">Marketing system assessment</div>
+    <h1>نظام التسويق عندك شغّال بكام في المية؟</h1>
+    <p class="lead">أغلب الشركات بتقيّم <b>حملاتها</b>. والحقيقة إن الحملة الفاشلة نادرًا بتبقى المشكلة — المشكلة النظام اللي الحملة طلعت منه.</p>
+    <p class="lead" style="margin-top:14px">التقييم ده بيقيس ٦ مجالات، كل واحد <b>من ١٠٠٪</b>: الوضوح والرسالة، المسؤولية والفريق، الأرقام، اكتشاف المشاكل، رحلة العميل، والتنفيذ. نفس منطق تشغيل الشركة — مطبّق على التسويق.</p>
+    <div class="nav" style="justify-content:flex-start"><button class="btn red" id="start">ابدأ التقييم</button></div>
+    <div class="note">٦ شاشات · ١٨ عبارة · حوالي ٥ دقايق</div>
+  </div>
+
+  <div id="quiz" class="hidden">
+    <div class="bar"><i id="fill"></i></div>
+    <div class="meta"><span id="qnum"></span><span id="qlat"></span></div>
+    <div class="card fade" id="qcard">
+      <div class="eyebrow" id="qkicker"></div>
+      <h2 id="qtitle"></h2>
+      <p class="hint">قيّم كل عبارة على الواقع الحالي — مش على اللي مخطط ليه.</p>
+      <div class="stmts" id="qstmts"></div>
+      <div class="nav"><button class="back hidden" id="back">← رجوع</button><button class="btn red" id="nextb" disabled>التالي</button></div>
+    </div>
+  </div>
+
+  <div id="result" class="hidden"></div>
+  <div class="foot">Executive Mastery Camp — الدقي، القاهرة<br>
+    <a target="_blank" rel="noopener" href="https://wa.me/201002248800">واتساب: 0100 224 8800</a></div>
+</div>
+
+<a class="wa" target="_blank" rel="noopener" href="https://wa.me/201002248800?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%2C%20%D8%AD%D8%A7%D8%A8%D8%A8%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A3%D9%83%D8%AA%D8%B1">واتساب</a>
+
+<script>
+(function(){
+var WA='201002248800';
+function wa(m){return 'https://wa.me/'+WA+'?text='+encodeURIComponent(m)}
+var $=function(i){return document.getElementById(i)};
+var SCALE=['لأ خالص','جزئيًا','لحد كبير','أيوة تمامًا'];
+
+var C=[
+ {n:'الوضوح والرسالة',lat:'CLARITY & MESSAGE',
+  s:['عميلنا المثالي محدد بدقة — مين هو ومين <b>مش</b> هو — ومكتوب.',
+     'عندنا وعد واحد واضح، والفريق كله بيقوله بنفس الصيغة.',
+     'نعرف بالظبط ليه العميل بيختارنا إحنا مش المنافس — بجملة نقدر نقولها.'],
+  why:'من غير وضوح، كل جنيه إعلانات بيتصرف على رسالة مش محسومة. وده أغلى نوع هدر لأنه بيبان ناجح (فيه ليدز) وهو بيجيب ناس غلط.',
+  fix:'اقعد ساعة واكتب حاجتين بس: مواصفات العميل اللي بنكسب معاه، ومواصفات العميل اللي بنخسر معاه. وبعدين راجع آخر ١٠ عملاء — هما مين فيهم؟ الورقة دي بتصحّح التسويق كله.'},
+ {n:'المسؤولية والفريق',lat:'OWNERSHIP',
+  s:['فيه شخص واحد بالاسم مسؤول عن نتيجة التسويق — مش لجنة ولا «كلنا».',
+     'الأدوار واضحة: مين بيعمل المحتوى، مين بيدير الإعلانات، مين بيتابع الليدز.',
+     'القدرات المطلوبة موجودة فعلًا — جوّه أو برّه — مش شغل بالقطعة كل مرة مع حد.'],
+  why:'التسويق من غير مالك واحد بيتحوّل لمجهود متقطّع. ولما النتيجة تبوظ، محدش مسؤول — فمحدش بيتعلّم.',
+  fix:'حدّد اسم واحد مسؤول عن رقم التسويق، حتى لو ده إنت مؤقتًا. واكتب جنبه الرقم اللي هو مقاس بيه. من غير الخطوة دي، أي شغل تاني في التسويق مش هيثبت.'},
+ {n:'الأرقام والقياس',lat:'DATA',
+  s:['بنعرف تكلفة الليد وتكلفة العميل الجديد بالأرقام مش بالتقدير.',
+     'عندنا مؤشرات تسويق أسبوعية بتتراجع في ميعاد ثابت.',
+     'نقدر نقول دلوقتي أي قناة جابت آخر ١٠ عملاء.'],
+  why:'من غير أرقام، القرارات بتتاخد بالانطباع — وبتوقّف القناة الشغّالة وتكمّل في اللي بتاكل ميزانية.',
+  fix:'ابدأ بسؤال واحد بس على كل عميل جديد: «عرفت عننا منين؟» وسجّله. أربع أسابيع من الإجابة دي بتديك صورة أوضح من أي تقرير.'},
+ {n:'اكتشاف المشاكل وحلّها',lat:'ISSUE SOLVING',
+  s:['بنعرف إن الحملة مش شغّالة بدري كفاية إننا نوقفها قبل ما تستهلك الميزانية.',
+     'لما حاجة تفشل بنراجع السبب — مش بنغيّر الحملة ونكمّل.',
+     'فيه مكان وميعاد ثابت بتتناقش فيه مشاكل التسويق، مش في الجروب وقت الأزمة.'],
+  why:'التسويق مجاله الوحيد اللي الغلط فيه بيتحول لفلوس محروقة كل يوم بيعدّي. سرعة الاكتشاف هنا أهم من جودة الخطة.',
+  fix:'حط سقف واضح لكل حملة: «لو ما وصلناش لكذا خلال كذا يوم، بنوقف ونراجع». اكتبه قبل ما تبدأ الحملة مش بعدها — بعدها بيبقى عاطفة مش قرار.'},
+ {n:'رحلة العميل والعمليات',lat:'PROCESS',
+  s:['رحلة العميل من أول ما يعرفنا لحد ما يشتري مرسومة ومكتوبة.',
+     'فيه نظام متابعة ثابت للّي أبدى اهتمام وما اشتراش.',
+     'إنتاج المحتوى ليه عملية ثابتة — مش «لما نفضى».'],
+  why:'أغلب الفلوس الضايعة في التسويق مش في جذب الليدز — في الليدز اللي جت وما اتتابعتش. ده أرخص مصدر إيراد عند أي شركة تقريبًا.',
+  fix:'ارسم الرحلة على ورقة واحدة بأربع مراحل بس، وحدّد عند كل مرحلة: مين بيتصرّف، وإمتى، وإيه الرسالة. أول فجوة هتلاقيها غالبًا في المتابعة.'},
+ {n:'التنفيذ والإيقاع',lat:'EXECUTION',
+  s:['عندنا أهداف تسويق للربع الحالي مكتوبة ومعروفة للفريق.',
+     'فيه اجتماع تسويق أسبوعي ثابت بيحصل فعلًا.',
+     'اللي بيتقرر في الاجتماع بيتنفّذ في مواعيده.'],
+  why:'التسويق بيموت من عدم الاستمرارية أكتر ما بيموت من الأفكار الوحشة. الحملة المتوسطة اللي بتتنفّذ ٥٢ أسبوع بتكسب الحملة العبقرية اللي بتشتغل شهرين.',
+  fix:'ثبّت اجتماع تسويق أسبوعي ٣٠ دقيقة بأجندة واحدة ما بتتغيّرش: الأرقام، المشاكل، القرارات. ولو مفيش حاجة تتقال، الاجتماع بيخلص في ٥ دقايق — بس ما بيتلغيش.'}
+];
+
+var page=0, ans=C.map(function(){return [null,null,null]});
+
+function render(){
+  var c=C[page];
+  $('qnum').textContent='القسم '+(page+1)+' من '+C.length;
+  $('qlat').textContent=c.lat;
+  $('fill').style.width=(page/C.length*100)+'%';
+  $('qkicker').textContent='المجال '+(page+1);
+  $('qtitle').textContent=c.n;
+  var box=$('qstmts');box.innerHTML='';
+  c.s.forEach(function(txt,si){
+    var d=document.createElement('div');d.className='st';
+    var p=document.createElement('p');p.innerHTML=txt;d.appendChild(p);
+    var sc=document.createElement('div');sc.className='scale';
+    SCALE.forEach(function(lbl,v){
+      var b=document.createElement('button');b.type='button';
+      b.className='sc'+(ans[page][si]===v?' sel':'');b.textContent=lbl;
+      b.addEventListener('click',function(){
+        ans[page][si]=v;
+        Array.prototype.forEach.call(sc.children,function(x){x.classList.remove('sel')});
+        b.classList.add('sel');
+        check();
+      });
+      sc.appendChild(b);
+    });
+    d.appendChild(sc);box.appendChild(d);
+  });
+  $('back').className='back'+(page===0?' hidden':'');
+  $('nextb').textContent = page===C.length-1 ? 'شوف النتيجة' : 'التالي';
+  check();
+  $('qcard').classList.remove('fade');void $('qcard').offsetWidth;$('qcard').classList.add('fade');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function check(){ $('nextb').disabled = ans[page].some(function(v){return v===null}) }
+$('nextb').addEventListener('click',function(){ page<C.length-1 ? (page++,render()) : finish() });
+$('back').addEventListener('click',function(){ if(page>0){page--;render()} });
+$('start').addEventListener('click',function(){$('intro').classList.add('hidden');$('quiz').classList.remove('hidden');render()});
+
+function col(p){return p<40?'#E74646':p<60?'#E08A2E':p<80?'#3D8FD1':'#2E8B57'}
+
+function finish(){
+  $('fill').style.width='100%';$('quiz').classList.add('hidden');
+  var pcts=ans.map(function(a){return Math.round(a.reduce(function(x,y){return x+y},0)/9*100)});
+  var overall=Math.round(pcts.reduce(function(a,b){return a+b},0)/pcts.length);
+  var idx=pcts.map(function(p,n){return n}).sort(function(a,b){return pcts[a]-pcts[b]});
+  var weak=idx[0], weak2=idx[1];
+
+  var band,bcol,verdict;
+  if(overall<40){band='تسويق بالمزاج';bcol='#E74646';
+    verdict='اللي عندك دلوقتي مش نظام تسويق — ده مجهود متقطّع بيعتمد على الحماس والوقت الفاضي. وده مش حكم على شطارتك: أغلب الشركات في مرحلتك بتشتغل بالطريقة دي، والفرق بيبدأ من اللحظة اللي بتحوّلها فيها لنظام.';}
+  else if(overall<60){band='شغل شغّال… بس مش نظام';bcol='#E08A2E';
+    verdict='فيه حاجات بتشتغل عندك فعلًا، بس النتيجة مش قابلة للتكرار. لما تنجح، مش عارف بالظبط ليه؛ ولما تفشل، مش عارف تصلّح إيه. ده أخطر من الفشل الواضح لأنه بيستهلك سنين.';}
+  else if(overall<80){band='نظام بيتكوّن';bcol='#3D8FD1';
+    verdict='الأساس موجود وواضح إن فيه شغل اتعمل. اللي فاضل مش إعادة بناء — تظبيط مجالين على الأكثر، وأغلب المكسب الجاي هيجي من أضعف مجال عندك لوحده.';}
+  else{band='نظام تسويق شغّال';bcol='#2E8B57';
+    verdict='إنت في نسبة صغيرة من الشركات. الخطر هنا مش الضعف — الخطر إن النظام ده متعلّق بشخص أو اتنين. لو مشيوا بكرة، النسبة دي بتنزل. تثبيت النظام في الأدوار مش في الأشخاص هو شغلك الجاي.';}
+
+  var bars=C.map(function(c,n){
+    var p=pcts[n];
+    return '<div class="dim'+(n===weak?' weak':'')+'"><div class="lbl"><b>'+c.n+'</b><span>'+p+'%</span></div>'+
+      '<div class="track"><i data-w="'+p+'" style="background:'+col(p)+'"></i></div></div>';
+  }).join('');
+
+  var order=idx.filter(function(n){return pcts[n]<80});
+  var orderHtml=order.length?('<ol><li>'+order.map(function(n){return '<b>'+C[n].n+'</b> — '+pcts[n]+'%'}).join('</li><li>')+'</li></ol>')
+    :'<p>كل المجالات فوق ٨٠٪. شغلك الجاي هو التثبيت مش التحسين.</p>';
+
+  var msg='السلام عليكم 👋\nعملت تقييم نظام التسويق وطلعت:\n\n'+
+    'النتيجة العامة: '+overall+'% — '+band+'\n'+
+    C.map(function(c,n){return '• '+c.n+': '+pcts[n]+'%'}).join('\n')+
+    '\n\nأضعف مجال: '+C[weak].n+'\nحابب أفهم أكتر.';
+
+  var r=$('result');r.classList.remove('hidden');
+  r.innerHTML='<div class="card fade">'+
+   '<div class="verdict"><div class="eyebrow">Overall</div>'+
+     '<div class="big" style="color:'+bcol+'">'+overall+'<small>%</small></div>'+
+     '<div><span class="badge" style="background:'+bcol+'">'+band+'</span></div></div>'+
+   '<div class="dims">'+bars+'</div>'+
+   '<div class="panel"><h3>يعني إيه؟</h3><p>'+verdict+'</p></div>'+
+   '<div class="panel"><h3>أضعف مجال: '+C[weak].n+' — '+pcts[weak]+'%</h3>'+
+     '<p>'+C[weak].why+'</p>'+
+     '<div class="step1"><b>أول خطوة من الأسبوع الجاي</b>'+C[weak].fix+'</div></div>'+
+   '<div class="panel"><h3>وبعده: '+C[weak2].n+' — '+pcts[weak2]+'%</h3>'+
+     '<p>'+C[weak2].why+'</p>'+
+     '<div class="step1"><b>أول خطوة</b>'+C[weak2].fix+'</div></div>'+
+   '<div class="panel"><h3>الترتيب اللي تشتغل بيه</h3>'+
+     '<p style="font-size:14.5px">من الأضعف للأقوى. واحد في المرة — التسويق بيتحسّن بالتتابع مش بالتوازي.</p>'+orderHtml+'</div>'+
+   '<div class="next"><h3>التسويق مش قسم منفصل</h3>'+
+     '<p>المجالات الستة دي هي نفسها اللي بتشغّل الشركة كلها — وضوح، مسؤولية، أرقام، مشاكل، عمليات، وإيقاع تنفيذ. لو ضعيفة في التسويق، غالبًا ضعيفة في باقي الأقسام كمان. ده اللي بنبنيه في الكامب على شركتك إنت.</p>'+
+     '<a class="btn" target="_blank" rel="noopener" href="'+wa(msg)+'">اتكلم معانا على واتساب</a></div>'+
+   '<div class="share">ابعت اللينك ده للمسؤول عن التسويق عندك من غير ما تقوله نتيجتك. لو النسب طلعت مختلفة بفارق كبير — دي أول مشكلة لازم تتحل، قبل أي حملة جديدة.</div>'+
+   '<div class="nav"><button class="back" id="again">↻ اعمل التقييم تاني</button><span></span></div></div>';
+
+  setTimeout(function(){r.querySelectorAll('.track i').forEach(function(e){e.style.width=e.dataset.w+'%'})},140);
+  $('again').addEventListener('click',function(){location.reload()});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+})();
+</script>
+<!-- EMC capture hook -->
+<script>
+(function(){
+  var TOOL="marketing";
+  var id={}; try{id=JSON.parse(sessionStorage.getItem("emc_lead")||"{}")}catch(e){}
+  var res=document.getElementById("result"); if(!res) return;
+  var fired=false;
+  function fire(){ if(fired) return; fired=true;
+    try{ if(window.EMCLeadCapture) EMCLeadCapture.save({
+      source:"tool_complete", tool:TOOL, toolTitle:document.title,
+      name:id.name||"", mobile:id.mobile||"", company:id.company||"",
+      email:id.email||"", leadId:id.leadId||""
+    }); }catch(_){}
+  }
+  var mo=new MutationObserver(function(){
+    if(!res.classList.contains("hidden") && res.children.length){ fire(); mo.disconnect(); }
+  });
+  try{ mo.observe(res,{attributes:true,childList:true}); }catch(e){}
+})();
+</script>
+</body>
+</html>

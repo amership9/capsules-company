@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ar-EG" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تشخيص اتفاق فريق القيادة — Executive Mastery Camp</title>
+<meta name="description" content="مش المهم درجتك — المهم الفجوة بين اللي إنت شايفه واللي فريقك شايفه. ١٢ سؤال، وبتقارن نتيجتك بنتايج فريق القيادة.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Archivo:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#003060;--deep:#001F3F;--red:#E74646;--slate:#547394;--gold:#C9A227;--ok:#2E8B57;
+--ar:'Cairo','Segoe UI',Tahoma,sans-serif;--lat:'Archivo','Cairo',sans-serif}
+*{box-sizing:border-box}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:var(--ar);background:var(--deep);color:#fff;line-height:1.75;-webkit-font-smoothing:antialiased}
+.shell{max-width:860px;margin:0 auto;padding:0 18px 70px}
+.top{display:flex;padding:20px 0 8px}
+.mark{font-family:var(--lat);font-weight:800;font-size:13px;letter-spacing:.14em;line-height:1.15}
+.mark span{display:block;font-size:9px;color:#9DBBDA;letter-spacing:.32em}
+.rule{width:40px;height:0;border-top:3px solid var(--red);position:relative;margin:0 0 16px}
+.rule::after{content:"";position:absolute;right:0;top:3px;width:12px;height:12px;border-right:3px solid var(--red);border-bottom:3px solid var(--red);transform:skewX(-18deg)}
+.bar{height:4px;background:rgba(255,255,255,.14);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--red);width:0;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.meta{display:flex;justify-content:space-between;font-size:12.5px;color:#9DBBDA;margin-top:8px;font-family:var(--lat);letter-spacing:.1em}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:clamp(22px,4vw,40px);margin-top:22px}
+h1{font-size:clamp(25px,4.6vw,40px);font-weight:900;letter-spacing:-.8px;margin:0 0 14px;line-height:1.25}
+h2{font-size:clamp(19px,3vw,25px);font-weight:900;margin:0 0 6px;line-height:1.45}
+p.lead{color:#CFE0F1;font-size:clamp(15px,1.8vw,18px);margin:0 0 8px}
+.eyebrow{font-family:var(--lat);font-size:11.5px;font-weight:800;letter-spacing:.24em;color:var(--red);margin-bottom:10px}
+.opts{display:grid;gap:10px;margin-top:20px}
+.opt{display:block;width:100%;text-align:start;font-family:var(--ar);font-size:16px;color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:14px 18px;cursor:pointer;transition:background .15s,border-color .15s,transform .12s}
+.opt:hover{background:rgba(231,70,70,.16);border-color:var(--red);transform:translateX(-3px)}
+.opt:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.opt.sel{background:rgba(231,70,70,.22);border-color:var(--red)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px;flex-wrap:wrap}
+.back{background:none;border:0;color:#9DBBDA;font-family:var(--ar);font-size:15px;cursor:pointer;padding:8px 0}
+.back:hover{color:#fff}
+.btn{border:0;font-family:var(--ar);font-weight:700;font-size:16px;padding:14px 28px;border-radius:5px;cursor:pointer;text-decoration:none;display:inline-block;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.red{background:var(--red);color:#fff}.red:hover{background:#d13636}
+.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.45)}
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px}
+.role{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:24px;cursor:pointer;text-align:start;font-family:var(--ar);color:#fff;transition:border-color .15s,background .15s}
+.role:hover{border-color:var(--red);background:rgba(231,70,70,.14)}
+.role b{display:block;font-size:18px;margin-bottom:6px}
+.role small{color:#9DBBDA;font-size:14px;line-height:1.6;display:block}
+@media(max-width:600px){.roles{grid-template-columns:1fr}}
+.note{font-size:13.5px;color:#8FAECD;margin-top:16px}
+.hidden{display:none}
+.panel{background:rgba(255,255,255,.06);border-radius:8px;padding:22px;margin-top:20px}
+.panel h3{margin:0 0 10px;font-size:19px}
+.panel p{margin:0 0 10px;color:#CFE0F1;font-size:15.5px}
+.panel p:last-child{margin-bottom:0}
+.dim{margin-bottom:18px}
+.dim .lbl{display:flex;justify-content:space-between;font-size:14.5px;margin-bottom:7px;align-items:center}
+.dim .lbl b{font-weight:700}
+.dim .lbl span{color:#9DBBDA;font-family:var(--lat);font-size:12.5px}
+.track{height:10px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;position:relative}
+.track i{display:block;height:100%;width:0;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.dual{display:grid;gap:5px}
+.dual .row{display:flex;align-items:center;gap:10px}
+.dual .tag{font-size:11.5px;font-family:var(--lat);letter-spacing:.1em;color:#9DBBDA;min-width:44px}
+.dual .track{flex:1;height:9px}
+.gapbig{border-inline-start:3px solid var(--red);padding-inline-start:12px;margin-inline-start:-15px}
+.big{font-family:var(--lat);font-size:clamp(52px,12vw,84px);font-weight:800;line-height:1;letter-spacing:-3px;text-align:center}
+.big small{font-size:.28em;color:#7f9fc0;letter-spacing:0}
+.badge{display:inline-block;font-size:14px;font-weight:700;padding:7px 18px;border-radius:99px;margin-top:10px}
+.codebox{background:rgba(0,0,0,.28);border:1px dashed rgba(255,255,255,.3);border-radius:7px;padding:16px;margin:14px 0;text-align:center}
+.codebox code{font-family:var(--lat);font-size:clamp(16px,3.4vw,22px);letter-spacing:.12em;color:#fff;font-weight:800;word-break:break-all}
+textarea,input{width:100%;font-family:var(--ar);font-size:15px;padding:12px 14px;border-radius:5px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.08);color:#fff}
+textarea{font-family:var(--lat);letter-spacing:.06em;min-height:110px;resize:vertical}
+textarea:focus,input:focus{outline:2px solid var(--gold);outline-offset:1px}
+label{font-size:13.5px;color:#9DBBDA;font-weight:600;display:block;margin-bottom:6px}
+.next{background:var(--red);border-radius:8px;padding:26px;margin-top:22px}
+.next h3{margin:0 0 8px;font-size:21px}
+.next p{margin:0 0 18px;font-size:15.5px;color:#FFE6E6}
+.next .btn{background:#fff;color:var(--navy)}
+.foot{text-align:center;color:#7f9fc0;font-size:13px;margin-top:34px}
+.foot a{color:#9DBBDA}
+.wa{position:fixed;inset-inline-start:16px;bottom:16px;z-index:80;background:#25D366;color:#fff;border-radius:50px;padding:12px 20px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.3);font-size:15px}
+.wa:hover{background:#1eb85a}
+.fade{animation:f .32s ease}
+@keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+<!-- EMC lead capture (fail-safe) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="emc-capture.js"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="top"><div class="mark">EXECUTIVE MASTERY<span>CAMP</span></div></div>
+
+  <!-- INTRO -->
+  <div id="intro" class="card fade">
+    <div class="rule"></div>
+    <div class="eyebrow">Leadership alignment</div>
+    <h1>فريق القيادة عندك شايف نفس الشركة اللي إنت شايفها؟</h1>
+    <p class="lead">مش المهم درجتك. المهم <b>الفجوة</b> — بين اللي إنت شايفه واللي فريقك شايفه. الفجوة دي هي اللي بتفسّر ليه القرارات بتتاخد وما بتتنفّذش.</p>
+    <p class="lead" style="margin-top:14px">١٢ سؤال، ٤ دقايق. إنت بتجاوب، وبتبعت لينك لفريق القيادة يجاوبوا، وبعدين بتشوف المقارنة بالأرقام.</p>
+    <div class="roles">
+      <button class="role" id="asLeader"><b>أنا صاحب الشركة أو القائد</b><small>هجاوب الأول، وبعدها هبعت اللينك للفريق</small></button>
+      <button class="role" id="asTeam"><b>وصلني لينك من قائد فريقي</b><small>هجاوب وهطلع بكود أبعتهوله</small></button>
+    </div>
+    <div class="note">مفيش تسجيل ومفيش بيانات — الإجابات بتتحوّل لكود وبتفضل عندك إنت.</div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz" class="hidden">
+    <div class="bar"><i id="fill"></i></div>
+    <div class="meta"><span id="qnum"></span><span id="qdim"></span></div>
+    <div class="card fade" id="qcard">
+      <h2 id="qtext"></h2>
+      <div class="opts" id="qopts"></div>
+      <div class="nav"><button class="back hidden" id="back">← رجوع</button><span></span></div>
+    </div>
+  </div>
+
+  <div id="result" class="hidden"></div>
+
+  <div class="foot">Executive Mastery Camp — الدقي، القاهرة<br>
+    <a target="_blank" rel="noopener" href="https://wa.me/201002248800">واتساب: 0100 224 8800</a></div>
+</div>
+
+<a class="wa" target="_blank" rel="noopener" href="https://wa.me/201002248800?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%2C%20%D8%AD%D8%A7%D8%A8%D8%A8%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A3%D9%83%D8%AA%D8%B1">واتساب</a>
+
+<script>
+(function(){
+var WA='201002248800';
+function wa(m){return 'https://wa.me/'+WA+'?text='+encodeURIComponent(m);}
+var $=function(i){return document.getElementById(i)};
+var DIM=[
+ {k:'clarity',n:'الوضوح والاتجاه'},
+ {k:'roles',n:'الأدوار والمسؤوليات'},
+ {k:'data',n:'الأرقام والقياس'},
+ {k:'exec',n:'الاجتماعات والتنفيذ'},
+ {k:'trust',n:'الثقة والمصارحة'},
+ {k:'acct',n:'المحاسبة والأداء'}
+];
+var Q=[
+ {d:0,t:'أهداف الشركة للسنة دي واضحة ومعروفة للكل؟',o:['مفيش أهداف معلنة','موجودة عند الإدارة العليا بس','اتقالت مرة وماحدش رجعلها','معروفة والكل يقدر يقولها']},
+ {d:0,t:'لو سألت خمس ناس دلوقتي «إيه أهم أولوية في الشركة؟» — هيقولوا إيه؟',o:['كل واحد هيقول حاجة مختلفة','اتنين بس هيتفقوا','الأغلبية إجاباتهم قريبة','كلهم هيقولوا نفس الحاجة']},
+ {d:1,t:'مين مسؤول عن إيه — واضح ومكتوب؟',o:['لأ، بالعُرف والخبرة','معروف شفهيًا بس مش مكتوب','مكتوب بس قديم أو محدش بيرجعله','مكتوب وواضح ومتفق عليه']},
+ {d:1,t:'فيه شغل بيقع بين الكراسي أو بيتعمل مرتين؟',o:['أيوة، وبيحصل كتير','بيحصل من وقت للتاني','نادر','تقريبًا مفيش']},
+ {d:2,t:'كل شخص عنده رقم أسبوعي بيقيس بيه شغله؟',o:['مفيش حاجة زي دي','فيه توقعات عامة من غير أرقام','بعض الأقسام أيوة والباقي لأ','أيوة — لكل دور رقم واضح']},
+ {d:2,t:'أرقام الشركة بتتشاف إمتى؟',o:['لما تحصل مشكلة','كل شهر تقريبًا','كل أسبوع بس من غير ترتيب','كل أسبوع في اجتماع ثابت ومقارنة بالمستهدف']},
+ {d:3,t:'الاجتماعات بتطلع بقرارات مكتوبة؟',o:['مفيش اجتماعات منتظمة','فيه اجتماعات بس من غير أجندة','فيه أجندة بس القرارات مش بتتكتب','قرارات مكتوبة وبتتراجع الأسبوع اللي بعده']},
+ {d:3,t:'القرارات بتتنفّذ في مواعيدها؟',o:['نادرًا جدًا','بتتأخر شهور','بتتأخر أسابيع','في مواعيدها في الغالب']},
+ {d:4,t:'الناس بتقول رأيها المخالف في الاجتماع نفسه؟',o:['لأ، بيقولوا اللي القيادة عايزة تسمعه','نادرًا وبحذر شديد','بعضهم أيوة والباقي لأ','أيوة، والاختلاف حاجة عادية']},
+ {d:4,t:'المشاكل الحقيقية بتتقال فين؟',o:['في الممرات بعد الاجتماع','في مكالمات خاصة','بتتقال بس متأخر','بتتقال في وقتها قدام الكل']},
+ {d:5,t:'الأداء الضعيف بيتواجه؟',o:['لأ، بنتفاداه','بيتقال بشكل غير مباشر','بيتواجه أحيانًا وبيتأجل أحيانًا','بيتواجه بوضوح وباحترام']},
+ {d:5,t:'الوعود بين الأقسام بتتنفّذ؟',o:['نادرًا، وكل قسم بيلوم التاني','بتتنفّذ بعد متابعة كتير','بتتنفّذ في الغالب','بتتنفّذ من غير ما حد يفكّر']}
+];
+
+var mode='leader',i=0,ans=new Array(Q.length).fill(null);
+if(location.hash.indexOf('team')>-1) mode='team';
+
+function startQuiz(m){mode=m;$('intro').classList.add('hidden');$('quiz').classList.remove('hidden');i=0;render();}
+$('asLeader').addEventListener('click',function(){startQuiz('leader')});
+$('asTeam').addEventListener('click',function(){startQuiz('team')});
+if(mode==='team'){ $('intro').innerHTML='<div class="rule"></div><div class="eyebrow">Leadership alignment</div>'+
+  '<h1>قائد فريقك طالب رأيك</h1>'+
+  '<p class="lead">١٢ سؤال عن الشركة زي ما إنت شايفها فعلًا. جاوب بصراحة — النتيجة بتتحوّل لكود، ومحدش بيشوف إجاباتك فرادى، بيتشاف المتوسط بس.</p>'+
+  '<div class="nav" style="justify-content:flex-start"><button class="btn red" id="go2">ابدأ</button></div>';
+  $('go2').addEventListener('click',function(){startQuiz('team')});
+}
+
+function render(){
+  var q=Q[i];
+  $('qnum').textContent='Q'+(i+1)+' / '+Q.length;
+  $('qdim').textContent=DIM[q.d].n;
+  $('fill').style.width=(i/Q.length*100)+'%';
+  $('qtext').textContent=q.t;
+  var box=$('qopts');box.innerHTML='';
+  q.o.forEach(function(o,idx){
+    var b=document.createElement('button');b.type='button';
+    b.className='opt'+(ans[i]===idx?' sel':'');b.textContent=o;
+    b.addEventListener('click',function(){ans[i]=idx;setTimeout(next,130)});
+    box.appendChild(b);
+  });
+  $('back').className='back'+(i===0?' hidden':'');
+  $('qcard').classList.remove('fade');void $('qcard').offsetWidth;$('qcard').classList.add('fade');
+}
+function next(){ i<Q.length-1 ? (i++,render()) : finish(); }
+$('back').addEventListener('click',function(){if(i>0){i--;render()}});
+
+function dims(a){var d=[0,0,0,0,0,0];Q.forEach(function(q,n){d[q.d]+=a[n]});return d;}
+function code(a){return 'EMC-'+a.join('');}
+function parse(txt){
+  var out=[],lines=txt.split(/\n+/);
+  lines.forEach(function(L){
+    var m=L.match(/([0-3]{12})/);
+    if(m){
+      var nm=L.split(/EMC-|[0-3]{12}/)[0].replace(/[:\-–—]/g,' ').trim();
+      out.push({name:nm||('عضو '+(out.length+1)),a:m[1].split('').map(Number)});
+    }
+  });
+  return out;
+}
+function bar(v,max,color){return '<div class="track"><i data-w="'+Math.round(v/max*100)+'" style="background:'+color+'"></i></div>';}
+function paint(root){setTimeout(function(){root.querySelectorAll('.track i').forEach(function(e){e.style.width=e.dataset.w+'%'})},120);}
+
+function finish(){
+  $('fill').style.width='100%';$('quiz').classList.add('hidden');
+  var r=$('result');r.classList.remove('hidden');
+  var my=dims(ans),myCode=code(ans);
+
+  if(mode==='team'){
+    r.innerHTML='<div class="card fade"><div class="rule"></div><h2>خلصت — شكرًا</h2>'+
+      '<p class="lead">ده الكود بتاعك. ابعته لقائد فريقك زي ما هو، ومعاه اسمك.</p>'+
+      '<div class="codebox"><code>'+myCode+'</code></div>'+
+      '<p class="lead" style="font-size:14.5px;color:#8FAECD">الكود ده مش بيتشاف فرادى — القائد بيشوف متوسط الفريق كله مقارنة برأيه هو.</p>'+
+      '<div class="nav" style="justify-content:flex-start"><button class="btn red" id="cp">انسخ الكود</button></div></div>';
+    $('cp').addEventListener('click',function(){
+      navigator.clipboard&&navigator.clipboard.writeText(myCode);
+      this.textContent='اتنسخ ✓';
+    });
+    window.scrollTo({top:0,behavior:'smooth'});return;
+  }
+
+  /* leader */
+  var link=location.href.split('#')[0]+'#team';
+  var rows=DIM.map(function(d,n){
+    var pct=Math.round(my[n]/6*100),c=pct<=33?'#E74646':pct<=66?'#E08A2E':'#2E8B57';
+    return '<div class="dim"><div class="lbl"><b>'+d.n+'</b><span>'+my[n]+'/6</span></div>'+bar(my[n],6,c)+'</div>';
+  }).join('');
+
+  r.innerHTML='<div class="card fade">'+
+   '<div class="rule"></div><div class="eyebrow">Step 1 of 2 — your view</div>'+
+   '<h2>الشركة زي ما إنت شايفها</h2>'+
+   '<div style="margin-top:22px">'+rows+'</div>'+
+   '<div class="panel"><h3>الخطوة الجاية — وهي اللي بتفرق</h3>'+
+     '<p>الأرقام دي لوحدها مش بتقول حاجة كتير. اللي بيقول هو الفرق بينها وبين أرقام فريقك.</p>'+
+     '<p>ابعت اللينك ده لـ ٣ إلى ٥ من فريق القيادة، وقولهم يبعتولك الكود اللي هيطلعلهم:</p>'+
+     '<div class="codebox"><code style="font-size:15px">'+link+'</code></div>'+
+     '<div class="nav" style="justify-content:flex-start;margin-top:6px">'+
+       '<button class="btn ghost" id="cplink">انسخ اللينك</button>'+
+       '<a class="btn red" target="_blank" rel="noopener" href="'+wa('ياريت تعمل التشخيص ده عن الشركة وتبعتلي الكود اللي هيطلعلك — بياخد ٤ دقايق:\n'+link)+'">ابعته على واتساب</a></div>'+
+   '</div>'+
+   '<div class="panel"><h3>لزّق أكواد فريقك هنا</h3>'+
+     '<p style="font-size:14.5px">كود في كل سطر. تقدر تكتب الاسم قبل الكود: <span style="font-family:var(--lat)">أحمد: EMC-231032013122</span></p>'+
+     '<textarea id="codes" placeholder="EMC-231032013122&#10;EMC-120231001211"></textarea>'+
+     '<div class="nav" style="justify-content:flex-start"><button class="btn red" id="cmp">قارن النتايج</button></div>'+
+     '<p style="font-size:13.5px;color:#8FAECD;margin-top:12px">كودك إنت: <span style="font-family:var(--lat)">'+myCode+'</span> — احتفظ بيه لو هتقفل الصفحة.</p>'+
+   '</div>'+
+   '<div id="cmpout"></div></div>';
+  paint(r);
+  $('cplink').addEventListener('click',function(){navigator.clipboard&&navigator.clipboard.writeText(link);this.textContent='اتنسخ ✓'});
+  $('cmp').addEventListener('click',function(){compare(my,myCode)});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function compare(my,myCode){
+  var team=parse($('codes').value);
+  if(!team.length){alert('لزّق كود واحد على الأقل من فريقك.');return;}
+  var sums=[0,0,0,0,0,0];
+  team.forEach(function(p){var d=dims(p.a);d.forEach(function(v,n){sums[n]+=v})});
+  var avg=sums.map(function(s){return s/team.length});
+  var gaps=avg.map(function(v,n){return my[n]-v});
+  var absAvg=gaps.reduce(function(a,b){return a+Math.abs(b)},0)/6;
+  var align=Math.max(0,Math.round(100-absAvg/6*100));
+  var worst=0;gaps.forEach(function(g,n){if(Math.abs(g)>Math.abs(gaps[worst]))worst=n});
+  var over=gaps.filter(function(g){return g>0.7}).length, under=gaps.filter(function(g){return g<-0.7}).length;
+
+  var band,color,verdict;
+  if(align>=85){band='اتفاق عالي';color='#2E8B57';
+    verdict='فريق القيادة عندك شايف الشركة زي ما إنت شايفها تقريبًا. ده أصل صحي — بس خد بالك: الاتفاق العالي جدًا أحيانًا بيبقى معناه إن الفريق بيقول اللي إنت عايز تسمعه، مش إنهم متفقين فعلًا. راجع درجة «الثقة والمصارحة» تحت.';}
+  else if(align>=70){band='اتفاق متوسط';color='#E08A2E';
+    verdict='فيه أساس مشترك، بس فيه محاور بتتشاف بشكل مختلف. الاختلافات دي هي اللي بتفسّر ليه القرار بيتاخد في الاجتماع وبعدين كل واحد بينفّذه بفهمه هو.';}
+  else{band='فجوة كبيرة';color='#E74646';
+    verdict='إنتوا بتديروا شركتين مختلفتين في نفس المكتب. أي خطة هتتبني على الفهم ده هتتنفّذ بأشكال مختلفة عند كل واحد — والمشكلة مش في التنفيذ، المشكلة إنكم مش بتتكلموا عن نفس الواقع.';}
+
+  var dir = over>under
+    ? 'الاتجاه العام: <b>إنت شايف الشركة أحسن مما فريقك شايفها</b> في '+over+' من ٦ محاور. ده أشيع نمط عند المؤسسين — لأن المعلومة اللي بتوصلك بتبقى متفلترة قبل ما توصل.'
+    : (under>over
+      ? 'الاتجاه العام: <b>فريقك شايف الشركة أحسن مما إنت شايفها</b> في '+under+' من ٦ محاور. ده أقل شيوعًا، ومعناه غالبًا إنك شايف مخاطر لسه ما وصلتهمش — أو إنك أقسى في التقييم منهم.'
+      : 'الاتجاه العام: الفروق متوزّعة في الاتجاهين — مفيش ميل ثابت، والاختلاف محصور في محاور معيّنة.');
+
+  var rows=DIM.map(function(d,n){
+    var g=gaps[n],big=Math.abs(g)>=1.5;
+    return '<div class="dim'+(n===worst?' gapbig':'')+'">'+
+      '<div class="lbl"><b>'+d.n+'</b><span>فرق '+(g>0?'+':'')+g.toFixed(1)+'</span></div>'+
+      '<div class="dual">'+
+        '<div class="row"><span class="tag">إنت</span>'+bar(my[n],6,'#3D6FB5')+'</div>'+
+        '<div class="row"><span class="tag">الفريق</span>'+bar(avg[n],6,big?'#E74646':'#8FAECD')+'</div>'+
+      '</div></div>';
+  }).join('');
+
+  var msg='السلام عليكم 👋\nعملت تشخيص اتفاق فريق القيادة مع '+team.length+' من فريقي.\n\n'+
+    'مؤشر الاتفاق: '+align+'% — '+band+'\n'+
+    'أكبر فجوة: '+DIM[worst].n+' (فرق '+gaps[worst].toFixed(1)+')\n\nحابب أفهم الرقم ده معناه إيه.';
+
+  var out=$('cmpout');
+  out.innerHTML='<div class="card fade" style="margin-top:26px">'+
+   '<div class="rule"></div><div class="eyebrow">Step 2 — the gap</div>'+
+   '<h2>الفجوة بينك وبين فريقك</h2>'+
+   '<p class="lead" style="font-size:14.5px;color:#8FAECD">محسوبة على '+team.length+' من فريق القيادة.</p>'+
+   '<div class="big" style="margin-top:18px;color:'+color+'">'+align+'<small>%</small></div>'+
+   '<div style="text-align:center"><span class="badge" style="background:'+color+'">'+band+'</span></div>'+
+   '<div style="margin-top:28px">'+rows+'</div>'+
+   '<div class="panel"><h3>يعني إيه؟</h3><p>'+verdict+'</p><p>'+dir+'</p></div>'+
+   '<div class="panel"><h3>أخطر فجوة: '+DIM[worst].n+'</h3>'+
+     '<p>ده المحور اللي إنت وفريقك أبعد ما تكونوا فيه عن بعض. أي شغل على الشركة لازم يبدأ من هنا — لأن باقي المحاور بتتبني على اتفاق مش موجود.</p>'+
+     '<p><b>أول خطوة:</b> اعرض الرسم ده على فريق القيادة من غير ما تدافع عن رقمك، واسأل سؤال واحد: «إيه اللي إنتوا شايفينه وأنا مش شايفه؟» وبعدين اسكت.</p></div>'+
+   '<div class="next"><h3>الفجوة دي مش بتتقفل بمحاضرة</h3>'+
+     '<p>بتتقفل بنظام إدارة الفريق كله بيشتغل بيه. ده اللي بيعمله فريق EMC Implementors جوه الشركة نفسها — أو اللي بتخرج بيه من الكامب لو إنت اللي هتبنيه.</p>'+
+     '<a class="btn" target="_blank" rel="noopener" href="'+wa(msg)+'">اتكلم معانا على واتساب</a></div></div>';
+  paint(out);
+  out.scrollIntoView({behavior:'smooth',block:'start'});
+}
+})();
+</script>
+<!-- EMC capture hook -->
+<script>
+(function(){
+  var TOOL="alignment";
+  var id={}; try{id=JSON.parse(sessionStorage.getItem("emc_lead")||"{}")}catch(e){}
+  var res=document.getElementById("result"); if(!res) return;
+  var fired=false;
+  function fire(){ if(fired) return; fired=true;
+    try{ if(window.EMCLeadCapture) EMCLeadCapture.save({
+      source:"tool_complete", tool:TOOL, toolTitle:document.title,
+      name:id.name||"", mobile:id.mobile||"", company:id.company||"",
+      email:id.email||"", leadId:id.leadId||""
+    }); }catch(_){}
+  }
+  var mo=new MutationObserver(function(){
+    if(!res.classList.contains("hidden") && res.children.length){ fire(); mo.disconnect(); }
+  });
+  try{ mo.observe(res,{attributes:true,childList:true}); }catch(e){}
+})();
+</script>
+</body>
+</html>

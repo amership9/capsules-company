@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ar-EG" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>شركتك معتمدة عليك قد إيه؟ — Executive Mastery Camp</title>
+<meta name="description" content="٨ أسئلة بتقيس درجة اعتماد شركتك عليك من ٢٤، وبتقدّرلك الساعات اللي بتضيع أسبوعيًا في شغل مش المفروض يوصلك.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Archivo:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#003060;--deep:#001F3F;--red:#E74646;--mist:#EAEEF3;--slate:#547394;--gold:#C9A227;--good:#3FA76A;
+  --ar:'Cairo','Segoe UI',Tahoma,sans-serif;--lat:'Archivo','Cairo',sans-serif;
+}
+*{box-sizing:border-box}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:var(--ar);background:var(--deep);color:#fff;line-height:1.75;-webkit-font-smoothing:antialiased}
+.shell{max-width:840px;margin:0 auto;padding:0 18px 70px}
+.top{display:flex;align-items:center;padding:20px 0 8px}
+.mark{font-family:var(--lat);font-weight:800;font-size:13px;letter-spacing:.14em;line-height:1.15}
+.mark span{display:block;font-size:9px;color:#9DBBDA;letter-spacing:.32em}
+.rule{width:40px;height:0;border-top:3px solid var(--red);position:relative;margin:0 0 16px}
+.rule::after{content:"";position:absolute;right:0;top:3px;width:12px;height:12px;border-right:3px solid var(--red);border-bottom:3px solid var(--red);transform:skewX(-18deg)}
+.bar{height:4px;background:rgba(255,255,255,.14);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--red);width:0;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.meta{display:flex;justify-content:space-between;font-size:12.5px;color:#9DBBDA;margin-top:8px;font-family:var(--lat);letter-spacing:.1em}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:clamp(22px,4vw,40px);margin-top:22px}
+h1{font-size:clamp(26px,5vw,42px);font-weight:900;letter-spacing:-.8px;margin:0 0 14px;line-height:1.25}
+h2{font-size:clamp(19px,3vw,26px);font-weight:900;margin:0 0 6px;line-height:1.45}
+p.lead{color:#CFE0F1;font-size:clamp(15px,1.8vw,18px);margin:0 0 8px}
+.eyebrow{font-family:var(--lat);font-size:11.5px;font-weight:800;letter-spacing:.24em;color:var(--red);margin-bottom:10px}
+.opts{display:grid;gap:10px;margin-top:20px}
+.opt{display:block;width:100%;text-align:start;font-family:var(--ar);font-size:16px;color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:15px 18px;cursor:pointer;transition:background .15s,border-color .15s,transform .12s}
+.opt:hover{background:rgba(231,70,70,.16);border-color:var(--red);transform:translateX(-3px)}
+.opt:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.opt.sel{background:rgba(231,70,70,.22);border-color:var(--red)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px}
+.back{background:none;border:0;color:#9DBBDA;font-family:var(--ar);font-size:15px;cursor:pointer;padding:8px 0}
+.back:hover{color:#fff}
+.btn{border:0;font-family:var(--ar);font-weight:700;font-size:16px;padding:15px 30px;border-radius:5px;cursor:pointer;text-decoration:none;display:inline-block;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.red{background:var(--red);color:#fff}.red:hover{background:#d13636}
+.note{font-size:13.5px;color:#8FAECD;margin-top:16px}
+.hidden{display:none}
+/* hours input */
+.hours{display:flex;align-items:center;gap:14px;margin-top:20px;flex-wrap:wrap}
+.hours input{width:120px;font-family:var(--lat);font-size:26px;font-weight:800;color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:12px 14px;text-align:center;outline:none}
+.hours input:focus{border-color:var(--red)}
+.hours span{color:#9DBBDA;font-size:15px}
+/* result */
+.verdict{text-align:center;padding:6px 0 24px;border-bottom:1px solid rgba(255,255,255,.14)}
+.score{font-family:var(--lat);font-size:clamp(56px,14vw,88px);font-weight:800;line-height:1;letter-spacing:-2px}
+.score small{font-size:.34em;color:#9DBBDA;font-weight:700}
+.bandname{font-size:clamp(24px,6vw,38px);font-weight:900;margin:8px 0 4px}
+.bandlat{font-family:var(--lat);font-size:13px;letter-spacing:.3em;color:#9DBBDA}
+.gauge{height:14px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin:24px 0 6px}
+.gauge i{display:block;height:100%;width:0;border-radius:99px;transition:width .9s cubic-bezier(.4,0,.2,1)}
+.hoursbox{text-align:center;background:rgba(231,70,70,.12);border:1px solid rgba(231,70,70,.4);border-radius:10px;padding:22px;margin-top:22px}
+.hoursbox .big{font-family:var(--lat);font-size:clamp(38px,9vw,56px);font-weight:800;color:#fff;line-height:1}
+.hoursbox .lbl{color:#FFCDCD;font-size:15px;margin-top:8px}
+.panel{background:rgba(255,255,255,.06);border-radius:8px;padding:22px;margin-top:20px}
+.panel h3{margin:0 0 10px;font-size:19px}
+.panel p{margin:0 0 10px;color:#CFE0F1;font-size:15.5px}
+.panel p:last-child{margin-bottom:0}
+.panel ul{margin:0;padding:0;list-style:none}
+.panel li{position:relative;padding-inline-start:20px;margin-bottom:8px;color:#CFE0F1;font-size:15.5px}
+.panel li::before{content:"";position:absolute;right:0;top:12px;width:9px;height:2px;background:var(--red)}
+.step1{background:rgba(201,162,39,.14);border-inline-start:3px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:16px}
+.step1 b{display:block;margin-bottom:6px}
+.next{background:var(--red);border-radius:8px;padding:26px;margin-top:22px}
+.next h3{margin:0 0 8px;font-size:21px}
+.next p{margin:0 0 18px;font-size:15.5px;color:#FFE6E6}
+.next .btn{background:#fff;color:var(--navy)}
+.share{border:1px dashed rgba(255,255,255,.28);border-radius:8px;padding:20px;margin-top:20px;font-size:15px;color:#CFE0F1}
+.foot{text-align:center;color:#7f9fc0;font-size:13px;margin-top:34px}
+.foot a{color:#9DBBDA}
+.wa{position:fixed;inset-inline-start:16px;bottom:16px;z-index:80;background:#25D366;color:#fff;border-radius:50px;padding:12px 20px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.3);font-size:15px}
+.wa:hover{background:#1eb85a}
+.fade{animation:f .32s ease}
+@keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+<!-- EMC lead capture (fail-safe) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="emc-capture.js"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="top"><div class="mark">EXECUTIVE MASTERY<span>CAMP</span></div></div>
+
+  <div id="intro" class="card fade">
+    <div class="rule"></div>
+    <div class="eyebrow">Founder Dependency</div>
+    <h1>شركتك معتمدة عليك قد إيه؟</h1>
+    <p class="lead">أنجح مؤسس مش اللي الشركة بتلف حواليه — ده اللي الشركة بتمشي من غيره. لو كل حاجة بترجعلك، إنت مش صاحب شركة، إنت أغلى موظف فيها.</p>
+    <p class="lead" style="margin-top:14px">٨ أسئلة، ٣ دقايق. هتطلع بدرجة اعتماد من ٢٤، وتقدير للساعات اللي بتضيع منك كل أسبوع في شغل مالوش لازمة يوصلك — وأول خطوة تفكّ بيها الاعتماد ده.</p>
+    <div class="nav" style="justify-content:flex-start"><button class="btn red" id="start">ابدأ التشخيص</button></div>
+    <div class="note">مفيش أي بيانات مطلوبة عشان تشوف نتيجتك.</div>
+  </div>
+
+  <div id="quiz" class="hidden">
+    <div class="bar"><i id="fill"></i></div>
+    <div class="meta"><span id="qnum"></span><span>FOUNDER DEPENDENCY</span></div>
+    <div class="card fade" id="qcard">
+      <h2 id="qtext"></h2>
+      <p class="lead" id="qhint" style="font-size:14.5px;color:#8FAECD"></p>
+      <div class="opts" id="qopts"></div>
+      <div class="nav"><button class="back hidden" id="back">← رجوع</button><span></span></div>
+    </div>
+  </div>
+
+  <div id="hoursStep" class="hidden">
+    <div class="bar"><i style="width:100%"></i></div>
+    <div class="meta"><span>سؤال أخير</span><span>WORK HOURS</span></div>
+    <div class="card fade">
+      <h2>بتشتغل كام ساعة في الأسبوع تقريبًا؟</h2>
+      <p class="lead" style="font-size:14.5px;color:#8FAECD">تقدير كفاية — عشان نحسب الساعات الضايعة.</p>
+      <div class="hours">
+        <input id="wh" type="number" min="20" max="100" step="1" value="60" inputmode="numeric" />
+        <span>ساعة في الأسبوع</span>
+      </div>
+      <div class="nav"><button class="back" id="hback">← رجوع</button><button class="btn red" id="seeResult">شوف نتيجتك</button></div>
+    </div>
+  </div>
+
+  <div id="result" class="hidden"></div>
+
+  <div class="foot">Executive Mastery Camp — الدقي، القاهرة<br>
+    <a target="_blank" rel="noopener" href="https://wa.me/201002248800">واتساب: 0100 224 8800</a></div>
+</div>
+
+<a class="wa" target="_blank" rel="noopener" href="https://wa.me/201002248800?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%2C%20%D8%AD%D8%A7%D8%A8%D8%A8%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A3%D9%83%D8%AA%D8%B1">واتساب</a>
+
+<script>
+(function(){
+var WA='201002248800';
+function wa(m){return 'https://wa.me/'+WA+'?text='+encodeURIComponent(m);}
+var $=function(i){return document.getElementById(i)};
+
+/* 8 أسئلة — كل خيار من 0 (صحي) لـ 3 (اعتماد كامل) */
+var Q=[
+ {t:'لما إنت مش موجود — القرارات اليومية بتتاخد إزاي؟',h:'اختار أقرب حاجة للواقع.',o:[
+   ['الفريق بياخدها ويرجعّني بالنتيجة',0],
+   ['بياخدوا الصغيّرة ويستنوني في المؤثرة',1],
+   ['بيستنوا لحد ما أرجع في معظم الحاجات',2],
+   ['كل حاجة بتقف لحد ما أقرر أنا',3]]},
+ {t:'لو سافرت أسبوع وقفلت الموبايل — الشغل هيبقى إزاي؟',h:'',o:[
+   ['ماشي عادي، فيه نظام بيمشّي',0],
+   ['هيمشي بس بتوتر ومكالمات',1],
+   ['هتبوظ حاجات مهمة',2],
+   ['هيقف تقريبًا',3]]},
+ {t:'الصفقات / المبيعات المهمة بتتقفل على إيد مين؟',h:'',o:[
+   ['عندي ناس بيقفلوا من غيري',0],
+   ['بيقفلوا الصغيّر، والكبير أنا',1],
+   ['أنا في كل صفقة مهمة تقريبًا',2],
+   ['محدش بيقفل غيري',3]]},
+ {t:'لما مشكلة تطلع في التنفيذ — بتتحل إزاي؟',h:'',o:[
+   ['المسؤول بيحلها ويبلّغني',0],
+   ['بيحلها بعد ما ياخد رأيي',1],
+   ['بيجيلي أنا الأول',2],
+   ['أنا اللي بنزل أحلها بإيدي',3]]},
+ {t:'الفريق بيستأذنك في حاجات هما أصلًا مسؤولين عنها؟',h:'',o:[
+   ['نادر جدًا',0],
+   ['في حاجات محدودة',1],
+   ['كتير',2],
+   ['في كل حاجة تقريبًا',3]]},
+ {t:'المعرفة المهمة (العملاء، الأسعار، العلاقات) موجودة فين؟',h:'',o:[
+   ['موثّقة ومتاحة للفريق',0],
+   ['نص موثّق ونص في دماغي',1],
+   ['معظمها في دماغي أنا',2],
+   ['كلها في دماغي أنا بس',3]]},
+ {t:'لو غبت شهر كامل، الشركة هتـ...',h:'',o:[
+   ['تكمل أو تنمو زي ما هي',0],
+   ['تكمل بصعوبة',1],
+   ['ترجع لورا',2],
+   ['تدخل في أزمة',3]]},
+ {t:'آخر مرة أخدت إجازة حقيقية مقفول فيها الموبايل؟',h:'',o:[
+   ['بعمل كده عادي',0],
+   ['من كام شهر',1],
+   ['من أكتر من سنة',2],
+   ['مش فاكر / مستحيل دلوقتي',3]]}
+];
+
+var i=0,ans=new Array(Q.length).fill(null),workHours=60;
+
+function render(){
+  var q=Q[i];
+  $('qnum').textContent='Q'+(i+1)+' / '+Q.length;
+  $('fill').style.width=(i/(Q.length+1)*100)+'%';
+  $('qtext').textContent=q.t;
+  $('qhint').textContent=q.h||'';
+  var box=$('qopts');box.innerHTML='';
+  q.o.forEach(function(o,idx){
+    var b=document.createElement('button');
+    b.type='button';b.className='opt'+(ans[i]===idx?' sel':'');b.textContent=o[0];
+    b.addEventListener('click',function(){ans[i]=idx;setTimeout(next,140);});
+    box.appendChild(b);
+  });
+  $('back').className='back'+(i===0?' hidden':'');
+  $('qcard').classList.remove('fade');void $('qcard').offsetWidth;$('qcard').classList.add('fade');
+}
+function next(){ i<Q.length-1 ? (i++,render()) : goHours(); }
+function goHours(){ $('quiz').classList.add('hidden');$('hoursStep').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'}); }
+$('back').addEventListener('click',function(){if(i>0){i--;render();}});
+$('hback').addEventListener('click',function(){$('hoursStep').classList.add('hidden');$('quiz').classList.remove('hidden');render();});
+$('start').addEventListener('click',function(){$('intro').classList.add('hidden');$('quiz').classList.remove('hidden');render();});
+$('seeResult').addEventListener('click',function(){
+  var v=parseInt($('wh').value,10); if(isNaN(v)||v<20)v=20; if(v>100)v=100; workHours=v; finish();
+});
+
+/* النطاقات */
+var BANDS=[
+ {min:0,max:6, name:'مؤسس بيقود',    lat:'FOUNDER-LED', c:'#3FA76A',
+  diag:'إنت في المكان الصح: الشركة بتمشي بنظام مش بشخصك. اللي وصّلك هنا إن فيه ناس بتقرر، ومعرفة موثّقة، ومسؤوليات واضحة. شغلك دلوقتي مش تحافظ على ده — ده تبني عليه: تفضّي وقتك للرؤية والنمو بدل التشغيل.',
+  sym:['الفريق بياخد قرارات من غيرك','تقدر تسيب أسبوع من غير قلق','المعرفة مش محبوسة في دماغك'],
+  risk:'الخطر الوحيد هنا إنك ترجع تتدخّل في التفاصيل وقت الضغط — وترجّع الاعتماد اللي فككته. حافظ على المسافة.'},
+ {min:7,max:12, name:'اعتماد متوسط', lat:'MODERATE', c:'#C9A227',
+  diag:'الشركة مش بتقف من غيرك، بس لسه بترجعلك أكتر من اللازم. فيه نظام في حتت، وفراغ في حتت — والفراغ ده إنت بتسدّه بشخصك. ده بيشتغل دلوقتي، بس هو نفسه السقف اللي هيمنعك تكبر: النمو بقى مربوط بعدد ساعاتك.',
+  sym:['بتُستأذن في حاجات مش لازم توصلك','بعض الأدوار شغّالة والباقي مربوط بيك','بتشتغل ساعات أكتر من اللازم بمراحل'],
+  risk:'لو استمر سنة، الفريق هيتعوّد يستنّاك، وإنت هتتعوّد إنك تسدّ. والنتيجة إن الشركة تفضل في نفس الحجم — لأنها مش بتكبر أكبر من طاقتك إنت.'},
+ {min:13,max:18, name:'اعتماد عالي', lat:'HIGH', c:'#E74646',
+  diag:'إنت دلوقتي مركز الشركة — كل حاجة مهمة بتمرّ عليك. ده حسّك بالأمان، بس هو في الحقيقة أخطر نقطة في الشركة: لو حصلك أي حاجة، أو حبيت تسيب، مفيش نظام يمسك. وإنت بتدفع التمن كل يوم من وقتك وصحّتك.',
+  sym:['كل قرار مؤثر بيقف عندك','الفريق بينفّذ ومبيقرّرش','المعرفة والعلاقات كلها في دماغك','مبتعرفش تسيب أكتر من يومين'],
+  risk:'لو استمر سنة، أحسن ناس عندك هيسيبوا — لأن محدش بيكبر جنبك، وإنت هتفضل تشتغل أكتر عشان تطلع نفس الرقم. الشركة بتتحوّل لسجن مبنيّ بإيدك.'},
+ {min:19,max:24, name:'اختناق كامل', lat:'CRITICAL', c:'#B02020',
+  diag:'الشركة دي مش شركة — دي امتداد ليك. كل قرار وكل صفقة وكل مشكلة بترجعلك. ده مش دليل على شطارتك، ده دليل إن مفيش نظام غيرك. وده أخطر وضع ممكن مؤسس يكون فيه: أي غياب = توقف، وأي نمو = مستحيل، لأنك خلصت طاقة.',
+  sym:['الشركة بتقف تمامًا لو غبت','بتشتغل من غير حدود ومن غير إجازات','محدش في الفريق بيقرر خالص','كل المعرفة محبوسة فيك'],
+  risk:'الوضع ده مش بيكمّل. يا إما بتحترق وتنهار، يا إما بتوصل لسقف بيكسر الشركة في أول أزمة. فك الاعتماد ده مش رفاهية — ده مسألة بقاء.'}
+];
+
+function bandFor(s){ for(var k=0;k<BANDS.length;k++){ if(s>=BANDS[k].min&&s<=BANDS[k].max) return BANDS[k]; } return BANDS[BANDS.length-1]; }
+
+function finish(){
+  var total=0; ans.forEach(function(v,n){ total += Q[n].o[v][1]; });
+  var band=bandFor(total);
+  var ratio=total/24;
+  // تقدير الساعات الضايعة: نسبة من ساعات الشغل × معامل الاعتماد
+  var wasted=Math.round(workHours*ratio*0.5);
+  if(wasted<1 && total>0) wasted=1;
+
+  var msg='السلام عليكم 👋\nعملت تشخيص «شركتك معتمدة عليك قد إيه؟» وطلعت:\n\n'+
+          'درجة الاعتماد: '+total+' / 24 ('+band.name+')\n'+
+          'تقدير الساعات الضايعة: حوالي '+wasted+' ساعة في الأسبوع\n\nحابب أفهم إزاي أفكّ الاعتماد ده.';
+
+  $('hoursStep').classList.add('hidden');
+  var r=$('result');r.classList.remove('hidden');
+  var lostYear=wasted*48;
+  r.innerHTML='<div class="card fade">'+
+   '<div class="verdict">'+
+     '<div class="eyebrow">Your dependency score</div>'+
+     '<div class="score" style="color:'+band.c+'">'+total+'<small> / 24</small></div>'+
+     '<div class="bandname" style="color:'+band.c+'">'+band.name+'</div>'+
+     '<div class="bandlat">'+band.lat+'</div>'+
+     '<div class="gauge"><i data-w="'+Math.round(ratio*100)+'" style="background:'+band.c+'"></i></div>'+
+   '</div>'+
+   (wasted>0?('<div class="hoursbox"><div class="big">~'+wasted+' ساعة</div>'+
+     '<div class="lbl">بتضيع منك كل أسبوع في شغل مالوش لازمة يوصلك — يعني حوالي '+lostYear+' ساعة في السنة.</div></div>'):'')+
+   '<div class="panel"><h3>قراءة نتيجتك</h3><p>'+band.diag+'</p></div>'+
+   '<div class="panel"><h3>الأعراض اللي غالبًا شايفها</h3><ul><li>'+band.sym.join('</li><li>')+'</li></ul></div>'+
+   '<div class="panel"><h3>لو الوضع استمر سنة كمان</h3><p>'+band.risk+'</p></div>'+
+   '<div class="step1"><b>أول خطوة تبدأ بيها من بكرة</b>'+
+     'اكتب آخر ٥ قرارات رجعوا ليك الأسبوع اللي فات. جنب كل واحد اسأل: «مين المفروض ياخد ده لو كان فيه نظام؟» — ده أول تعريف لدور مش موجود عندك دلوقتي. أول اعتماد بيتفكّ من هنا، مش من التفويض العشوائي.</div>'+
+   '<div class="next"><h3>ده تشخيص… مش علاج</h3>'+
+     '<p>عرفت درجة اعتمادك وتكلفتها بالساعات. اللي بعد كده إنك تبني النظام اللي يخلّي الشركة تمشي من غيرك — وده بالظبط اللي بنشتغل عليه في الكامب على شركتك إنت، خطوة بخطوة.</p>'+
+     '<a class="btn" target="_blank" rel="noopener" href="'+wa(msg)+'">اتكلم معانا على واتساب</a></div>'+
+   '<div class="share">ابعت اللينك ده لشريكك أو لحد في فريق القيادة، وقارنوا نتايجكم — الفرق بين درجتك ودرجتهم بيكشف فين الاعتماد الحقيقي.</div>'+
+   '<div class="nav"><button class="back" id="again">↻ اعمل التشخيص تاني</button><span></span></div>'+
+  '</div>';
+
+  setTimeout(function(){var e=r.querySelector('.gauge i');if(e)e.style.width=e.dataset.w+'%';},120);
+  $('again').addEventListener('click',function(){location.reload()});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+})();
+</script>
+<!-- EMC capture hook -->
+<script>
+(function(){
+  var TOOL="founder-dependency";
+  var id={}; try{id=JSON.parse(sessionStorage.getItem("emc_lead")||"{}")}catch(e){}
+  var res=document.getElementById("result"); if(!res) return;
+  var fired=false;
+  function fire(){ if(fired) return; fired=true;
+    try{ if(window.EMCLeadCapture) EMCLeadCapture.save({
+      source:"tool_complete", tool:TOOL, toolTitle:document.title,
+      name:id.name||"", mobile:id.mobile||"", company:id.company||"",
+      email:id.email||"", leadId:id.leadId||""
+    }); }catch(_){}
+  }
+  var mo=new MutationObserver(function(){
+    if(!res.classList.contains("hidden") && res.children.length){ fire(); mo.disconnect(); }
+  });
+  try{ mo.observe(res,{attributes:true,childList:true}); }catch(e){}
+})();
+</script>
+</body>
+</html>

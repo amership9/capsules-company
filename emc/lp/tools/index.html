@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>مركز التشخيص · Executive Mastery Camp</title>
+<meta name="description" content="سبع أدوات تشخيص لقادة الشركات — اعرف موقعك بالظبط في دقائق." />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Archivo:wght@700;800&display=swap" rel="stylesheet" />
+<!-- Firebase (compat) — نفس نسخة الـ CRM -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="emc-capture.js"></script>
+<style>
+:root{
+  --navy:#003060;--deep:#001F3F;--red:#E74646;--mist:#EAEEF3;--slate:#547394;--gold:#C9A227;
+  --ar:'Cairo','Segoe UI',Tahoma,sans-serif;--lat:'Archivo','Cairo',sans-serif;
+}
+*{box-sizing:border-box}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:var(--ar);background:var(--deep);color:#fff;line-height:1.75;-webkit-font-smoothing:antialiased}
+.shell{max-width:960px;margin:0 auto;padding:26px 20px 90px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}
+.mark{font-family:var(--lat);font-weight:800;font-size:13px;letter-spacing:.14em;line-height:1.15}
+.mark span{color:var(--red)}
+.rule{width:40px;height:0;border-top:3px solid var(--red);position:relative;margin:0 0 16px}
+.rule::after{content:"";position:absolute;right:0;top:3px;width:12px;height:12px;border-right:3px solid var(--red);border-bottom:3px solid var(--red);transform:skewX(-18deg)}
+.eyebrow{font-family:var(--lat);font-size:11.5px;font-weight:800;letter-spacing:.24em;color:var(--red);margin-bottom:10px}
+h1{font-size:clamp(26px,4vw,40px);line-height:1.25;margin:0 0 14px}
+p.lead{color:#CFE0F1;font-size:clamp(15px,1.8vw,18px);margin:0 0 8px}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:26px 24px}
+.hero{margin-bottom:22px}
+/* gate form */
+.gate{margin-top:20px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13.5px;color:#9DBBDA;margin-bottom:7px;font-weight:600}
+.field label b{color:var(--red)}
+.field input{width:100%;font-family:var(--ar);font-size:16px;color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:14px 16px;outline:none;transition:border-color .15s}
+.field input:focus{border-color:var(--red)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.btn{border:0;font-family:var(--ar);font-weight:700;font-size:16px;padding:15px 30px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-block;transition:transform .15s,background .15s}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.red{background:var(--red);color:#fff}.red:hover{background:#d13636;transform:translateY(-1px)}
+.err{color:#ffb4b4;font-size:13.5px;margin-top:8px;min-height:18px}
+.note{color:#8FAECD;font-size:13px;margin-top:12px}
+/* tools */
+.tools{margin-top:30px}
+.tools.locked{opacity:.32;filter:grayscale(.55);pointer-events:none}
+.sec-head{display:flex;align-items:center;gap:12px;margin:0 0 6px}
+.sec-head h2{font-size:20px;margin:0}
+.count{font-family:var(--lat);font-size:12px;letter-spacing:.14em;color:#9DBBDA;border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 12px}
+.subtitle{color:#9DBBDA;font-size:14.5px;margin:0 0 20px}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.tgrid,.grid2{grid-template-columns:1fr}}
+.tool{display:flex;flex-direction:column;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:11px;padding:22px 20px;transition:border-color .15s,transform .15s,background .15s;text-decoration:none;color:#fff}
+.tool:hover{border-color:var(--red);transform:translateY(-3px);background:rgba(231,70,70,.08)}
+.tool .idx{font-family:var(--lat);font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--red);margin-bottom:10px}
+.tool h3{font-size:18px;margin:0 0 8px;line-height:1.4}
+.tool .measures{color:#CFE0F1;font-size:14px;margin:0 0 14px;flex:1}
+.tool .who{display:inline-block;font-size:12px;color:#9DBBDA;background:rgba(255,255,255,.06);border-radius:6px;padding:4px 11px;margin-bottom:16px;align-self:flex-start}
+.tool .go{font-weight:700;color:var(--red);font-size:14.5px}
+.tool .go::after{content:" ←"}
+.foot{margin-top:40px;color:#8FAECD;font-size:13.5px;line-height:2;text-align:center}
+.foot a{color:#9DBBDA}
+.wa{position:fixed;inset-inline-start:16px;bottom:16px;z-index:80;background:#25D366;color:#fff;border-radius:50px;padding:12px 20px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.3);font-size:15px}
+.wa:hover{background:#1eb85a}
+.fade{animation:f .34s ease}
+@keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top"><div class="mark">EXECUTIVE MASTERY<span> CAMP</span></div></div>
+
+  <!-- HERO + GATE -->
+  <div id="gateCard" class="card hero fade">
+    <div class="rule"></div>
+    <div class="eyebrow">Diagnostic Center · مركز التشخيص</div>
+    <h1>٧ أدوات. كل واحدة بتوريك حتة من الحقيقة اللي مش باين منها من جوّه.</h1>
+    <p class="lead">اعتمادك على نفسك، انحراف شركتك، اتفاق فريقك، جاهزيتك للتوسّع، ثقافتك الحقيقية، نظام تسويقك، ونمطك كقائد. كل أداة ٣–٤ دقايق، والنتيجة فورية.</p>
+    <p class="lead" style="margin-top:12px;font-size:15.5px;color:#9DBBDA">سيبلنا اسمك ورقمك، وافتح المركز كامل.</p>
+
+    <div class="gate">
+      <div class="field">
+        <label>الاسم <b>*</b></label>
+        <input id="f_name" type="text" autocomplete="name" placeholder="اسمك بالكامل" />
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>الموبايل / واتساب <b>*</b></label>
+          <input id="f_mobile" type="tel" inputmode="tel" autocomplete="tel" placeholder="010xxxxxxxx" />
+        </div>
+        <div class="field">
+          <label>اسم الشركة</label>
+          <input id="f_company" type="text" autocomplete="organization" placeholder="اختياري" />
+        </div>
+      </div>
+      <div class="field">
+        <label>الإيميل</label>
+        <input id="f_email" type="email" autocomplete="email" placeholder="اختياري" />
+      </div>
+      <button class="btn red" id="startBtn" style="width:100%">افتح المركز وابدأ التشخيص</button>
+      <div class="err" id="gateErr"></div>
+      <div class="note">🔒 بياناتك بتتسجّل عندنا بس — عشان نتابع معاك نتايجك. مش بتظهر لحد تاني.</div>
+    </div>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="tools locked" id="toolsWrap" aria-hidden="true">
+    <div class="sec-head"><h2 id="secGreet">الأدوات السبعة</h2><span class="count">7 / 7</span></div>
+    <p class="subtitle">اختار أي أداة تبدأ بيها — مفيش ترتيب إجباري. كل واحدة مستقلة، وممكن تعمل اللي تحبه.</p>
+    <div class="tgrid">
+
+      <a class="tool" href="founder-dependency.html">
+        <div class="idx">TOOL 01</div>
+        <h3>شركتك معتمدة عليك قد إيه؟</h3>
+        <p class="measures">درجة اعتماد من ٢٤ + تقدير الساعات الضايعة أسبوعيًا في شغل مش بتاعك.</p>
+        <span class="who">للمؤسس</span>
+        <span class="go">ابدأ</span>
+      </a>
+
+      <a class="tool" href="drift.html">
+        <div class="idx">TOOL 02</div>
+        <h3>شركتك بتنحرف ناحية إيه؟</h3>
+        <p class="measures">نوع الانحراف: فوضى / سيطرة / راحة — والخطأ القيادي اللي بيغذّيه.</p>
+        <span class="who">للمؤسس</span>
+        <span class="go">ابدأ</span>
+      </a>
+
+      <a class="tool" href="alignment.html">
+        <div class="idx">TOOL 03</div>
+        <h3>اتفاق فريق القيادة</h3>
+        <p class="measures">الفجوة بينك وبين فريقك بالنسبة — فين متفقين وفين لأ.</p>
+        <span class="who">للشركة · B2B</span>
+        <span class="go">ابدأ</span>
+      </a>
+
+      <a class="tool" href="scale.html">
+        <div class="idx">TOOL 04</div>
+        <h3>جاهز تفتح فرع تاني؟</h3>
+        <p class="measures">٥ بوابات جاهزية — وأضعف بوابة هي الحُكم النهائي.</p>
+        <span class="who">لصاحب نية توسّع</span>
+        <span class="go">ابدأ</span>
+      </a>
+
+      <a class="tool" href="culture.html">
+        <div class="idx">TOOL 05</div>
+        <h3>ثقافة شركتك الحقيقية</h3>
+        <p class="measures">خريطة ٢×٢: خوف / ناضجة / ودّية / نجاة — فين ثقافتكم واقعة.</p>
+        <span class="who">للشركة</span>
+        <span class="go">ابدأ</span>
+      </a>
+
+      <a class="tool" href="marketing.html">
+        <div class="idx">TOOL 06</div>
+        <h3>نظام التسويق عندك بكام في المية؟</h3>
+        <p class="measures">٦ مجالات، كل واحد من ١٠٠٪ — فين نظامك قوي وفين مكسور.</p>
+        <span class="who">للتسويق</span>
+        <span class="go">ابدأ</span>
+      </a>
+
+      <a class="tool" href="visionary.html">
+        <div class="idx">TOOL 07</div>
+        <h3>صاحب رؤية ولا قائد منفّذ؟</h3>
+        <p class="measures">نمطك القيادي + تقرير كامل قابل للطباعة تشاركه مع شريكك.</p>
+        <span class="who">للمؤسس + الشراكة</span>
+        <span class="go">ابدأ</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="foot">
+    Executive Mastery Camp — الدقي، القاهرة<br>
+    <a target="_blank" rel="noopener" href="https://wa.me/201002248800">واتساب: 0100 224 8800</a>
+  </div>
+</div>
+
+<a class="wa" target="_blank" rel="noopener" href="https://wa.me/201002248800?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%2C%20%D8%AD%D8%A7%D8%A8%D8%A8%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A3%D9%83%D8%AA%D8%B1%20%D8%B9%D9%86%20%D9%85%D8%B1%D9%83%D8%B2%20%D8%A7%D9%84%D8%AA%D8%B4%D8%AE%D9%8A%D8%B5">واتساب</a>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var LKEY='emc_lead';
+
+  // لو المستخدم عمل البوابة قبل كده في نفس الجلسة → افتح على طول
+  try{
+    var prev=JSON.parse(sessionStorage.getItem(LKEY)||'null');
+    if(prev && prev.name){ unlock(prev,true); }
+  }catch(e){}
+
+  function normPhone(v){ return (v||'').replace(/[^\d+]/g,''); }
+
+  function unlock(lead, silent){
+    var w=$('toolsWrap');
+    w.classList.remove('locked'); w.setAttribute('aria-hidden','false');
+    if(lead && lead.name){
+      var fn=(lead.name.trim().split(/\s+/)[0])||'';
+      $('secGreet').textContent = fn ? ('يا '+fn+'، اتفضّل — دي أدواتك') : 'الأدوات السبعة';
+    }
+    if(!silent){
+      $('gateCard').classList.add('hidden');
+      w.classList.add('fade');
+      w.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  }
+
+  $('startBtn').addEventListener('click', function(){
+    var name=$('f_name').value.trim();
+    var mobile=normPhone($('f_mobile').value);
+    var company=$('f_company').value.trim();
+    var email=$('f_email').value.trim();
+    var err=$('gateErr'); err.textContent='';
+
+    if(name.length<2){ err.textContent='اكتب اسمك الأول.'; $('f_name').focus(); return; }
+    if(mobile.replace(/\D/g,'').length<8){ err.textContent='اكتب رقم موبايل صح.'; $('f_mobile').focus(); return; }
+
+    var lead={ name:name, mobile:mobile, company:company, email:email };
+
+    // خزّن محليًا فورًا (عشان الأدوات تقرا الهوية) — من غير انتظار
+    try{ sessionStorage.setItem(LKEY, JSON.stringify(lead)); }catch(e){}
+
+    // افتح الأدوات فورًا — مننتظرش Firebase
+    unlock(lead,false);
+
+    // سجّل في الـ CRM في الخلفية (fail-safe) — ولو رجع id ضيفه للهوية
+    try{
+      var p = window.EMCLeadCapture ? EMCLeadCapture.save(Object.assign({source:'hub_gate'}, lead)) : null;
+      if(p && p.then){
+        p.then(function(id){
+          if(id){ lead.leadId=id; try{ sessionStorage.setItem(LKEY, JSON.stringify(lead)); }catch(e){} }
+        });
+      }
+    }catch(e){}
+  });
+})();
+</script>
+</body>
+</html>

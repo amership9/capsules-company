@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ar-EG" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>جاهز تفتح فرع تاني؟ — Executive Mastery Camp</title>
+<meta name="description" content="خمس بوابات لازم تعدّيها قبل ما تكرّر أي حاجة. جاهزيتك = أضعف بوابة، مش المتوسط. ١٢ سؤال في ٤ دقايق.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Archivo:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#003060;--deep:#001F3F;--red:#E74646;--slate:#547394;--gold:#C9A227;--ok:#2E8B57;--warn:#E08A2E;
+--ar:'Cairo','Segoe UI',Tahoma,sans-serif;--lat:'Archivo','Cairo',sans-serif}
+*{box-sizing:border-box}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:var(--ar);background:var(--deep);color:#fff;line-height:1.75;-webkit-font-smoothing:antialiased}
+.shell{max-width:860px;margin:0 auto;padding:0 18px 70px}
+.top{display:flex;padding:20px 0 8px}
+.mark{font-family:var(--lat);font-weight:800;font-size:13px;letter-spacing:.14em;line-height:1.15}
+.mark span{display:block;font-size:9px;color:#9DBBDA;letter-spacing:.32em}
+.rule{width:40px;height:0;border-top:3px solid var(--red);position:relative;margin:0 0 16px}
+.rule::after{content:"";position:absolute;right:0;top:3px;width:12px;height:12px;border-right:3px solid var(--red);border-bottom:3px solid var(--red);transform:skewX(-18deg)}
+.bar{height:4px;background:rgba(255,255,255,.14);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--red);width:0;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.meta{display:flex;justify-content:space-between;font-size:12.5px;color:#9DBBDA;margin-top:8px;font-family:var(--lat);letter-spacing:.1em}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:clamp(22px,4vw,40px);margin-top:22px}
+h1{font-size:clamp(26px,5vw,42px);font-weight:900;letter-spacing:-.8px;margin:0 0 14px;line-height:1.25}
+h2{font-size:clamp(19px,3vw,25px);font-weight:900;margin:0 0 6px;line-height:1.45}
+p.lead{color:#CFE0F1;font-size:clamp(15px,1.8vw,18px);margin:0 0 8px}
+.eyebrow{font-family:var(--lat);font-size:11.5px;font-weight:800;letter-spacing:.24em;color:var(--red);margin-bottom:10px}
+.opts{display:grid;gap:10px;margin-top:20px}
+.opt{display:block;width:100%;text-align:start;font-family:var(--ar);font-size:16px;color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:14px 18px;cursor:pointer;transition:background .15s,border-color .15s,transform .12s}
+.opt:hover{background:rgba(231,70,70,.16);border-color:var(--red);transform:translateX(-3px)}
+.opt:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.opt.sel{background:rgba(231,70,70,.22);border-color:var(--red)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px;flex-wrap:wrap}
+.back{background:none;border:0;color:#9DBBDA;font-family:var(--ar);font-size:15px;cursor:pointer;padding:8px 0}
+.back:hover{color:#fff}
+.btn{border:0;font-family:var(--ar);font-weight:700;font-size:16px;padding:14px 28px;border-radius:5px;cursor:pointer;text-decoration:none;display:inline-block;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.red{background:var(--red);color:#fff}.red:hover{background:#d13636}
+.note{font-size:13.5px;color:#8FAECD;margin-top:16px}
+.hidden{display:none}
+
+/* gates chain */
+.verdict{text-align:center;padding:4px 0 22px;border-bottom:1px solid rgba(255,255,255,.14)}
+.vhead{font-size:clamp(28px,6.4vw,46px);font-weight:900;line-height:1.2;letter-spacing:-1.2px;margin:8px 0 6px}
+.chain{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:26px 0 6px}
+.g{border-radius:7px;padding:14px 8px;text-align:center;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);position:relative}
+.g b{display:block;font-family:var(--lat);font-size:11px;letter-spacing:.14em;color:#9DBBDA;margin-bottom:6px}
+.g .ic{font-size:20px;line-height:1;margin-bottom:6px}
+.g small{display:block;font-size:11.5px;color:#CFE0F1;line-height:1.45}
+.g.pass{border-color:rgba(46,139,87,.7);background:rgba(46,139,87,.16)}
+.g.warn{border-color:rgba(224,138,46,.7);background:rgba(224,138,46,.14)}
+.g.fail{border-color:var(--red);background:rgba(231,70,70,.2)}
+.g.block::after{content:"";position:absolute;inset:-3px;border:2px solid var(--red);border-radius:9px}
+@media(max-width:640px){.chain{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:380px){.chain{grid-template-columns:1fr}}
+
+.gatelist{margin-top:26px}
+.gate{border-top:1px solid rgba(255,255,255,.12);padding:16px 0}
+.gate .h{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.gate .h b{font-size:16.5px}
+.chip{font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:99px;white-space:nowrap}
+.chip.pass{background:rgba(46,139,87,.25);color:#8FE0B0}
+.chip.warn{background:rgba(224,138,46,.25);color:#F3C68A}
+.chip.fail{background:rgba(231,70,70,.28);color:#FFB3B3}
+.gate p{margin:8px 0 0;color:#9DBBDA;font-size:14.5px}
+.panel{background:rgba(255,255,255,.06);border-radius:8px;padding:22px;margin-top:20px}
+.panel h3{margin:0 0 10px;font-size:19px}
+.panel p{margin:0 0 10px;color:#CFE0F1;font-size:15.5px}
+.panel p:last-child{margin-bottom:0}
+.panel ol{margin:6px 0 0;padding-inline-start:20px;color:#CFE0F1;font-size:15.5px}
+.panel ol li{margin-bottom:7px}
+.step1{background:rgba(201,162,39,.14);border-inline-start:3px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:14px}
+.step1 b{display:block;margin-bottom:6px}
+.next{background:var(--red);border-radius:8px;padding:26px;margin-top:22px}
+.next h3{margin:0 0 8px;font-size:21px}
+.next p{margin:0 0 18px;font-size:15.5px;color:#FFE6E6}
+.next .btn{background:#fff;color:var(--navy)}
+.share{border:1px dashed rgba(255,255,255,.28);border-radius:8px;padding:20px;margin-top:20px;font-size:15px;color:#CFE0F1}
+.foot{text-align:center;color:#7f9fc0;font-size:13px;margin-top:34px}
+.foot a{color:#9DBBDA}
+.wa{position:fixed;inset-inline-start:16px;bottom:16px;z-index:80;background:#25D366;color:#fff;border-radius:50px;padding:12px 20px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.3);font-size:15px}
+.wa:hover{background:#1eb85a}
+.fade{animation:f .32s ease}
+@keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+<!-- EMC lead capture (fail-safe) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="emc-capture.js"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="top"><div class="mark">EXECUTIVE MASTERY<span>CAMP</span></div></div>
+
+  <div id="intro" class="card fade">
+    <div class="rule"></div>
+    <div class="eyebrow">Scale readiness</div>
+    <h1>جاهز تفتح فرع تاني؟</h1>
+    <p class="lead">التوسّع مش بيخلق نظام — بيكشفه. أي خلل موجود عندك دلوقتي، التوسّع بيضربه في اتنين، مش بيداويه.</p>
+    <p class="lead" style="margin-top:14px">فيه <b>٥ بوابات</b> لازم تعدّيها قبل ما تكرّر أي حاجة. والقاعدة هنا مختلفة عن أي تقييم تاني: <b>جاهزيتك = أضعف بوابة عندك، مش المتوسط.</b> بوابة واحدة مقفولة كفاية توقّف التوسّع كله.</p>
+    <div class="nav" style="justify-content:flex-start"><button class="btn red" id="start">ابدأ التقييم</button></div>
+    <div class="note">١٢ سؤال · ٤ دقايق · مفيش بيانات مطلوبة</div>
+  </div>
+
+  <div id="quiz" class="hidden">
+    <div class="bar"><i id="fill"></i></div>
+    <div class="meta"><span id="qnum"></span><span id="qgate"></span></div>
+    <div class="card fade" id="qcard">
+      <h2 id="qtext"></h2>
+      <div class="opts" id="qopts"></div>
+      <div class="nav"><button class="back hidden" id="back">← رجوع</button><span></span></div>
+    </div>
+  </div>
+
+  <div id="result" class="hidden"></div>
+  <div class="foot">Executive Mastery Camp — الدقي، القاهرة<br>
+    <a target="_blank" rel="noopener" href="https://wa.me/201002248800">واتساب: 0100 224 8800</a></div>
+</div>
+
+<a class="wa" target="_blank" rel="noopener" href="https://wa.me/201002248800?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%2C%20%D8%AD%D8%A7%D8%A8%D8%A8%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A3%D9%83%D8%AA%D8%B1">واتساب</a>
+
+<script>
+(function(){
+var WA='201002248800';
+function wa(m){return 'https://wa.me/'+WA+'?text='+encodeURIComponent(m);}
+var $=function(i){return document.getElementById(i)};
+
+var G=[
+ {n:'الشركة بتمشي من غيرك',lat:'GATE 1',ic:'🔓',
+  why:'التوسّع بيقسّم وقتك على اتنين. لو الوحدة الحالية محتاجاك كل يوم، الوحدة الجديدة هتاخد نصك — والاتنين هيبقوا نص شغّالين.',
+  fail:'ده أخطر سبب لفشل الفرع التاني في السوق المصري. المؤسس بيروح يفتح الجديد، فالقديم بيقع؛ يرجع يمسك القديم، فالجديد بيقع.',
+  fix:'قبل أي توسّع: سيب الوحدة الحالية أسبوعين كاملين من غير تدخّل، وسجّل كل حاجة وقفت. القائمة دي هي اللي لازم تتبني قبل ما تصرف جنيه.'},
+ {n:'العمليات مكتوبة وقابلة للنسخ',lat:'GATE 2',ic:'📄',
+  why:'التوسّع في جوهره عملية نسخ. اللي مش مكتوب مش بيتنسخ — بيتنقل غلط أو ما بيتنقلش أصلًا.',
+  fail:'من غير عمليات موثّقة، الوحدة الجديدة هتخترع طريقتها الخاصة. وبعد سنة هيبقى عندك شركتين بجودة مختلفة وباسم واحد.',
+  fix:'اكتب أهم ٥ عمليات بس — اللي لو اتعملت غلط العميل هيلاحظ. مش دليل عمليات كامل، خمس ورقات يقدر حد جديد يمشي عليها.'},
+ {n:'الأرقام بتوصلك بدري',lat:'GATE 3',ic:'📊',
+  why:'الوحدة اللي إنت مش فيها بتفشل في صمت. من غير رقم أسبوعي، بتعرف بالمشكلة بعد ما تكبر بشهرين.',
+  fail:'المسافة بتخفي المشاكل. الفرع الجديد ممكن يخسر ٦ شهور قبل ما الرقم يوصلك — والوقت ده هو الفرق بين تصحيح وقفل.',
+  fix:'حدّد ٥ أرقام أسبوعية للوحدة الحالية وشغّلها شهرين قبل التوسّع. لو ما نفعتش عليك وإنت موجود، مش هتنفع عن بُعد.'},
+ {n:'فيه حد جاهز يقود الوحدة الجديدة',lat:'GATE 4',ic:'👤',
+  why:'الوحدة الجديدة محتاجة حد بيقرر فيها، مش حد بينفّذ تعليماتك. والقائد ده بيتبني قبل التوسّع بشهور مش بعده.',
+  fail:'أشيع خطأ: «هوظّف مدير للفرع الجديد». الشخص الجاي من برّا مش عارف طريقتكم ولا معاييركم، وبيتعلّم على حساب الوحدة الجديدة نفسها.',
+  fix:'اختار حد من فريقك الحالي دلوقتي، وسيبله الوحدة الحالية بالكامل ٣ شهور وإنت موجود بتتفرج. لو نجح — إنت جاهز. لو لأ — إنت وفّرت على نفسك كارثة.'},
+ {n:'الوحدة الحالية بتكسب فعلًا',lat:'GATE 5',ic:'💰',
+  why:'التوسّع بيضاعف النموذج زي ما هو. لو الوحدة الحالية بتكسب بالعافية، التانية هتخسر — لأنها هتشيل تكاليف تأسيس فوق نفس الهامش.',
+  fail:'مضاعفة نموذج غير مربح مش نمو، ده تسريع للخسارة. وأخطر حاجة إن الإيراد بيزيد فالإحساس بيبقى إيجابي وإنت بتخسر أكتر.',
+  fix:'اطلع رقم واحد بالظبط: ربح الوحدة الحالية بعد كل التكاليف، آخر ٦ شهور. لو مش عارفه بدقة، ده هو مشروعك الجاي — مش الفرع.'}
+];
+
+var Q=[
+ {g:0,t:'لو سبت الشركة شهر كامل من غير تليفون — هتلاقي إيه لما ترجع؟',o:['كارثة — الشغل هيبقى واقف','مشاكل كتير محتاجة شهر أصلّحها','مشاكل بسيطة متوقعة','ماشية عادي وفيه حاجات اتنفّذت']},
+ {g:0,t:'كام قرار في اليوم بيستنى موافقتك؟',o:['كل القرارات تقريبًا','معظمها','القرارات الكبيرة بس','نادرًا — بيرجعولي في المصيري فقط']},
+ {g:1,t:'العمليات الأساسية مكتوبة بشكل يخلّي حد جديد يمشي عليها؟',o:['مفيش حاجة مكتوبة','فيه ملاحظات متفرقة','مكتوبة بس قديمة أو ناقصة','مكتوبة ومُحدّثة وبتتستخدم فعلًا']},
+ {g:1,t:'لو أهم موظف عندك مشي بكرة — شغله موثّق؟',o:['لأ، الشغل كله في دماغه','فيه حاجات بسيطة','جزء كبير موثّق','موثّق بالكامل وفيه حد تاني يعرفه']},
+ {g:2,t:'بتعرف إن فيه مشكلة إمتى؟',o:['لما العميل يشتكي','لما الرقم الشهري يبان','خلال أسبوع أو اتنين','من مؤشر أسبوعي قبل ما تكبر']},
+ {g:2,t:'عندك أرقام أسبوعية لكل قسم أو وحدة؟',o:['مفيش','رقم الإيراد بس','بعض الأقسام','لكل وحدة مؤشراتها وبتتراجع أسبوعيًا']},
+ {g:3,t:'مين هيقود الوحدة الجديدة؟',o:['أنا','هوظّف حد من برّا','فيه حد عندي بيتجهّز','فيه حد جاهز واتجرّب فعلًا']},
+ {g:3,t:'الشخص ده اشتغل قد إيه بمسؤولية كاملة من غير تدخّل منك؟',o:['ولا مرة','أيام متفرقة','أسابيع','شهور، وبنتايج كويسة']},
+ {g:4,t:'الوحدة الحالية بتحقق ربح ثابت آخر ٦ شهور؟',o:['لأ، بنخسر أو بنتعادل','متذبذب من شهر للتاني','ربح بسيط بس ثابت','ربح واضح وثابت']},
+ {g:4,t:'عارف تكلفة اكتساب العميل وقيمته على عمره بالأرقام؟',o:['مش عارفهم','عندي تقدير تقريبي','عارف واحد منهم بدقة','عارف الاتنين وبتابعهم']},
+ {g:4,t:'التوسّع هيتموّل منين؟',o:['قرض أو مستثمر ولسه مش متأكد','فلوس شخصية','أرباح الشركة بس هتوقّف السيولة','أرباح الشركة من غير ما تأثر على التشغيل']},
+ {g:0,t:'لو التوسّع اتأجّل ٦ شهور — إيه اللي هيحصل؟',o:['هخسر فرصة عمري','هخسر ميزة السبق','هتأخر بس مفيش خسارة كبيرة','مفيش مشكلة — الوحدة الحالية شغّالة كويس']}
+];
+
+var i=0,ans=new Array(Q.length).fill(null);
+function render(){
+  var q=Q[i];
+  $('qnum').textContent='Q'+(i+1)+' / '+Q.length;
+  $('qgate').textContent=G[q.g].lat;
+  $('fill').style.width=(i/Q.length*100)+'%';
+  $('qtext').textContent=q.t;
+  var b=$('qopts');b.innerHTML='';
+  q.o.forEach(function(o,idx){
+    var el=document.createElement('button');el.type='button';
+    el.className='opt'+(ans[i]===idx?' sel':'');el.textContent=o;
+    el.addEventListener('click',function(){ans[i]=idx;setTimeout(next,130)});
+    b.appendChild(el);
+  });
+  $('back').className='back'+(i===0?' hidden':'');
+  $('qcard').classList.remove('fade');void $('qcard').offsetWidth;$('qcard').classList.add('fade');
+}
+function next(){ i<Q.length-1 ? (i++,render()) : finish(); }
+$('back').addEventListener('click',function(){if(i>0){i--;render()}});
+$('start').addEventListener('click',function(){$('intro').classList.add('hidden');$('quiz').classList.remove('hidden');render()});
+
+function finish(){
+  $('fill').style.width='100%';$('quiz').classList.add('hidden');
+  var sum=[0,0,0,0,0],cnt=[0,0,0,0,0];
+  Q.forEach(function(q,n){sum[q.g]+=ans[n];cnt[q.g]++});
+  var pct=sum.map(function(s,n){return s/(cnt[n]*3)});   /* 0..1 per gate */
+  var state=pct.map(function(p){return p>=0.7?'pass':p>=0.45?'warn':'fail'});
+  var weak=0;pct.forEach(function(p,n){if(p<pct[weak])weak=n});
+  var fails=state.filter(function(s){return s==='fail'}).length;
+  var warns=state.filter(function(s){return s==='warn'}).length;
+
+  var head,color,body;
+  if(fails>0){color='#E74646';
+    head=fails===1?'بوابة واحدة مقفولة':fails+' بوابات مقفولة';
+    body='التوسّع دلوقتي مش قرار جريء — ده قرار مكلّف. البوابة المقفولة مش هتتفتح بالتوسّع، هي هي اللي هتكسر التوسّع. والتكلفة مش بس فلوس الوحدة الجديدة — التكلفة إن الوحدة الحالية هتتأثر كمان.';}
+  else if(warns>0){color='#E08A2E';
+    head='لسه بدري — بس قريّب';
+    body='مفيش بوابة مقفولة تمامًا، بس فيه '+warns+' محتاجين شغل قبل ما تتحرك. المسافة بينك وبين الجاهزية هنا بتتقاس بشهور مش بسنين — لو اشتغلت على الترتيب اللي تحت.';}
+  else{color='#2E8B57';
+    head='جاهز — بشروط';
+    body='البوابات الخمسة مفتوحة. ده مش معناه إن التوسّع هينجح تلقائي، معناه إن الأساس اللي بيتبنى عليه موجود. اللي فاضل هو إنك تقرر التوقيت والتمويل، وتحافظ على الوحدة الحالية وإنت بتبني الجديدة.';}
+
+  var chain=G.map(function(g,n){
+    var s=state[n],ic=s==='pass'?'✓':s==='warn'?'!':'✕';
+    return '<div class="g '+s+(n===weak&&s!=='pass'?' block':'')+'"><b>'+g.lat+'</b><div class="ic">'+ic+'</div><small>'+g.n+'</small></div>';
+  }).join('');
+
+  var list=G.map(function(g,n){
+    var s=state[n],lbl=s==='pass'?'مفتوحة':s==='warn'?'محتاجة شغل':'مقفولة';
+    return '<div class="gate"><div class="h"><b>'+g.lat+' · '+g.n+'</b><span class="chip '+s+'">'+lbl+'</span></div>'+
+           '<p>'+g.why+'</p></div>';
+  }).join('');
+
+  /* closing order: fails first by severity, then warns */
+  var order=[0,1,2,3,4].filter(function(n){return state[n]!=='pass'}).sort(function(a,b){return pct[a]-pct[b]});
+  var orderHtml=order.length?('<ol><li>'+order.map(function(n){return '<b>'+G[n].lat+'</b> — '+G[n].n}).join('</li><li>')+'</li></ol>')
+    :'<p>مفيش بوابة محتاجة قفل. ركّز على حماية الوحدة الحالية وإنت بتبني الجديدة.</p>';
+
+  var msg='السلام عليكم 👋\nعملت تقييم «جاهز تفتح فرع تاني؟» وطلعت:\n\n'+
+          'النتيجة: '+head+'\n'+
+          'أضعف بوابة: '+G[weak].lat+' — '+G[weak].n+'\n\nحابب أفهم أكتر.';
+
+  var r=$('result');r.classList.remove('hidden');
+  r.innerHTML='<div class="card fade">'+
+   '<div class="verdict"><div class="eyebrow">Verdict</div>'+
+     '<div class="vhead" style="color:'+color+'">'+head+'</div>'+
+     '<p class="lead" style="font-size:14.5px;color:#8FAECD;margin:0">جاهزيتك = أضعف بوابة، مش المتوسط</p></div>'+
+   '<div class="chain">'+chain+'</div>'+
+   '<div class="panel"><h3>يعني إيه؟</h3><p>'+body+'</p></div>'+
+   '<div class="gatelist">'+list+'</div>'+
+   '<div class="panel" style="margin-top:26px"><h3>أضعف بوابة عندك: '+G[weak].n+'</h3>'+
+     '<p>'+G[weak].fail+'</p>'+
+     '<div class="step1"><b>أول خطوة عملية</b>'+G[weak].fix+'</div></div>'+
+   '<div class="panel"><h3>الترتيب اللي لازم تقفل بيه البوابات</h3>'+
+     '<p style="font-size:14.5px">من الأضعف للأقوى. ماتشتغلش عليهم بالتوازي — واحدة ورا التانية.</p>'+orderHtml+'</div>'+
+   '<div class="next"><h3>البوابات دي مش بتتفتح بقرار</h3>'+
+     '<p>بتتفتح بنظام إدارة: أدوار مكتوبة، عمليات موثّقة، أرقام أسبوعية، وقائد متجهّز. ده بالظبط اللي بتخرج بيه من الكامب — على شركتك إنت مش على حالة عامة.</p>'+
+     '<a class="btn" target="_blank" rel="noopener" href="'+wa(msg)+'">اتكلم معانا على واتساب</a></div>'+
+   '<div class="share">ابعت اللينك ده لشريكك أو للي هيقود الوحدة الجديدة، وقارنوا إجاباتكم. لو اختلفتوا على بوابة واحدة — دي المكالمة اللي لازم تحصل قبل أي قرار توسّع.</div>'+
+   '<div class="nav"><button class="back" id="again">↻ اعمل التقييم تاني</button><span></span></div></div>';
+  $('again').addEventListener('click',function(){location.reload()});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+})();
+</script>
+<!-- EMC capture hook -->
+<script>
+(function(){
+  var TOOL="scale";
+  var id={}; try{id=JSON.parse(sessionStorage.getItem("emc_lead")||"{}")}catch(e){}
+  var res=document.getElementById("result"); if(!res) return;
+  var fired=false;
+  function fire(){ if(fired) return; fired=true;
+    try{ if(window.EMCLeadCapture) EMCLeadCapture.save({
+      source:"tool_complete", tool:TOOL, toolTitle:document.title,
+      name:id.name||"", mobile:id.mobile||"", company:id.company||"",
+      email:id.email||"", leadId:id.leadId||""
+    }); }catch(_){}
+  }
+  var mo=new MutationObserver(function(){
+    if(!res.classList.contains("hidden") && res.children.length){ fire(); mo.disconnect(); }
+  });
+  try{ mo.observe(res,{attributes:true,childList:true}); }catch(e){}
+})();
+</script>
+</body>
+</html>

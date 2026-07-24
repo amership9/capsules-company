@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ═══════════════════════════════════════════════════════════
+    // 🔑 الأدوات العامة (مركز التشخيص) بتكتب هنا فقط.
+    // create-only: أي حد يقدر يضيف lead، بس محدش يقدر يقرا
+    // قاعدة البيانات من المتصفح. ده الفرق بين "تجربة مفتوحة"
+    // و"لينك بتبعته لـ 40 شخص وتحطه في إعلان".
+    // ═══════════════════════════════════════════════════════════
+    match /emc_leads/{doc} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+
+    // ───── EMC Collections — مرحلة الاختبار (LocalAuth) ─────
+    match /emc_contacts/{doc}      { allow read, write: if true; }
+    match /emc_events/{doc}        { allow read, write: if true; }
+    match /emc_segments/{doc}      { allow read, write: if true; }
+    match /emc_touchpoints/{doc}   { allow read, write: if true; }
+    match /emc_cohorts/{doc}       { allow read, write: if true; }
+    match /emc_templates/{doc}     { allow read, write: if true; }
+    match /emc_admins/{doc}        { allow read, write: if true; }
+    match /emc_opportunities/{doc} { allow read, write: if true; }
+    match /emc_automations/{doc}   { allow read, write: if true; }
+    match /emc_referrals/{doc}     { allow read, write: if true; }
+    match /emc_settings/{doc}      { allow read, write: if true; }
+
+    // ───── Reignite ─────
+    match /reignite_responses/{doc}   { allow read, write: if true; }
+    match /reignite_drafts/{doc}      { allow read, write: if true; }
+    match /wb_workshop/{document=**}   { allow read, write: if true; }
+    match /reignite_soil/{doc}         { allow read, write: if true; }
+    match /reignite_soil_drafts/{doc}  { allow read, write: if true; }
+  }
+}

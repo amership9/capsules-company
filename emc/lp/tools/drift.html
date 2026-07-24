@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar-EG" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>شركتك بتنحرف ناحية إيه؟ — Executive Mastery Camp</title>
+<meta name="description" content="كل شركة بتنحرف ناحية واحدة من تلاتة: فوضى، سيطرة، أو راحة. ١١ سؤال بيحددوا انحرافك، تكلفته، والآلية الناقصة عندك.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Archivo:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#003060;--deep:#001F3F;--red:#E74646;--mist:#EAEEF3;--slate:#547394;
+  --chaos:#E74646;--control:#3D6FB5;--comfort:#C9A227;
+  --ar:'Cairo','Segoe UI',Tahoma,sans-serif;--lat:'Archivo','Cairo',sans-serif;
+}
+*{box-sizing:border-box}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:var(--ar);background:var(--deep);color:#fff;line-height:1.75;-webkit-font-smoothing:antialiased}
+.shell{max-width:840px;margin:0 auto;padding:0 18px 70px}
+.top{display:flex;align-items:center;padding:20px 0 8px}
+.mark{font-family:var(--lat);font-weight:800;font-size:13px;letter-spacing:.14em;line-height:1.15}
+.mark span{display:block;font-size:9px;color:#9DBBDA;letter-spacing:.32em}
+.rule{width:40px;height:0;border-top:3px solid var(--red);position:relative;margin:0 0 16px}
+.rule::after{content:"";position:absolute;right:0;top:3px;width:12px;height:12px;border-right:3px solid var(--red);border-bottom:3px solid var(--red);transform:skewX(-18deg)}
+.bar{height:4px;background:rgba(255,255,255,.14);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--red);width:0;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.meta{display:flex;justify-content:space-between;font-size:12.5px;color:#9DBBDA;margin-top:8px;font-family:var(--lat);letter-spacing:.1em}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:clamp(22px,4vw,40px);margin-top:22px}
+h1{font-size:clamp(26px,5vw,42px);font-weight:900;letter-spacing:-.8px;margin:0 0 14px;line-height:1.25}
+h2{font-size:clamp(19px,3vw,26px);font-weight:900;margin:0 0 6px;line-height:1.45}
+p.lead{color:#CFE0F1;font-size:clamp(15px,1.8vw,18px);margin:0 0 8px}
+.eyebrow{font-family:var(--lat);font-size:11.5px;font-weight:800;letter-spacing:.24em;color:var(--red);margin-bottom:10px}
+.opts{display:grid;gap:10px;margin-top:20px}
+.opt{display:block;width:100%;text-align:start;font-family:var(--ar);font-size:16px;color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:15px 18px;cursor:pointer;transition:background .15s,border-color .15s,transform .12s}
+.opt:hover{background:rgba(231,70,70,.16);border-color:var(--red);transform:translateX(-3px)}
+.opt:focus-visible{outline:3px solid #C9A227;outline-offset:2px}
+.opt.sel{background:rgba(231,70,70,.22);border-color:var(--red)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px}
+.back{background:none;border:0;color:#9DBBDA;font-family:var(--ar);font-size:15px;cursor:pointer;padding:8px 0}
+.back:hover{color:#fff}
+.btn{border:0;font-family:var(--ar);font-weight:700;font-size:16px;padding:15px 30px;border-radius:5px;cursor:pointer;text-decoration:none;display:inline-block;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn:focus-visible{outline:3px solid #C9A227;outline-offset:3px}
+.red{background:var(--red);color:#fff}.red:hover{background:#d13636}
+.note{font-size:13.5px;color:#8FAECD;margin-top:16px}
+.hidden{display:none}
+
+/* result */
+.verdict{text-align:center;padding:6px 0 24px;border-bottom:1px solid rgba(255,255,255,.14)}
+.typename{font-size:clamp(34px,8vw,58px);font-weight:900;line-height:1.15;letter-spacing:-1.5px;margin:10px 0 4px}
+.typelat{font-family:var(--lat);font-size:13px;letter-spacing:.3em;color:#9DBBDA}
+.mix{margin:26px 0 4px}
+.m{margin-bottom:14px}
+.m .lbl{display:flex;justify-content:space-between;font-size:14.5px;margin-bottom:6px}
+.m .lbl span{color:#9DBBDA;font-family:var(--lat);font-size:13px}
+.track{height:10px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden}
+.track i{display:block;height:100%;width:0;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.panel{background:rgba(255,255,255,.06);border-radius:8px;padding:22px;margin-top:20px}
+.panel h3{margin:0 0 10px;font-size:19px}
+.panel p{margin:0 0 10px;color:#CFE0F1;font-size:15.5px}
+.panel p:last-child{margin-bottom:0}
+.panel ul{margin:0;padding:0;list-style:none}
+.panel li{position:relative;padding-inline-start:20px;margin-bottom:8px;color:#CFE0F1;font-size:15.5px}
+.panel li::before{content:"";position:absolute;right:0;top:12px;width:9px;height:2px;background:var(--red)}
+.mech{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 4px}
+.mech div{text-align:center;padding:14px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.18);font-size:14px}
+.mech div.on{border-color:var(--red);background:rgba(231,70,70,.16);font-weight:700}
+.mech b{display:block;font-family:var(--lat);font-size:12px;letter-spacing:.16em;color:#9DBBDA;margin-bottom:4px}
+.mech div.on b{color:#fff}
+.step1{background:rgba(201,162,39,.14);border-inline-start:3px solid #C9A227;border-radius:6px;padding:18px 20px;margin-top:16px}
+.step1 b{display:block;margin-bottom:6px}
+.next{background:var(--red);border-radius:8px;padding:26px;margin-top:22px}
+.next h3{margin:0 0 8px;font-size:21px}
+.next p{margin:0 0 18px;font-size:15.5px;color:#FFE6E6}
+.next .btn{background:#fff;color:var(--navy)}
+.share{border:1px dashed rgba(255,255,255,.28);border-radius:8px;padding:20px;margin-top:20px;font-size:15px;color:#CFE0F1}
+.share a{color:#fff;font-weight:700}
+.foot{text-align:center;color:#7f9fc0;font-size:13px;margin-top:34px}
+.foot a{color:#9DBBDA}
+.wa{position:fixed;inset-inline-start:16px;bottom:16px;z-index:80;background:#25D366;color:#fff;border-radius:50px;padding:12px 20px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.3);font-size:15px}
+.wa:hover{background:#1eb85a}
+.fade{animation:f .32s ease}
+@keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:560px){.mech{grid-template-columns:1fr}}
+</style>
+<!-- EMC lead capture (fail-safe) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="emc-capture.js"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="top"><div class="mark">EXECUTIVE MASTERY<span>CAMP</span></div></div>
+
+  <div id="intro" class="card fade">
+    <div class="rule"></div>
+    <div class="eyebrow">Drift diagnostic</div>
+    <h1>شركتك بتنحرف ناحية إيه؟</h1>
+    <p class="lead">مفيش شركة بتقف في النص. كل شركة بتميل ناحية واحدة من تلاتة: <b>فوضى</b>، أو <b>سيطرة</b>، أو <b>راحة</b>. والانحراف ده مش بيبدأ من الفريق — بيبدأ من سلوك القيادة.</p>
+    <p class="lead" style="margin-top:14px">١١ سؤال، ٤ دقايق. هتعرف نوع انحرافك، والخطأ القيادي اللي بيغذّيه، وتكلفته الحقيقية، والآلية الناقصة عندك — وأول خطوة تبدأ بيها من بكرة.</p>
+    <div class="nav" style="justify-content:flex-start"><button class="btn red" id="start">ابدأ التشخيص</button></div>
+    <div class="note">مش هنطلب أي بيانات عشان تشوف نتيجتك.</div>
+  </div>
+
+  <div id="quiz" class="hidden">
+    <div class="bar"><i id="fill"></i></div>
+    <div class="meta"><span id="qnum"></span><span id="qpart"></span></div>
+    <div class="card fade" id="qcard">
+      <h2 id="qtext"></h2>
+      <p class="lead" id="qhint" style="font-size:14.5px;color:#8FAECD"></p>
+      <div class="opts" id="qopts"></div>
+      <div class="nav"><button class="back hidden" id="back">← رجوع</button><span></span></div>
+    </div>
+  </div>
+
+  <div id="result" class="hidden"></div>
+  <div class="foot">Executive Mastery Camp — الدقي، القاهرة<br>
+    <a target="_blank" rel="noopener" href="https://wa.me/201002248800">واتساب: 0100 224 8800</a></div>
+</div>
+
+<a class="wa" target="_blank" rel="noopener" href="https://wa.me/201002248800?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%2C%20%D8%AD%D8%A7%D8%A8%D8%A8%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A3%D9%83%D8%AA%D8%B1">واتساب</a>
+
+<script>
+(function(){
+var WA='201002248800';
+function wa(m){return 'https://wa.me/'+WA+'?text='+encodeURIComponent(m);}
+var $=function(i){return document.getElementById(i)};
+
+/* Part 1: drift — each option maps to a type. Order shuffled per question on purpose. */
+var Q=[
+ {t:'لما حد في الفريق يغلط غلطة مؤثرة — بيحصل إيه؟',h:'اختار أقرب حاجة للواقع، مش للمفروض.',o:[
+   ['بنعدّيها ونكمّل — مش فاضيين نقف عندها','chaos'],
+   ['بتوصل ليّا وأنا اللي بصلّحها بنفسي','control'],
+   ['بنتفاداها عشان منكسرش خاطر حد','comfort']]},
+ {t:'القرارات في الشركة بتتاخد إزاي؟',h:'',o:[
+   ['مفيش قرار بيعدّي من غير موافقتي','control'],
+   ['بنأجّل لحد ما الوضع يفرض نفسه','comfort'],
+   ['كل واحد بيقرر في اللحظة على حسب الظرف','chaos']]},
+ {t:'الأولويات بتاعتكم دلوقتي؟',h:'',o:[
+   ['ثابتة من زمان وماحدش راجعها','comfort'],
+   ['بتتغيّر كل أسبوع تقريبًا','chaos'],
+   ['ثابتة بس أنا اللي بحطها لوحدي','control']]},
+ {t:'الاجتماعات عندكم شكلها إيه؟',h:'',o:[
+   ['منتظمة وودّية، بس مش بتطلع منها مواجهات صعبة','comfort'],
+   ['بتتعمل لما تحصل مشكلة','chaos'],
+   ['منتظمة بس أنا اللي بتكلم فيها معظم الوقت','control']]},
+ {t:'فيه حد في الفريق أداؤه ضعيف من فترة — إنت عامل إيه؟',h:'',o:[
+   ['بشيل عنه شغله بنفسي عشان الشغل ميقفش','control'],
+   ['مش فاضيين نتابعه أصلًا','chaos'],
+   ['موجود من زمان ومحرج نفتح الموضوع','comfort']]},
+ {t:'لو جت فرصة جديدة كبيرة النهاردة؟',h:'',o:[
+   ['هنجري وراها على طول ونشوف بعدين','chaos'],
+   ['مش هتتحرك غير لما أدرسها أنا بنفسي','control'],
+   ['غالبًا هنسيبها — إحنا مرتاحين في اللي إحنا فيه','comfort']]},
+ {t:'النمو في آخر سنتين؟',h:'',o:[
+   ['بنكبر بس بتوهان وضغط عالي','chaos'],
+   ['تقريبًا ثابت من غير تغيير حقيقي','comfort'],
+   ['بنكبر بقد ما وقتي أنا يسمح','control']]},
+ {t:'لو سألت فريقك «أكبر مشكلة عندنا إيه؟» — هيقولوا إيه؟',h:'',o:[
+   ['كل واحد هيقول حاجة مختلفة تمامًا','chaos'],
+   ['هيقولوا «إحنا مستنيين حضرتك»','control'],
+   ['هيقولوا «مفيش مشكلة، الأمور ماشية»','comfort']]},
+ /* Part 2: mechanism */
+ {p:2,k:'S',t:'الأدوار والصلاحيات مكتوبة ومتفق عليها مع كل واحد؟',h:'الآلية الناقصة — Structure',o:[
+   ['لأ، كل واحد عارف شغله بالعُرف',0],['في دماغي أنا بس',1],['مكتوبة بس قديمة أو محدش بيرجعلها',2],['مكتوبة وواضحة وكل واحد موافق عليها',3]]},
+ {p:2,k:'T',t:'الفريق بيقول رأيه المخالف قدامك بصراحة؟',h:'الآلية الناقصة — Trust',o:[
+   ['لأ، بيقولوا اللي أنا عايز أسمعه',0],['نادرًا، وبعد ما يتأكدوا إني مش متضايق',1],['بعضهم أيوة والباقي لأ',2],['أيوة، وبيختلفوا معايا في الاجتماع نفسه',3]]},
+ {p:2,k:'P',t:'كل شخص عنده نتيجة واضحة بتتراجع بانتظام؟',h:'الآلية الناقصة — Performance',o:[
+   ['مفيش حاجة زي دي',0],['فيه توقعات عامة من غير أرقام',1],['فيه أرقام بس المراجعة مش منتظمة',2],['أيوة — رقم لكل دور وبيتراجع كل أسبوع',3]]}
+];
+
+var i=0,ans=new Array(Q.length).fill(null);
+
+function render(){
+  var q=Q[i];
+  $('qnum').textContent='Q'+(i+1)+' / '+Q.length;
+  $('qpart').textContent=q.p===2?'PART 2 — MECHANISM':'PART 1 — DRIFT';
+  $('fill').style.width=(i/Q.length*100)+'%';
+  $('qtext').textContent=q.t;
+  $('qhint').textContent=q.h||'';
+  var box=$('qopts');box.innerHTML='';
+  q.o.forEach(function(o,idx){
+    var b=document.createElement('button');
+    b.type='button';b.className='opt'+(ans[i]===idx?' sel':'');b.textContent=o[0];
+    b.addEventListener('click',function(){ans[i]=idx;setTimeout(next,140);});
+    box.appendChild(b);
+  });
+  $('back').className='back'+(i===0?' hidden':'');
+  $('qcard').classList.remove('fade');void $('qcard').offsetWidth;$('qcard').classList.add('fade');
+}
+function next(){ i<Q.length-1 ? (i++,render()) : finish(); }
+$('back').addEventListener('click',function(){if(i>0){i--;render();}});
+$('start').addEventListener('click',function(){$('intro').classList.add('hidden');$('quiz').classList.remove('hidden');render();});
+
+var T={
+ chaos:{n:'فوضى',lat:'CHAOS',c:'#E74646',
+  err:'سرعة من غير نظام. القيادة بتكافئ الحركة والمجهود، مش النتيجة — فكل واحد بيجري في اتجاه.',
+  sym:['الأولويات بتتغيّر قبل ما تتنفّذ','يوم شغل كله إطفاء حرايق','كل واحد شغّال بطريقته الخاصة','مواعيد العملاء بتتأخر وبنعتذر كتير'],
+  cost:'بتدفع مجهود مضاعف عشان تطلع نفس النتيجة. وأول ناس بتحترق وتسيب هما الشاطرين — لأن الشاطر بيتحمّل الحمل الزيادة.',
+  risk:'الشركة هتوصل لسقف بيكسر. أول أزمة كبيرة هتكشف إن مفيش نظام يمتصّها، والفوضى اللي كانت مقبولة وإنتوا صغيرين بتبقى قاتلة وإنتوا أكبر.'},
+ control:{n:'سيطرة',lat:'CONTROL',c:'#3D6FB5',
+  err:'عدم ثقة متحوّل لنظام. القيادة بتحلّ بدل ما تبني حد يحلّ — والنية كويسة، بس النتيجة إن محدش بيكبر.',
+  sym:['كل قرار بيمرّ عليك','الفريق بيستنى بدل ما يتحرك','الشاطرين بيمشوا بعد سنة','إنت أول واحد بيفتح وآخر واحد بيقفل'],
+  cost:'سقف نمو الشركة بقى بالظبط قد طاقتك الشخصية. وكل ساعة بتشتغلها في شغل مش بتاعك هي ساعة مش بتقود فيها.',
+  risk:'هتفضل تشتغل أكتر وتطلع نفس الرقم. والفريق هيتحوّل من مسؤولين لمنفّذين — ولما تحتاج تسيب، مش هتلاقي حد اتدرّب على القرار.'},
+ comfort:{n:'راحة',lat:'COMFORT',c:'#C9A227',
+  err:'تفضيل الجو الحلو على المواجهة. القيادة بتحمي العلاقات على حساب الأداء — وده أخطر انحراف لأنه أهدأ واحد.',
+  sym:['مفيش مواجهات صعبة','الأداء الضعيف مقبول لأن صاحبه قديم','الخطط زي ما هي من سنين','الحماس قلّ من غير ما حد يقول'],
+  cost:'أحسن ناس عندك بيتساووا مع أضعف ناس. وده مش بيطفّي الضعاف — بيطفّي الشاطرين الأول، لأنهم أول ناس بتلاحظ.',
+  risk:'السوق بيتحرك وإنتوا واقفين. الانحدار في الراحة بيبان متأخر جدًا — بيتقال «إحنا كويسين» لحد ما رقم كبير يقع فجأة.'}
+};
+var M={
+ S:{n:'Structure — هيكل ونظام',
+    why:'مفيش وضوح مكتوب لمين مسؤول عن إيه وصلاحياته لحد فين. من غير ده، أي كلام عن المحاسبة بيبقى شخصي مش مهني.',
+    step:'ارسم الأدوار على ورقة واحدة — كل دور واسمه واللي مسؤول عنه — واعرضها على الفريق واسأل سؤال واحد: «فيه حاجة هنا مش متفق عليها؟» اللي هيطلع من السؤال ده هيفاجئك.'},
+ T:{n:'Trust — ثقة',
+    why:'الفريق مش بيقول لك اللي إنت محتاج تسمعه. وده مش عيب فيهم — ده نتيجة إن الاختلاف مكلّف عندكم.',
+    step:'في أول اجتماع، اسأل سؤال واحد وبعدين اسكت خالص لمدة دقيقة كاملة: «إيه الحاجة اللي إحنا كلنا عارفينها وبنتجنب نتكلم فيها؟» أول مرة هتلاقي سكوت — استحمله.'},
+ P:{n:'Performance — أداء ومحاسبة',
+    why:'مفيش رقم واضح لكل شخص، فالتقييم بيبقى بالانطباع. والانطباع بيتغيّر بمزاج الأسبوع.',
+    step:'حدّد رقم أسبوعي واحد بس لكل دور — رقم يقدر صاحبه يأثر فيه فعلًا — وابدأ تراجعه كل أسبوع في نفس الميعاد. اتنين وخمسين مراجعة في السنة بتعمل اللي مفيش خطة بتعمله.'}
+};
+
+function finish(){
+  $('fill').style.width='100%';
+  var c={chaos:0,control:0,comfort:0},mech={S:0,T:0,P:0};
+  Q.forEach(function(q,n){
+    var v=q.o[ans[n]][1];
+    if(q.p===2) mech[q.k]=v; else c[v]++;
+  });
+  var order=['chaos','control','comfort'].sort(function(a,b){return c[b]-c[a]});
+  var main=order[0],second=order[1],t=T[main];
+  var total=8;
+  var weakK=['S','T','P'].sort(function(a,b){return mech[a]-mech[b]})[0], m=M[weakK];
+  var tie=c[main]===c[second];
+
+  var bars=['chaos','control','comfort'].map(function(k){
+    var pct=Math.round(c[k]/total*100);
+    return '<div class="m"><div class="lbl"><b>'+T[k].n+'</b><span>'+pct+'%</span></div>'+
+           '<div class="track"><i data-w="'+pct+'" style="background:'+T[k].c+'"></i></div></div>';
+  }).join('');
+
+  var mechRow=['S','T','P'].map(function(k){
+    return '<div class="'+(k===weakK?'on':'')+'"><b>'+M[k].n.split(' — ')[0]+'</b>'+mech[k]+'/3</div>';
+  }).join('');
+
+  var secondLine = tie
+   ? 'إجاباتك متوزّعة بالتساوي بين <b>'+T[main].n+'</b> و<b>'+T[second].n+'</b> — والشركات اللي بتتأرجح بين اتنين عادةً بتكون في لحظة تحوّل، أو فيه إدارتين شغّالين بمنطقين مختلفين.'
+   : 'وبعدها بيجي ميل تاني ناحية <b>'+T[second].n+'</b> — وده طبيعي، الانحراف نادرًا بيكون نقي.';
+
+  var msg='السلام عليكم 👋\nعملت تشخيص «شركتك بتنحرف ناحية إيه؟» وطلعت:\n\n'+
+          'نوع الانحراف: '+t.n+' ('+t.lat+')\n'+
+          'الميل التاني: '+T[second].n+'\n'+
+          'الآلية الناقصة: '+m.n+'\n\nحابب أفهم أكتر.';
+
+  $('quiz').classList.add('hidden');
+  var r=$('result');r.classList.remove('hidden');
+  r.innerHTML='<div class="card fade">'+
+   '<div class="verdict"><div class="eyebrow">Your drift</div>'+
+     '<div class="typename" style="color:'+t.c+'">'+t.n+'</div>'+
+     '<div class="typelat">'+t.lat+'</div></div>'+
+   '<div class="mix">'+bars+'</div>'+
+   '<p class="lead" style="font-size:15.5px">'+secondLine+'</p>'+
+   '<div class="panel"><h3>الخطأ القيادي اللي بيغذّي الانحراف ده</h3><p>'+t.err+'</p></div>'+
+   '<div class="panel"><h3>الأعراض اللي غالبًا شايفها</h3><ul><li>'+t.sym.join('</li><li>')+'</li></ul></div>'+
+   '<div class="panel"><h3>التكلفة الحقيقية</h3><p>'+t.cost+'</p></div>'+
+   '<div class="panel"><h3>لو الوضع استمر سنة كمان</h3><p>'+t.risk+'</p></div>'+
+   '<div class="panel"><h3>الآلية الناقصة عندك</h3>'+
+     '<div class="mech">'+mechRow+'</div>'+
+     '<p style="margin-top:14px"><b>'+m.n+'</b> — '+m.why+'</p>'+
+     '<div class="step1"><b>أول خطوة تبدأ بيها من بكرة</b>'+m.step+'</div></div>'+
+   '<div class="next"><h3>ده تشخيص… مش علاج</h3>'+
+     '<p>عرفت الانحراف والآلية الناقصة. اللي بعد كده هو إنك تبني النظام نفسه — وده اللي بنعمله في الكامب على شركتك إنت، مش على حالة عامة.</p>'+
+     '<a class="btn" target="_blank" rel="noopener" href="'+wa(msg)+'">اتكلم معانا على واتساب</a></div>'+
+   '<div class="share">ابعت اللينك ده لشريكك أو لأي حد في فريق القيادة، وقارنوا نتايجكم. لو طلعتوا نوعين مختلفين — دي أهم مكالمة هتعملوها الأسبوع ده.</div>'+
+   '<div class="nav"><button class="back" id="again">↻ اعمل التشخيص تاني</button><span></span></div>'+
+  '</div>';
+
+  setTimeout(function(){r.querySelectorAll('.track i').forEach(function(e){e.style.width=e.dataset.w+'%'});},120);
+  $('again').addEventListener('click',function(){location.reload()});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+})();
+</script>
+<!-- EMC capture hook -->
+<script>
+(function(){
+  var TOOL="drift";
+  var id={}; try{id=JSON.parse(sessionStorage.getItem("emc_lead")||"{}")}catch(e){}
+  var res=document.getElementById("result"); if(!res) return;
+  var fired=false;
+  function fire(){ if(fired) return; fired=true;
+    try{ if(window.EMCLeadCapture) EMCLeadCapture.save({
+      source:"tool_complete", tool:TOOL, toolTitle:document.title,
+      name:id.name||"", mobile:id.mobile||"", company:id.company||"",
+      email:id.email||"", leadId:id.leadId||""
+    }); }catch(_){}
+  }
+  var mo=new MutationObserver(function(){
+    if(!res.classList.contains("hidden") && res.children.length){ fire(); mo.disconnect(); }
+  });
+  try{ mo.observe(res,{attributes:true,childList:true}); }catch(e){}
+})();
+</script>
+</body>
+</html>

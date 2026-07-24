@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ar-EG" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>إنت صاحب رؤية ولا قائد منفّذ؟ — Executive Mastery Camp</title>
+<meta name="description" content="حدّد نمطك القيادي، وقيّم حالة الشراكة بينك وبين اللي بيدير شركتك — وبتخرج بتقرير كامل قابل للطباعة.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Archivo:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#003060;--deep:#001F3F;--red:#E74646;--slate:#547394;--gold:#C9A227;--ok:#2E8B57;--warn:#E08A2E;
+--ar:'Cairo','Segoe UI',Tahoma,sans-serif;--lat:'Archivo','Cairo',sans-serif}
+*{box-sizing:border-box}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:var(--ar);background:var(--deep);color:#fff;line-height:1.75;-webkit-font-smoothing:antialiased}
+.shell{max-width:900px;margin:0 auto;padding:0 18px 70px}
+.top{display:flex;padding:20px 0 8px}
+.mark{font-family:var(--lat);font-weight:800;font-size:13px;letter-spacing:.14em;line-height:1.15}
+.mark span{display:block;font-size:9px;color:#9DBBDA;letter-spacing:.32em}
+.rule{width:40px;height:0;border-top:3px solid var(--red);position:relative;margin:0 0 16px}
+.rule::after{content:"";position:absolute;right:0;top:3px;width:12px;height:12px;border-right:3px solid var(--red);border-bottom:3px solid var(--red);transform:skewX(-18deg)}
+.bar{height:4px;background:rgba(255,255,255,.14);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--red);width:0;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.meta{display:flex;justify-content:space-between;font-size:12.5px;color:#9DBBDA;margin-top:8px;font-family:var(--lat);letter-spacing:.1em}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:clamp(22px,4vw,40px);margin-top:22px}
+h1{font-size:clamp(25px,4.8vw,40px);font-weight:900;letter-spacing:-.8px;margin:0 0 14px;line-height:1.28}
+h2{font-size:clamp(19px,3vw,25px);font-weight:900;margin:0 0 6px;line-height:1.45}
+p.lead{color:#CFE0F1;font-size:clamp(15px,1.8vw,18px);margin:0 0 8px}
+.eyebrow{font-family:var(--lat);font-size:11.5px;font-weight:800;letter-spacing:.24em;color:var(--red);margin-bottom:10px}
+.hint{font-size:14px;color:#8FAECD;margin:0 0 16px}
+
+/* A/B choice */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.pick{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:24px 20px;cursor:pointer;text-align:start;font-family:var(--ar);color:#fff;font-size:16.5px;line-height:1.6;transition:all .14s;min-height:120px;display:flex;align-items:center}
+.pick:hover{border-color:var(--red);background:rgba(231,70,70,.15);transform:translateY(-2px)}
+.pick:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.pick.sel{background:rgba(231,70,70,.24);border-color:var(--red)}
+@media(max-width:620px){.pair{grid-template-columns:1fr}.pick{min-height:0}}
+.opts{display:grid;gap:10px;margin-top:20px}
+.opt{display:block;width:100%;text-align:start;font-family:var(--ar);font-size:16px;color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:14px 18px;cursor:pointer;transition:all .14s}
+.opt:hover{background:rgba(231,70,70,.16);border-color:var(--red);transform:translateX(-3px)}
+.opt:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.opt.sel{background:rgba(231,70,70,.22);border-color:var(--red)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:24px;gap:12px;flex-wrap:wrap}
+.back{background:none;border:0;color:#9DBBDA;font-family:var(--ar);font-size:15px;cursor:pointer;padding:8px 0}
+.back:hover{color:#fff}
+.btn{border:0;font-family:var(--ar);font-weight:700;font-size:16px;padding:14px 28px;border-radius:5px;cursor:pointer;text-decoration:none;display:inline-block;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.red{background:var(--red);color:#fff}.red:hover{background:#d13636}
+.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.45)}
+.note{font-size:13.5px;color:#8FAECD;margin-top:16px}
+.hidden{display:none}
+
+/* report */
+.rephead{border-bottom:2px solid var(--red);padding-bottom:18px;margin-bottom:6px}
+.rephead .t{font-family:var(--lat);font-size:11.5px;letter-spacing:.26em;color:#9DBBDA;font-weight:800}
+.rephead h2{font-size:clamp(23px,4vw,32px);margin:8px 0 4px}
+.split{display:flex;height:44px;border-radius:6px;overflow:hidden;margin:20px 0 8px;border:1px solid rgba(255,255,255,.2)}
+.split div{display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;transition:width .9s cubic-bezier(.4,0,.2,1);white-space:nowrap;overflow:hidden}
+.splitlab{display:flex;justify-content:space-between;font-size:13px;color:#9DBBDA;font-family:var(--lat);letter-spacing:.08em}
+.sec{margin-top:30px;padding-top:24px;border-top:1px solid rgba(255,255,255,.14)}
+.sec .num{font-family:var(--lat);font-size:11.5px;letter-spacing:.22em;color:var(--red);font-weight:800;margin-bottom:6px}
+.sec h3{margin:0 0 12px;font-size:21px}
+.sec p{margin:0 0 12px;color:#CFE0F1;font-size:15.5px}
+.sec p:last-child{margin-bottom:0}
+.sec ul{margin:0 0 12px;padding:0;list-style:none}
+.sec li{position:relative;padding-inline-start:20px;margin-bottom:9px;color:#CFE0F1;font-size:15.5px}
+.sec li::before{content:"";position:absolute;right:0;top:12px;width:9px;height:2px;background:var(--red)}
+.statebox{border-radius:8px;padding:20px;margin:6px 0 14px;border:1px solid}
+.tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}
+.tbl th{text-align:start;font-size:12.5px;font-family:var(--lat);letter-spacing:.12em;color:#9DBBDA;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.2);font-weight:800}
+.tbl td{padding:11px 10px;border-bottom:1px solid rgba(255,255,255,.1);color:#CFE0F1;vertical-align:top}
+.tbl td:first-child{color:#fff;font-weight:700;width:42%}
+.step1{background:rgba(201,162,39,.14);border-inline-start:3px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:12px}
+.step1 b{display:block;margin-bottom:6px}
+.warnbox{background:rgba(231,70,70,.13);border:1px solid rgba(231,70,70,.5);border-radius:8px;padding:20px;margin-top:12px}
+.warnbox b{color:#FFB3B3}
+.next{background:var(--red);border-radius:8px;padding:26px;margin-top:26px}
+.next h3{margin:0 0 8px;font-size:21px}
+.next p{margin:0 0 18px;font-size:15.5px;color:#FFE6E6}
+.next .btn{background:#fff;color:var(--navy)}
+.foot{text-align:center;color:#7f9fc0;font-size:13px;margin-top:34px}
+.foot a{color:#9DBBDA}
+.wa{position:fixed;inset-inline-start:16px;bottom:16px;z-index:80;background:#25D366;color:#fff;border-radius:50px;padding:12px 20px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.3);font-size:15px}
+.wa:hover{background:#1eb85a}
+.fade{animation:f .32s ease}
+@keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+@media print{
+  body{background:#fff;color:#111}
+  .wa,.nav,.next,.bar,.meta,#intro,#quiz{display:none!important}
+  .shell{max-width:none;padding:0}
+  .card{background:none;border:0;padding:0;margin:0}
+  .sec{border-top:1px solid #ccc;break-inside:avoid}
+  .sec p,.sec li,.tbl td{color:#333}
+  .sec h3,.rephead h2{color:#003060}
+  .mark{color:#003060}
+  .statebox,.step1,.warnbox{border-color:#ccc!important;background:#f6f8fa!important}
+  .step1 b{color:#003060}
+  .tbl th{color:#547394;border-color:#ccc}
+  .tbl td{border-color:#eee}
+  .splitlab{color:#547394}
+}
+</style>
+<!-- EMC lead capture (fail-safe) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="emc-capture.js"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="top"><div class="mark">EXECUTIVE MASTERY<span>CAMP</span></div></div>
+
+  <div id="intro" class="card fade">
+    <div class="rule"></div>
+    <div class="eyebrow">Leadership pair diagnostic</div>
+    <h1>إنت صاحب رؤية… ولا قائد منفّذ؟</h1>
+    <p class="lead">أغلب الشركات اللي بتقف عند سقف معيّن مش ناقصها فلوس ولا سوق — ناقصها <b>الشخص التاني</b>. صاحب الرؤية بيخلق الاتجاه، والقائد المنفّذ بيحوّله لواقع يومي. ونادر جدًا إن شخص واحد يعمل الاتنين كويس على المدى الطويل.</p>
+    <p class="lead" style="margin-top:14px">التشخيص ده بيحدّد نمطك بنسبة مئوية، وبيقيّم حالة الشراكة عندك دلوقتي — وبتخرج بـ<b>تقرير كامل</b> فيه مواصفات الشخص اللي محتاجه، وتقسيم المسؤوليات، وخطة أول ٩٠ يوم. تقدر تطبعه أو تحفظه PDF.</p>
+    <div class="nav" style="justify-content:flex-start"><button class="btn red" id="start">ابدأ التشخيص</button></div>
+    <div class="note">١٦ سؤال · حوالي ٦ دقايق · التقرير بيتولّد من إجاباتك</div>
+  </div>
+
+  <div id="quiz" class="hidden">
+    <div class="bar"><i id="fill"></i></div>
+    <div class="meta"><span id="qnum"></span><span id="qpart"></span></div>
+    <div class="card fade" id="qcard">
+      <h2 id="qtext"></h2>
+      <p class="hint" id="qhint"></p>
+      <div id="qbody"></div>
+      <div class="nav"><button class="back hidden" id="back">← رجوع</button><span></span></div>
+    </div>
+  </div>
+
+  <div id="result" class="hidden"></div>
+  <div class="foot">Executive Mastery Camp — الدقي، القاهرة<br>
+    <a target="_blank" rel="noopener" href="https://wa.me/201002248800">واتساب: 0100 224 8800</a></div>
+</div>
+
+<a class="wa" target="_blank" rel="noopener" href="https://wa.me/201002248800?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%2C%20%D8%AD%D8%A7%D8%A8%D8%A8%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A3%D9%83%D8%AA%D8%B1">واتساب</a>
+
+<script>
+(function(){
+var WA='201002248800';
+function wa(m){return 'https://wa.me/'+WA+'?text='+encodeURIComponent(m)}
+var $=function(i){return document.getElementById(i)};
+
+var PAIRS=[
+ ['بتحمّس أكتر لما نبدأ حاجة جديدة','بتحمّس أكتر لما نخلّص حاجة بدأناها'],
+ ['بشوف الفرصة الأول','بشوف المخاطر والتفاصيل الأول'],
+ ['بتضايق من الروتين والتقارير','بتضايق من الفوضى وعدم الوضوح'],
+ ['بحل المشاكل بالحدس وبسرعة','بحل المشاكل بالبيانات وبترتيب'],
+ ['بحب أتكلم مع السوق والعملاء والشركاء','بحب أشتغل جوّه مع الفريق على التنفيذ'],
+ ['عندي أفكار أكتر من الوقت','عندي مهام أكتر من الأفكار'],
+ ['بقول «أيوة» بسرعة للفرص الجديدة','بقول «لأ» عشان نفضل مركّزين'],
+ ['لو الخطة اتغيّرت فجأة — مش هتضايق','لو الخطة اتغيّرت فجأة — هتضايق'],
+ ['بحب أرسم الاتجاه وأسيب التنفيذ','بحب أمسك التنفيذ وأتأكد إنه بيحصل'],
+ ['بقيس نفسي بالحماس والاتجاه اللي بخلقه','بقيس نفسي بالوعود اللي اتنفّذت']
+];
+var PART2=[
+ {k:'exists',t:'فيه حد بيدير الشركة يوم بيوم غيرك؟',o:['لأ — أنا اللي بدير كل حاجة','فيه حد بينفّذ بس بيرجعلي في كل قرار','فيه حد بياخد قرارات في نطاقه','فيه حد بيدير الشركة فعليًا وأنا بشوف النتيجة']},
+ {k:'roles',t:'الأدوار بينكم واضحة ومكتوبة؟',o:['متداخلة تمامًا','معروفة شفهيًا بس بتتلخبط','مكتوبة بس فيها تداخل','مكتوبة وواضحة والفريق فاهمها']},
+ {k:'rhythm',t:'بتتقابلوا بشكل ثابت؟',o:['لأ، بنتكلم في الشغل وقت الحاجة','لما تحصل مشكلة','أسبوعي بس مش منتظم','أسبوعي ثابت بأجندة معروفة']},
+ {k:'decide',t:'لما تختلفوا في قرار — بيحصل إيه؟',o:['بيتأجّل ومحدش بيحسم','أنا بحسم دايمًا','بنتناقش وأحيانًا بنوصل','فيه قاعدة متفق عليها مين بيحسم إيه']},
+ {k:'candour',t:'بتقول له الحقيقة كاملة عن أدائه وعن مخاوفك؟',o:['بخفّف كتير عشان العلاقة','بقول الجزء السهل','بقول أغلبها','بنتكلم بصراحة تامة من الجهتين']},
+ {k:'away',t:'لو غبت شهر كامل — الشركة هتعمل إيه؟',o:['هتقف','هتبطّأ جدًا','هتمشي بمشاكل','هتمشي عادي وفيه حاجات هتتنفّذ']}
+];
+
+var i=0, N=PAIRS.length+PART2.length;
+var ansP=new Array(PAIRS.length).fill(null), ansQ=new Array(PART2.length).fill(null);
+
+function render(){
+  $('qnum').textContent='Q'+(i+1)+' / '+N;
+  $('fill').style.width=(i/N*100)+'%';
+  var body=$('qbody');body.innerHTML='';
+  if(i<PAIRS.length){
+    $('qpart').textContent='PART 1 — YOUR TYPE';
+    $('qtext').textContent='أنهي جملة أقرب ليك؟';
+    $('qhint').textContent='مفيش إجابة صح وغلط — اختار اللي بتعمله فعلًا، مش اللي المفروض.';
+    var wrap=document.createElement('div');wrap.className='pair';
+    PAIRS[i].forEach(function(txt,side){
+      var b=document.createElement('button');b.type='button';
+      b.className='pick'+(ansP[i]===side?' sel':'');b.textContent=txt;
+      b.addEventListener('click',function(){ansP[i]=side;setTimeout(next,130)});
+      wrap.appendChild(b);
+    });
+    body.appendChild(wrap);
+  } else {
+    var n=i-PAIRS.length,q=PART2[n];
+    $('qpart').textContent='PART 2 — THE PARTNERSHIP';
+    $('qtext').textContent=q.t;
+    $('qhint').textContent='';
+    var box=document.createElement('div');box.className='opts';
+    q.o.forEach(function(o,idx){
+      var b=document.createElement('button');b.type='button';
+      b.className='opt'+(ansQ[n]===idx?' sel':'');b.textContent=o;
+      b.addEventListener('click',function(){ansQ[n]=idx;setTimeout(next,130)});
+      box.appendChild(b);
+    });
+    body.appendChild(box);
+  }
+  $('back').className='back'+(i===0?' hidden':'');
+  $('qcard').classList.remove('fade');void $('qcard').offsetWidth;$('qcard').classList.add('fade');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function next(){ i<N-1 ? (i++,render()) : finish() }
+$('back').addEventListener('click',function(){if(i>0){i--;render()}});
+$('start').addEventListener('click',function(){$('intro').classList.add('hidden');$('quiz').classList.remove('hidden');render()});
+
+var TYPES={
+ v:{n:'صاحب رؤية',lat:'VISIONARY',
+   d:'إنت بتخلق الاتجاه. طاقتك بتطلع من الفرص الجديدة والعلاقات والصورة الكبيرة، وبتضعف بسرعة في التفاصيل المتكررة. الشركة بتتحرك بسببك — وبتتلخبط بسببك كمان لما الأفكار تزيد عن قدرة التنفيذ.',
+   str:['بتشوف الفرصة قبل السوق','بتفتح أبواب وعلاقات محدش تاني بيفتحها','بتحمّس الناس وبتخلق طاقة','بتاخد قرارات كبيرة في وقت الغموض'],
+   drain:['المتابعة اليومية والتقارير','حسم الخلافات بين الأقسام','ضبط المواعيد والالتزامات','التفاصيل التشغيلية المتكررة']},
+ i:{n:'قائد منفّذ',lat:'INTEGRATOR',
+   d:'إنت بتحوّل الكلام لواقع. طاقتك بتطلع من الترتيب والإنجاز المكتمل، وبتضعف في الغموض والتغيير المستمر. الشركة بتمشي بسببك — وبتقف عن النمو لو مفيش حد بيفتح اتجاهات جديدة.',
+   str:['بتخلّص اللي بيتبدأ','بتمسك الأرقام والمتابعة','بتحسم الخلافات وبتحمي التركيز','بتبني نظام بيشتغل من غيرك'],
+   drain:['خلق أفكار واتجاهات جديدة باستمرار','الشغل الخارجي والعلاقات والشراكات','الشغل في غموض من غير خطة','تغيير الاتجاه كل شوية']},
+ mix:{n:'خليط — بتشتغل الدورين',lat:'HYBRID',
+   d:'إجاباتك متوزّعة على الاتنين تقريبًا بالتساوي. ده ممكن يكون معناه إنك فعلًا مرن — بس في أغلب الحالات معناه إنك <b>بتعمل الدورين لأن مفيش حد تاني</b>، مش لأن دي طبيعتك. والفرق بين التفسيرين بيبان في سؤال واحد: بتخرج من أنهي شغل مشحون، وبتخرج من أنهي شغل فاضي؟',
+   str:['بتقدر تشتغل في الاتجاهين','بتفهم لغة الاتنين وده بيسهّل التوظيف بعدين','بتغطّي الفجوات بسرعة'],
+   drain:['بتقفز بين نوعين شغل بيستهلكوا مخ مختلف','مفيش دور واضح تتحاسب عليه','بتخلص اليوم من غير ما تعرف إنت اشتغلت في إيه']}
+};
+
+function finish(){
+  $('fill').style.width='100%';$('quiz').classList.add('hidden');
+  var vCount=ansP.filter(function(x){return x===0}).length;
+  var V=Math.round(vCount/PAIRS.length*100), I=100-V;
+  var t = V>=58?'v' : V<=42?'i' : 'mix';
+  var T=TYPES[t];
+  var strength = V>=75||V<=25 ? 'واضح جدًا' : (t==='mix'?'متوازن':'واضح مع ميل للتاني');
+
+  var g={};PART2.forEach(function(q,n){g[q.k]=ansQ[n]});
+  var pScore=Math.round(ansQ.reduce(function(a,b){return a+b},0)/(PART2.length*3)*100);
+
+  var state,sc,sd;
+  if(g.exists<=1){state='مفيش قائد منفّذ';sc='#E74646';
+    sd='الشركة كلها ماشية عليك. مهما كانت رؤيتك قوية، سقف الشركة دلوقتي = عدد ساعاتك في اليوم. ده مش نقص في شطارتك — ده نقص في الهيكل.';}
+  else if(pScore<55){state='فيه حد… بس الشراكة مش شغّالة';sc='#E08A2E';
+    sd='فيه شخص موجود، بس العلاقة لسه مش بتنتج. غالبًا السبب مش الشخص — السبب إن الأدوار متداخلة، أو مفيش إيقاع ثابت بينكم، أو مفيش قاعدة واضحة مين بيحسم إيه.';}
+  else if(pScore<80){state='شراكة بتتكوّن';sc='#3D8FD1';
+    sd='الأساس موجود وشغّال. اللي فاضل تظبيط — وأغلب المكسب الجاي هيجي من تثبيت الإيقاع الأسبوعي ومن حسم المناطق اللي لسه فيها تداخل.';}
+  else{state='شراكة ناضجة';sc='#2E8B57';
+    sd='الشراكة عندك في حالة نادرة. الخطر هنا مش الفشل — الخطر إن العلاقة دي شخصية أكتر منها نظامية. لو حد فيكم مشي، هل اللي اتبنى هيفضل؟';}
+
+  var gaps=[];
+  if(g.roles<=1) gaps.push('<b>الأدوار متداخلة.</b> ده بيخلق ازدواج في الشغل، وبيخلي الفريق يلف على الاتنين لحد ما يلاقي الإجابة اللي عايزها.');
+  if(g.rhythm<=1) gaps.push('<b>مفيش إيقاع ثابت بينكم.</b> اللقاء وقت الأزمة معناه إن كل تواصل بينكم مرتبط بمشكلة — وده بيرهق العلاقة نفسها.');
+  if(g.decide<=1) gaps.push('<b>مفيش قاعدة للحسم.</b> لما محدش يعرف مين بيحسم إيه، القرارات إما بتتأجّل أو بتترجع لك دايمًا — وفي الحالتين الشراكة مش بتشتغل.');
+  if(g.candour<=1) gaps.push('<b>المصارحة ناقصة.</b> لو بتخفّف الكلام عشان العلاقة، إنت بتحمي العلاقة وبتضحّي بالشركة. وده بيتراكم لحد ما ينفجر.');
+  if(g.away<=1) gaps.push('<b>الشركة لسه واقفة عليك.</b> ده المؤشر النهائي — أي كلام تاني عن الشراكة بيتقاس بالسؤال ده.');
+  if(!gaps.length) gaps.push('مفيش فجوة حرجة في الإجابات. ركّز على تثبيت اللي بنيته في نظام مكتوب — مش في تفاهم شخصي.');
+
+  var need = t==='i' ? TYPES.v : TYPES.i;
+  var needName = t==='i' ? 'صاحب رؤية' : 'قائد منفّذ';
+
+  var splitRows = t==='i'
+   ? [['التنفيذ اليومي وإدارة الفريق','إنت'],['الأرقام والمتابعة الأسبوعية','إنت'],['حسم الخلافات بين الأقسام','إنت'],['العلاقات والشراكات والسوق','الشريك'],['الاتجاه والفرص الجديدة','الشريك'],['الرسالة والصورة الخارجية','الشريك']]
+   : [['الاتجاه والرؤية وأهداف السنة','إنت'],['العلاقات والشراكات والسوق','إنت'],['الرسالة والصورة الخارجية','إنت'],['التنفيذ اليومي وإدارة الفريق','الشريك'],['الأرقام والمتابعة الأسبوعية','الشريك'],['حسم الخلافات بين الأقسام','الشريك']];
+
+  var msg='السلام عليكم 👋\nعملت تشخيص «صاحب رؤية ولا قائد منفّذ» وطلعت:\n\n'+
+    'النمط: '+T.n+' ('+V+'% رؤية / '+I+'% تنفيذ)\n'+
+    'حالة الشراكة: '+state+' — '+pScore+'%\n\nحابب أفهم أكتر.';
+
+  var r=$('result');r.classList.remove('hidden');
+  r.innerHTML='<div class="card fade">'+
+
+  '<div class="rephead"><div class="t">CONFIDENTIAL REPORT · تقرير شخصي</div>'+
+    '<h2>تقرير النمط القيادي وحالة الشراكة</h2>'+
+    '<p class="lead" style="margin:0;font-size:14.5px;color:#8FAECD">مولّد من إجاباتك — Executive Mastery Camp</p></div>'+
+
+  '<div class="sec" style="border-top:0"><div class="num">SECTION 01</div><h3>الملخص التنفيذي</h3>'+
+    '<p>نمطك: <b>'+T.n+'</b> ('+strength+') — بنسبة <b>'+V+'٪ رؤية</b> مقابل <b>'+I+'٪ تنفيذ</b>.</p>'+
+    '<p>حالة الشراكة عندك: <b>'+state+'</b> بدرجة <b>'+pScore+'٪</b>.</p>'+
+    '<p>'+(g.exists<=1
+      ? 'الأولوية الأولى دلوقتي: إنك تجيب '+needName+' — مش إنك تشتغل أكتر. القسم ٥ و٦ فيهم مواصفات الشخص ده وتقسيم المسؤوليات.'
+      : 'الأولوية الأولى دلوقتي: إنك تقفل الفجوات في القسم ٤ قبل ما تفكّر في أي توسّع أو توظيف جديد.')+'</p></div>'+
+
+  '<div class="sec"><div class="num">SECTION 02</div><h3>نمطك</h3>'+
+    '<div class="split"><div id="sv" style="width:50%;background:var(--red)">رؤية '+V+'٪</div>'+
+    '<div id="si" style="width:50%;background:#3D6FB5">تنفيذ '+I+'٪</div></div>'+
+    '<div class="splitlab"><span>VISIONARY</span><span>INTEGRATOR</span></div>'+
+    '<p style="margin-top:16px">'+T.d+'</p></div>'+
+
+  '<div class="sec"><div class="num">SECTION 03</div><h3>قوتك الطبيعية — واللي بيستنزفك</h3>'+
+    '<p><b>الشغل اللي بيدّيك طاقة:</b></p><ul><li>'+T.str.join('</li><li>')+'</li></ul>'+
+    '<p><b>الشغل اللي بياخد منك طاقة — وده اللي المفروض يتسلّم:</b></p><ul><li>'+T.drain.join('</li><li>')+'</li></ul>'+
+    '<p style="font-size:14.5px;color:#8FAECD">القاعدة البسيطة: الشغل اللي بتأجّله كل أسبوع مش لأنك كسلان — لأنه مش شغلك.</p></div>'+
+
+  '<div class="sec"><div class="num">SECTION 04</div><h3>حالة الشراكة والفجوات</h3>'+
+    '<div class="statebox" style="border-color:'+sc+';background:rgba(255,255,255,.05)">'+
+      '<b style="color:'+sc+';font-size:18px">'+state+' — '+pScore+'٪</b>'+
+      '<p style="margin:8px 0 0;color:#CFE0F1;font-size:15.5px">'+sd+'</p></div>'+
+    '<p><b>الفجوات المحددة من إجاباتك:</b></p><ul><li>'+gaps.join('</li><li>')+'</li></ul></div>'+
+
+  '<div class="sec"><div class="num">SECTION 05</div><h3>مواصفات '+needName+' اللي محتاجه</h3>'+
+    '<p>ده مش إعلان وظيفة — دي مواصفات الشخص اللي هيغطّي الفجوة عندك إنت بالذات.</p>'+
+    '<p><b>لازم يكون:</b></p><ul>'+
+      '<li>صريح ومباشر — يقولك «لأ» ويشرح ليه، من غير ما يستأذن</li>'+
+      '<li>بيمشي بالأرقام مش بالانطباع، وبيرجع بمؤشرات من غير ما تطلبها</li>'+
+      '<li>جوعان للنمو الشخصي — بيسأل ويتعلّم بسرعة</li>'+
+      '<li>بيهتم بنتيجة العميل مش بإنجاز المهمة</li>'+
+      '<li>مرتاح في التكرار والترتيب — الروتين مش بيرهقه</li></ul>'+
+    '<p><b>علامات خطر ترفضه بسببها فورًا:</b></p><ul>'+
+      '<li>بيوافقك في كل حاجة من أول مقابلة</li>'+
+      '<li>بيتكلم عن الأفكار أكتر من التنفيذ</li>'+
+      '<li>مالوش سجل في إنه خلّص حاجة لحد آخرها</li>'+
+      '<li>محتاج تفاصيل التعليمات كل مرة</li></ul></div>'+
+
+  '<div class="sec"><div class="num">SECTION 06</div><h3>تقسيم المسؤوليات المقترح</h3>'+
+    '<p>الجدول ده هو أهم حاجة في التقرير. اكتبه، واعرضه على الشريك، واتفقوا عليه بالحرف — التداخل هو أول سبب لفشل الشراكة.</p>'+
+    '<table class="tbl"><tr><th>المسؤولية</th><th>صاحبها</th></tr>'+
+      splitRows.map(function(x){return '<tr><td>'+x[0]+'</td><td>'+x[1]+'</td></tr>'}).join('')+
+    '</table>'+
+    '<div class="step1"><b>قاعدة الحسم</b>لو اختلفتم في قرار تشغيلي يومي — القائد المنفّذ بيحسم. لو اختلفتم في قرار اتجاه أو هوية أو التزام طويل المدى — صاحب الرؤية بيحسم. اتفقوا على السطرين دول مكتوبين، وارجعوا لهم وقت الخلاف بدل ما تتفاوضوا من الأول كل مرة.</div></div>'+
+
+  '<div class="sec"><div class="num">SECTION 07</div><h3>أول ٩٠ يوم</h3>'+
+    '<p><b>الشهر الأول — يتفرّج ويتعلّم.</b> بيحضر كل اجتماع، بيقرا كل العمليات المكتوبة، وبيتابع معاك يوميًا ١٥ دقيقة. ما بيمسكش مسؤولية كاملة لسه. في آخر الشهر: مراجعة مكتوبة — كمّل ولا لأ.</p>'+
+    '<p><b>الشهر التاني — يشارك الملكية.</b> بياخد وظيفة ورا التانية بالكامل، وإنت بتتفرّج من بعيد. الاجتماع اليومي بيتحوّل لأسبوعي ٣٠ دقيقة. الأخطاء هنا مقبولة ومطلوبة — دي مرحلة التعلّم بالتكلفة.</p>'+
+    '<p><b>الشهر التالت — يمسك لوحده.</b> بيدير التشغيل كامل، وإنت بترجع لدورك الطبيعي. المؤشر النهائي: تسيب أسبوعين وترجع تلاقي الشغل ماشي.</p>'+
+    '<div class="warnbox"><b>أخطر شهر هو التاني.</b> ده الشهر اللي أغلب المؤسسين بيرجعوا فيه يمسكوا التنفيذ، لأنهم بيشوفوا الشخص بيعمل الحاجة بطريقة مختلفة عن طريقتهم. مختلف ≠ غلط. لو رجعت تمسك، إنت مش بتصلّح — إنت بتبلّغ الفريق إن الشخص ده مش المسؤول فعلًا.</div></div>'+
+
+  '<div class="sec"><div class="num">SECTION 08</div><h3>مخاطر لازم تتجنبها</h3><ul>'+
+    '<li><b>ما تدّيهوش الدور من غير صلاحية.</b> مسؤولية من غير سلطة بتخلق موظف محبط مش شريك.</li>'+
+    '<li><b>ما تخليش الفريق يلف عليه لك.</b> أول مرة تسمح بده، الدور بيموت.</li>'+
+    '<li><b>ما تديهوش نسبة من الشركة في أول ٦ شهور.</b> لو فيه ملكية، تبقى بجدول استحقاق ومراحل — مش هدية بداية.</li>'+
+    '<li><b>ما تتوقعش نسخة منك.</b> إنت مش بتدوّر على حد يفكّر زيك، بتدوّر على حد يكمّلك.</li></ul></div>'+
+
+  '<div class="sec"><div class="num">SECTION 09</div><h3>أول خطوة من الأسبوع الجاي</h3>'+
+    '<div class="step1"><b>'+(g.exists<=1?'قبل ما تدوّر على حد':'قبل أي كلام مع شريكك')+'</b>'+
+    (g.exists<=1
+      ? 'افتح ورقة واكتب كل حاجة عملتها الأسبوع اللي فات. حطّ جنب كل بند: «ده شغلي» ولا «ده شغل حد تاني». القائمة التانية هي الوصف الوظيفي للشخص اللي محتاجه — وهي كمان أول إجابة على سؤال «هو هيعمل إيه بالظبط؟».'
+      : 'اطبع جدول القسم ٦ واقعدوا عليه ساعة. عدّي على كل سطر واسأل سؤال واحد: «مين اللي بيعمل ده فعلًا دلوقتي؟» كل سطر فيه إجابتين هو سطر بينزف وقت وفلوس كل أسبوع.')+
+    '</div></div>'+
+
+  '<div class="nav"><button class="btn ghost" id="print">🖨️ اطبع التقرير أو احفظه PDF</button><button class="back" id="again">↻ من الأول</button></div>'+
+
+  '<div class="next"><h3>التقرير ده بيقولك إيه المشكلة — مش إزاي تبنيها</h3>'+
+    '<p>تقسيم المسؤوليات وقاعدة الحسم والإيقاع الأسبوعي — دي أدوات بتتبني على شركتك إنت، بأسماء فريقك وأرقامك. ده بالظبط اللي بيحصل في الكامب.</p>'+
+    '<a class="btn" target="_blank" rel="noopener" href="'+wa(msg)+'">اتكلم معانا على واتساب</a></div>'+
+
+  '</div>';
+
+  setTimeout(function(){$('sv').style.width=V+'%';$('si').style.width=I+'%'},150);
+  $('print').addEventListener('click',function(){window.print()});
+  $('again').addEventListener('click',function(){location.reload()});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+})();
+</script>
+<!-- EMC capture hook -->
+<script>
+(function(){
+  var TOOL="visionary";
+  var id={}; try{id=JSON.parse(sessionStorage.getItem("emc_lead")||"{}")}catch(e){}
+  var res=document.getElementById("result"); if(!res) return;
+  var fired=false;
+  function fire(){ if(fired) return; fired=true;
+    try{ if(window.EMCLeadCapture) EMCLeadCapture.save({
+      source:"tool_complete", tool:TOOL, toolTitle:document.title,
+      name:id.name||"", mobile:id.mobile||"", company:id.company||"",
+      email:id.email||"", leadId:id.leadId||""
+    }); }catch(_){}
+  }
+  var mo=new MutationObserver(function(){
+    if(!res.classList.contains("hidden") && res.children.length){ fire(); mo.disconnect(); }
+  });
+  try{ mo.observe(res,{attributes:true,childList:true}); }catch(e){}
+})();
+</script>
+</body>
+</html>
