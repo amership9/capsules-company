@@ -35,16 +35,30 @@
 .tm-tb{background:var(--emc-cream);border:1px solid var(--emc-line);border-radius:10px;padding:13px 14px}
 .tm-tb .c{font-family:'JetBrains Mono',monospace;font-size:23px;font-weight:700;color:var(--emc-navy)}
 .tm-tb .t{font-size:12.5px;color:var(--emc-muted);margin-top:3px}
-.tm-tblwrap{background:var(--emc-card);border:1px solid var(--emc-line);border-radius:12px;overflow:hidden}
-table.tm{width:100%;border-collapse:collapse;font-size:14px}
-table.tm th{text-align:right;color:var(--emc-muted);font-weight:600;font-size:12.5px;padding:12px 14px;border-bottom:1px solid var(--emc-line);background:var(--emc-cream)}
-table.tm td{padding:12px 14px;border-bottom:1px solid var(--emc-line);color:var(--emc-ink)}
-table.tm tr:last-child td{border-bottom:0}
-.tm-pill{display:inline-block;font-size:11.5px;padding:3px 10px;border-radius:20px;font-weight:600}
+/* people */
+.tm-person{background:var(--emc-card);border:1px solid var(--emc-line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.tm-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+.tm-head:hover{background:var(--emc-cream)}
+.tm-ava{width:38px;height:38px;border-radius:50%;background:var(--emc-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:0 0 auto}
+.tm-who{flex:1;min-width:0}
+.tm-who .nm{font-weight:700;color:var(--emc-navy);font-size:15px}
+.tm-who .mt{color:var(--emc-muted);font-size:12.5px;margin-top:2px}
+.tm-who .mt .tm-phone{font-family:'JetBrains Mono',monospace}
+.tm-count{background:var(--emc-cream);border:1px solid var(--emc-line);border-radius:20px;padding:4px 12px;font-size:12.5px;color:var(--emc-navy);font-weight:600;white-space:nowrap}
+.tm-caret{color:var(--emc-faint);font-size:13px;transition:transform .18s}
+.tm-person.open .tm-caret{transform:rotate(180deg)}
+.tm-body{display:none;border-top:1px solid var(--emc-line);padding:6px 16px 14px}
+.tm-person.open .tm-body{display:block}
+.tm-item{padding:12px 0;border-bottom:1px dashed var(--emc-line)}
+.tm-item:last-child{border-bottom:0}
+.tm-item .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px}
+.tm-item .nmtool{font-weight:700;color:var(--emc-ink);font-size:14px}
+.tm-item .tmtime{color:var(--emc-faint);font-size:12px;font-family:'JetBrains Mono',monospace}
+.tm-item .res{white-space:pre-line;color:var(--emc-muted);font-size:13.5px;line-height:1.7;background:var(--emc-cream);border-radius:8px;padding:10px 12px;margin-top:6px}
+.tm-pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600;margin-inline-start:6px}
 .tm-pill.gate{background:rgba(201,169,97,.18);color:#8a6d1f}
 .tm-pill.tool{background:rgba(46,125,91,.14);color:var(--emc-success)}
-.tm-phone{font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
-.tm-empty{text-align:center;color:var(--emc-muted);padding:44px 20px}
+.tm-empty{text-align:center;color:var(--emc-muted);padding:44px 20px;background:var(--emc-card);border:1px solid var(--emc-line);border-radius:12px}
 .tm-upd{color:var(--emc-faint);font-size:12.5px}
 </style>
 </head>
@@ -53,10 +67,10 @@ table.tm tr:last-child td{border-bottom:0}
 
 <template id="tm-tpl">
   <div style="max-width:1080px;margin:0 auto">
-    <div style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px">
       <div>
         <h1 style="margin:0 0 4px;font-size:26px;color:var(--emc-navy)">متابعة مركز التشخيص</h1>
-        <p style="margin:0;color:var(--emc-muted);font-size:14px">كل من يبدأ من المركز أو يُنهي أداة يظهر هنا — تحديث مباشر.</p>
+        <p style="margin:0;color:var(--emc-muted);font-size:14px">كل شخص وكل اللي عمله ونتيجته في كل أداة — تحديث مباشر. دوس على أي شخص تشوف تفاصيله.</p>
       </div>
       <span class="tm-upd" id="tm-upd"></span>
     </div>
@@ -64,30 +78,22 @@ table.tm tr:last-child td{border-bottom:0}
     <div class="tm-grid" style="margin-top:18px">
       <div class="tm-stat gold"><div class="n" id="tm-gate">0</div><div class="l">سجّل بياناته (بوابة)</div></div>
       <div class="tm-stat green"><div class="n" id="tm-done">0</div><div class="l">أداة اكتملت (خلوص)</div></div>
-      <div class="tm-stat"><div class="n" id="tm-people">0</div><div class="l">أشخاص مختلفين (بالرقم)</div></div>
+      <div class="tm-stat"><div class="n" id="tm-people">0</div><div class="l">أشخاص مختلفين</div></div>
       <div class="tm-stat red"><div class="n" id="tm-total">0</div><div class="l">إجمالي السجلات</div></div>
     </div>
 
-    <div class="tm-sec">
-      <h2>الأدوات — عدد مرات الخلوص</h2>
-      <span class="tm-live"><span class="tm-dot"></span> مباشر</span>
-    </div>
+    <div class="tm-sec"><h2>الأدوات — عدد مرات الخلوص</h2><span class="tm-live"><span class="tm-dot"></span> مباشر</span></div>
     <div class="tm-bd" id="tm-bd"></div>
 
-    <div class="tm-sec"><h2>آخر السجلات</h2></div>
-    <div class="tm-tblwrap">
-      <table class="tm">
-        <thead><tr><th>الوقت</th><th>النوع</th><th>الاسم</th><th>الموبايل</th><th>الشركة</th><th>الأداة</th></tr></thead>
-        <tbody id="tm-rows"><tr><td colspan="6" class="tm-empty">جاري التحميل…</td></tr></tbody>
-      </table>
-    </div>
+    <div class="tm-sec"><h2>الأشخاص</h2></div>
+    <div id="tm-people-list"></div>
   </div>
 </template>
 
 <script>
 (async function () {
   const main = await EMC.layout.render({ page: 'tools-monitor' });
-  if (!main) return; // protect() redirected to login
+  if (!main) return;
   main.innerHTML = document.getElementById('tm-tpl').innerHTML;
 
   const TOOL_NAMES = {
@@ -96,22 +102,33 @@ table.tm tr:last-child td{border-bottom:0}
   };
   const ORDER = ['founder-dependency','drift','alignment','scale','culture','marketing','visionary'];
   const $ = (id) => document.getElementById(id);
+  const esc = (s) => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const initials = (n) => { const p=(n||'').trim().split(/\s+/); return ((p[0]||'')[0]||'؟')+((p[1]||'')[0]||''); };
+  function fmtTime(iso){ try{ return new Date(iso).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}); }catch(e){ return iso||''; } }
 
-  function fmtTime(iso){
-    try{ return new Date(iso).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}); }
-    catch(e){ return iso || ''; }
-  }
+  const openKeys = new Set(); // نحافظ على المفتوح وقت التحديث المباشر
 
   function paint(docs){
-    let gate=0, done=0; const phones={}, tc={};
+    let gate=0, done=0; const tc={};
+    // group by person
+    const people = {}; // key -> {name,mobile,company,items[],last}
     docs.forEach(v=>{
       if(v.source==='hub_gate') gate++;
       if(v.source==='tool_complete'){ done++; tc[v.tool]=(tc[v.tool]||0)+1; }
-      const ph=(v.mobile||'').replace(/\D/g,''); if(ph.length>=8) phones[ph]=1;
+      const ph=(v.mobile||'').replace(/\D/g,'');
+      const key = ph.length>=8 ? ('p_'+ph) : ('n_'+(v.name||'').trim() || ('x_'+(v.createdAtISO||Math.random())));
+      if(!people[key]) people[key]={name:v.name||'',mobile:v.mobile||'',company:v.company||'',items:[],last:''};
+      const P=people[key];
+      if(v.name && !P.name) P.name=v.name;
+      if(v.mobile && !P.mobile) P.mobile=v.mobile;
+      if(v.company && !P.company) P.company=v.company;
+      P.items.push(v);
+      if((v.createdAtISO||'')>P.last) P.last=v.createdAtISO||'';
     });
+
     $('tm-gate').textContent=gate;
     $('tm-done').textContent=done;
-    $('tm-people').textContent=Object.keys(phones).length;
+    $('tm-people').textContent=Object.keys(people).length;
     $('tm-total').textContent=docs.length;
     $('tm-upd').textContent='آخر تحديث: '+new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
@@ -119,30 +136,48 @@ table.tm tr:last-child td{border-bottom:0}
       `<div class="tm-tb"><div class="c">${tc[k]||0}</div><div class="t">${TOOL_NAMES[k]||k}</div></div>`
     ).join('');
 
-    const tb=$('tm-rows');
-    if(!docs.length){ tb.innerHTML='<tr><td colspan="6" class="tm-empty">لسه مفيش سجلات — أول ما حد يبدأ من المركز هيظهر هنا فورًا.</td></tr>'; return; }
-    tb.innerHTML = docs.map(v=>{
-      const type = v.source==='hub_gate' ? '<span class="tm-pill gate">بوابة</span>'
-                 : v.source==='tool_complete' ? '<span class="tm-pill tool">أداة</span>' : (v.source||'');
-      const tool = v.source==='tool_complete' ? (TOOL_NAMES[v.tool]||v.tool||'') : '—';
-      return `<tr><td>${fmtTime(v.createdAtISO)}</td><td>${type}</td><td>${v.name||'—'}</td>`+
-             `<td class="tm-phone">${v.mobile||'—'}</td><td>${v.company||'—'}</td><td>${tool}</td></tr>`;
+    const list = Object.keys(people).map(k=>({key:k,...people[k]})).sort((a,b)=>(b.last||'').localeCompare(a.last||''));
+    const wrap = $('tm-people-list');
+    if(!list.length){ wrap.innerHTML='<div class="tm-empty">لسه مفيش سجلات — أول ما حد يبدأ من المركز هيظهر هنا فورًا.</div>'; return; }
+
+    wrap.innerHTML = list.map(P=>{
+      const tools = P.items.filter(i=>i.source==='tool_complete').length;
+      const isOpen = openKeys.has(P.key);
+      const items = P.items.slice().sort((a,b)=>(b.createdAtISO||'').localeCompare(a.createdAtISO||'')).map(v=>{
+        const isTool = v.source==='tool_complete';
+        const label = isTool ? (TOOL_NAMES[v.tool]||v.tool||'أداة') : 'سجّل بياناته في البوابة';
+        const pill = isTool ? '<span class="tm-pill tool">أداة</span>' : '<span class="tm-pill gate">بوابة</span>';
+        const res = (isTool && v.resultSummary) ? `<div class="res">${esc(v.resultSummary)}</div>` : '';
+        return `<div class="tm-item"><div class="top"><div class="nmtool">${esc(label)}${pill}</div>`+
+               `<div class="tmtime">${fmtTime(v.createdAtISO)}</div></div>${res}</div>`;
+      }).join('');
+      return `<div class="tm-person${isOpen?' open':''}" data-key="${esc(P.key)}">`+
+        `<div class="tm-head"><div class="tm-ava">${esc(initials(P.name))}</div>`+
+        `<div class="tm-who"><div class="nm">${esc(P.name||'بدون اسم')}</div>`+
+        `<div class="mt"><span class="tm-phone">${esc(P.mobile||'—')}</span>${P.company?(' · '+esc(P.company)):''}</div></div>`+
+        `<span class="tm-count">${tools} أداة</span><span class="tm-caret">▼</span></div>`+
+        `<div class="tm-body">${items}</div></div>`;
     }).join('');
+
+    // toggle
+    wrap.querySelectorAll('.tm-head').forEach(h=>{
+      h.addEventListener('click',()=>{
+        const card=h.parentElement, key=card.getAttribute('data-key');
+        card.classList.toggle('open');
+        if(card.classList.contains('open')) openKeys.add(key); else openKeys.delete(key);
+      });
+    });
   }
 
-  // live listener على emc_leads (بيستخدم firebase اللي هيّأه emc-firebase.js)
   const db = firebase.firestore();
   function listen(ordered){
-    const ref = ordered ? db.collection('emc_leads').orderBy('createdAtISO','desc').limit(500)
-                        : db.collection('emc_leads').limit(500);
+    const ref = ordered ? db.collection('emc_leads').orderBy('createdAtISO','desc').limit(1000)
+                        : db.collection('emc_leads').limit(1000);
     return ref.onSnapshot(snap=>{
       const docs=[]; snap.forEach(d=>docs.push(d.data()));
       if(!ordered) docs.sort((a,b)=>(b.createdAtISO||'').localeCompare(a.createdAtISO||''));
       paint(docs);
-    }, err=>{
-      if(ordered){ listen(false); } // fallback من غير ترتيب لو حصل خطأ index
-      else { $('tm-rows').innerHTML='<tr><td colspan="6" class="tm-empty">تعذّر تحميل البيانات: '+(err.message||err.code)+'</td></tr>'; }
-    });
+    }, err=>{ if(ordered) listen(false); else $('tm-people-list').innerHTML='<div class="tm-empty">تعذّر التحميل: '+esc(err.message||err.code)+'</div>'; });
   }
   listen(true);
 })();
