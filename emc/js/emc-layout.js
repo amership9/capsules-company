@@ -12,6 +12,7 @@ window.EMC.layout = {
     { id: 'segments',   label: 'الشرائح المستهدفة', href: 'segments.html', icon: 'target' },
     { id: 'pipeline',   label: 'خط الفرص',      href: 'contacts.html?zone=2', icon: 'columns' },
     { id: 'leads',      label: 'المتفاعلون',     href: 'leads.html', icon: 'magnet' },
+    { id: 'tools-monitor', label: 'متابعة الأدوات', href: 'leads-monitor.html', icon: 'target' },
     { id: 'mql-alerts', label: 'تنبيهات MQL', href: 'mql-alerts.html', icon: 'bell', countKey: 'mqls', accent: 'red' },
     { id: 'qualify',    label: 'تأهيل المبيعات', href: 'qualify.html', icon: 'clipboardCheck', countKey: 'mqls' },
     { id: 'sources',    label: 'المصادر و Landing', href: 'sources.html', icon: 'globe' },
