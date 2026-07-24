@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>متابعة الأدوات · EMC Admin</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/emc-styles.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../js/emc-firebase.js"></script>
+<script src="../js/emc-utils.js"></script>
+<script src="../js/emc-segments.js"></script>
+<script src="../js/emc-touchpoints.js"></script>
+<script src="../js/emc-contacts.js"></script>
+<script src="../js/emc-layout.js"></script>
+<style>
+.tm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+@media(max-width:820px){.tm-grid{grid-template-columns:repeat(2,1fr)}}
+.tm-stat{background:var(--emc-card);border:1px solid var(--emc-line);border-radius:12px;padding:18px 20px}
+.tm-stat .n{font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:700;line-height:1;color:var(--emc-navy)}
+.tm-stat .l{color:var(--emc-muted);font-size:13px;margin-top:6px}
+.tm-stat.red .n{color:var(--emc-red)} .tm-stat.gold .n{color:var(--emc-gold)} .tm-stat.green .n{color:var(--emc-success)}
+.tm-sec{display:flex;justify-content:space-between;align-items:center;margin:26px 0 12px}
+.tm-sec h2{font-size:17px;margin:0;color:var(--emc-navy)}
+.tm-live{font-size:12.5px;color:var(--emc-success);display:flex;align-items:center;gap:7px}
+.tm-dot{width:9px;height:9px;border-radius:50%;background:var(--emc-success);animation:tmpulse 1.8s infinite}
+@keyframes tmpulse{0%{box-shadow:0 0 0 0 rgba(46,125,91,.5)}70%{box-shadow:0 0 0 8px rgba(46,125,91,0)}100%{box-shadow:0 0 0 0 rgba(46,125,91,0)}}
+.tm-bd{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:820px){.tm-bd{grid-template-columns:repeat(2,1fr)}}
+.tm-tb{background:var(--emc-cream);border:1px solid var(--emc-line);border-radius:10px;padding:13px 14px}
+.tm-tb .c{font-family:'JetBrains Mono',monospace;font-size:23px;font-weight:700;color:var(--emc-navy)}
+.tm-tb .t{font-size:12.5px;color:var(--emc-muted);margin-top:3px}
+.tm-tblwrap{background:var(--emc-card);border:1px solid var(--emc-line);border-radius:12px;overflow:hidden}
+table.tm{width:100%;border-collapse:collapse;font-size:14px}
+table.tm th{text-align:right;color:var(--emc-muted);font-weight:600;font-size:12.5px;padding:12px 14px;border-bottom:1px solid var(--emc-line);background:var(--emc-cream)}
+table.tm td{padding:12px 14px;border-bottom:1px solid var(--emc-line);color:var(--emc-ink)}
+table.tm tr:last-child td{border-bottom:0}
+.tm-pill{display:inline-block;font-size:11.5px;padding:3px 10px;border-radius:20px;font-weight:600}
+.tm-pill.gate{background:rgba(201,169,97,.18);color:#8a6d1f}
+.tm-pill.tool{background:rgba(46,125,91,.14);color:var(--emc-success)}
+.tm-phone{font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+.tm-empty{text-align:center;color:var(--emc-muted);padding:44px 20px}
+.tm-upd{color:var(--emc-faint);font-size:12.5px}
+</style>
+</head>
+<body>
+<div id="emc-shell-root"></div>
+
+<template id="tm-tpl">
+  <div style="max-width:1080px;margin:0 auto">
+    <div style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px">
+      <div>
+        <h1 style="margin:0 0 4px;font-size:26px;color:var(--emc-navy)">متابعة مركز التشخيص</h1>
+        <p style="margin:0;color:var(--emc-muted);font-size:14px">كل من يبدأ من المركز أو يُنهي أداة يظهر هنا — تحديث مباشر.</p>
+      </div>
+      <span class="tm-upd" id="tm-upd"></span>
+    </div>
+
+    <div class="tm-grid" style="margin-top:18px">
+      <div class="tm-stat gold"><div class="n" id="tm-gate">0</div><div class="l">سجّل بياناته (بوابة)</div></div>
+      <div class="tm-stat green"><div class="n" id="tm-done">0</div><div class="l">أداة اكتملت (خلوص)</div></div>
+      <div class="tm-stat"><div class="n" id="tm-people">0</div><div class="l">أشخاص مختلفين (بالرقم)</div></div>
+      <div class="tm-stat red"><div class="n" id="tm-total">0</div><div class="l">إجمالي السجلات</div></div>
+    </div>
+
+    <div class="tm-sec">
+      <h2>الأدوات — عدد مرات الخلوص</h2>
+      <span class="tm-live"><span class="tm-dot"></span> مباشر</span>
+    </div>
+    <div class="tm-bd" id="tm-bd"></div>
+
+    <div class="tm-sec"><h2>آخر السجلات</h2></div>
+    <div class="tm-tblwrap">
+      <table class="tm">
+        <thead><tr><th>الوقت</th><th>النوع</th><th>الاسم</th><th>الموبايل</th><th>الشركة</th><th>الأداة</th></tr></thead>
+        <tbody id="tm-rows"><tr><td colspan="6" class="tm-empty">جاري التحميل…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</template>
+
+<script>
+(async function () {
+  const main = await EMC.layout.render({ page: 'tools-monitor' });
+  if (!main) return; // protect() redirected to login
+  main.innerHTML = document.getElementById('tm-tpl').innerHTML;
+
+  const TOOL_NAMES = {
+    'founder-dependency':'اعتماد المؤسس','drift':'الانحراف','alignment':'اتفاق القيادة',
+    'scale':'جاهزية التوسّع','culture':'الثقافة','marketing':'نظام التسويق','visionary':'رؤية/تنفيذ'
+  };
+  const ORDER = ['founder-dependency','drift','alignment','scale','culture','marketing','visionary'];
+  const $ = (id) => document.getElementById(id);
+
+  function fmtTime(iso){
+    try{ return new Date(iso).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}); }
+    catch(e){ return iso || ''; }
+  }
+
+  function paint(docs){
+    let gate=0, done=0; const phones={}, tc={};
+    docs.forEach(v=>{
+      if(v.source==='hub_gate') gate++;
+      if(v.source==='tool_complete'){ done++; tc[v.tool]=(tc[v.tool]||0)+1; }
+      const ph=(v.mobile||'').replace(/\D/g,''); if(ph.length>=8) phones[ph]=1;
+    });
+    $('tm-gate').textContent=gate;
+    $('tm-done').textContent=done;
+    $('tm-people').textContent=Object.keys(phones).length;
+    $('tm-total').textContent=docs.length;
+    $('tm-upd').textContent='آخر تحديث: '+new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+    $('tm-bd').innerHTML = ORDER.map(k=>
+      `<div class="tm-tb"><div class="c">${tc[k]||0}</div><div class="t">${TOOL_NAMES[k]||k}</div></div>`
+    ).join('');
+
+    const tb=$('tm-rows');
+    if(!docs.length){ tb.innerHTML='<tr><td colspan="6" class="tm-empty">لسه مفيش سجلات — أول ما حد يبدأ من المركز هيظهر هنا فورًا.</td></tr>'; return; }
+    tb.innerHTML = docs.map(v=>{
+      const type = v.source==='hub_gate' ? '<span class="tm-pill gate">بوابة</span>'
+                 : v.source==='tool_complete' ? '<span class="tm-pill tool">أداة</span>' : (v.source||'');
+      const tool = v.source==='tool_complete' ? (TOOL_NAMES[v.tool]||v.tool||'') : '—';
+      return `<tr><td>${fmtTime(v.createdAtISO)}</td><td>${type}</td><td>${v.name||'—'}</td>`+
+             `<td class="tm-phone">${v.mobile||'—'}</td><td>${v.company||'—'}</td><td>${tool}</td></tr>`;
+    }).join('');
+  }
+
+  // live listener على emc_leads (بيستخدم firebase اللي هيّأه emc-firebase.js)
+  const db = firebase.firestore();
+  function listen(ordered){
+    const ref = ordered ? db.collection('emc_leads').orderBy('createdAtISO','desc').limit(500)
+                        : db.collection('emc_leads').limit(500);
+    return ref.onSnapshot(snap=>{
+      const docs=[]; snap.forEach(d=>docs.push(d.data()));
+      if(!ordered) docs.sort((a,b)=>(b.createdAtISO||'').localeCompare(a.createdAtISO||''));
+      paint(docs);
+    }, err=>{
+      if(ordered){ listen(false); } // fallback من غير ترتيب لو حصل خطأ index
+      else { $('tm-rows').innerHTML='<tr><td colspan="6" class="tm-empty">تعذّر تحميل البيانات: '+(err.message||err.code)+'</td></tr>'; }
+    });
+  }
+  listen(true);
+})();
+</script>
+</body>
+</html>
