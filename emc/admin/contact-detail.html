@@ -2370,7 +2370,20 @@
       deposit: 'دفع دفعة مقدمة',
       paid: 'مدفوع بالكامل'
     };
-    const fmtEGP = (n) => (n == null || n === '') ? '—' : Number(n).toLocaleString('en-US') + ' ج.م';
+    
+const fmtEGP = (n) => (n == null || n === '') ? '—' : Number(n).toLocaleString('en-US') + ' ج.م';
+
+    // ── [المدفوعات] بيانات خطة السداد ──
+    const PLAN_D = EMC.PAYMENT_PLANS || {};
+    const OVR_D  = EMC.PAYMENT_OVERALL || {};
+    const payS   = EMC.payments.summary(c);
+    const pay    = c.payment || {};
+    const payRows = Array.isArray(pay.installments) ? pay.installments : [];
+    const planNow = pay.plan || 'full';
+    const firstRow = payRows[0] || {};
+    const instCount = (planNow === 'installments' && payRows.length >= 2) ? payRows.length : 3;
+    const instEvery = pay.everyMonths || 1;
+    
 
     function summaryHtml() {
       if (!saved.outcome) return '';
@@ -2381,11 +2394,19 @@
               <span class="badge" style="background:#E1F1E8; color:#1E5C42; border-color:#BFE0CD;">✓ تم الإغلاق (Won)</span>
               ${saved.decidedAt ? `<span style="font-size:11.5px; color:var(--emc-muted);">${EMC.utils.formatDate(saved.decidedAt)}</span>` : ''}
             </div>
-            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; font-size:13px;">
+
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; font-size:13px;">
               <div><div style="color:var(--emc-muted); font-size:11.5px;">الكوهورت</div><strong style="color:var(--emc-ink);">${saved.cohort || '—'}</strong></div>
-              <div><div style="color:var(--emc-muted); font-size:11.5px;">المبلغ المدفوع</div><strong style="color:var(--emc-ink);">${fmtEGP(saved.paidAmount)}</strong></div>
-              <div><div style="color:var(--emc-muted); font-size:11.5px;">حالة الدفع</div><strong style="color:var(--emc-ink);">${PAY_STATUS[saved.paymentStatus] || '—'}</strong></div>
+              <div><div style="color:var(--emc-muted); font-size:11.5px;">قيمة التعاقد</div><strong style="color:var(--emc-ink);">${fmtEGP(payS.total)}</strong></div>
+              <div><div style="color:var(--emc-muted); font-size:11.5px;">المحصّل</div><strong style="color:var(--emc-success);">${fmtEGP(payS.collected)}</strong></div>
+              <div><div style="color:var(--emc-muted); font-size:11.5px;">المتبقي</div><strong style="color:${payS.remaining > 0 ? 'var(--emc-red)' : 'var(--emc-success)'};">${fmtEGP(payS.remaining)}</strong></div>
             </div>
+            <div style="margin-top:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              ${payS.hasPlan ? `<span class="badge" style="background:${PLAN_D[payS.plan].bg}; color:${PLAN_D[payS.plan].color}; border-color:${PLAN_D[payS.plan].border};">${PLAN_D[payS.plan].icon} ${PLAN_D[payS.plan].label}${payS.plan === 'installments' ? ` · محصّل ${payS.paidCount} من ${payS.count}` : ''}</span>` : ''}
+              <span class="badge" style="background:${OVR_D[payS.overall].bg}; color:${OVR_D[payS.overall].color}; border-color:${OVR_D[payS.overall].border};">${OVR_D[payS.overall].label}</span>
+              ${payS.overdueCount > 0 ? `<span style="font-size:11.5px; color:var(--emc-red); font-weight:700;">⚠️ ${payS.overdueCount} قسط متأخر (${fmtEGP(payS.overdueAmount)})</span>` : ''}
+            </div>
+            
             <div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--emc-line); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
               <button class="btn btn-accent btn-sm" id="dec-start-onboarding">🚀 ابدأ الإعداد (المرحلة 10)</button>
               <span style="font-size:11.5px; color:var(--emc-muted);">العميل دفع وجاهز للإعداد</span>
@@ -2434,13 +2455,51 @@
                 <input class="input" id="dec-cohort-end" type="date" /></div>
             </div>
           </div>
-          <div class="field-row">
-            <div class="field" style="margin-bottom:0;"><label class="field-label">المبلغ المدفوع (ج.م)</label>
-              <input class="input" id="dec-amount" type="number" min="0" value="${saved.paidAmount ?? ''}" placeholder="0" /></div>
-            <div class="field" style="margin-bottom:0;"><label class="field-label">حالة الدفع</label>
-              <select class="select" id="dec-pay">${Object.entries(PAY_STATUS).map(([k,v])=>`<option value="${k}" ${saved.paymentStatus===k?'selected':''}>${v}</option>`).join('')}</select></div>
+
+<div style="padding:14px; background:var(--emc-cream); border:1px solid var(--emc-line); border-radius:10px;">
+            <div style="font-size:12.5px; font-weight:800; color:var(--emc-navy); margin-bottom:12px;">💰 خطة السداد</div>
+
+            <div class="field">
+              <label class="field-label">إجمالي قيمة التعاقد (ج.م) <span class="req">*</span></label>
+              <input class="input" id="dec-total" type="number" min="0" value="${pay.totalAmount ?? ''}" placeholder="مثلاً: 90000" />
+            </div>
+
+            <div class="field">
+              <label class="field-label">طريقة السداد <span class="req">*</span></label>
+              <div class="checkbox-group" id="dec-plan">
+                <label class="chip-check ${planNow === 'full' ? 'checked' : ''}"><input type="radio" name="payPlan" value="full" ${planNow === 'full' ? 'checked' : ''} /> 💵 دفعة واحدة</label>
+                <label class="chip-check ${planNow === 'installments' ? 'checked' : ''}"><input type="radio" name="payPlan" value="installments" ${planNow === 'installments' ? 'checked' : ''} /> 🗓️ تقسيط</label>
+              </div>
+            </div>
+
+            <div class="field-row" id="dec-full-block" style="display:${planNow === 'full' ? 'grid' : 'none'};">
+              <div class="field" style="margin-bottom:0;"><label class="field-label">تاريخ الاستحقاق</label>
+                <input class="input" id="dec-full-date" type="date" value="${firstRow.dueDate || ''}" /></div>
+              <div class="field" style="margin-bottom:0;"><label class="field-label">اتحصّل؟</label>
+                <select class="select" id="dec-full-paid">
+                  <option value="due" ${firstRow.status !== 'paid' ? 'selected' : ''}>لسه ما اتحصّلش</option>
+                  <option value="paid" ${firstRow.status === 'paid' ? 'selected' : ''}>اتحصّل بالكامل ✓</option>
+                </select></div>
+            </div>
+
+            <div id="dec-inst-block" style="display:${planNow === 'installments' ? 'block' : 'none'};">
+              <div class="field-row-3">
+                <div class="field" style="margin-bottom:0;"><label class="field-label">عدد الأقساط</label>
+                  <input class="input" id="dec-inst-count" type="number" min="2" max="24" value="${instCount}" /></div>
+                <div class="field" style="margin-bottom:0;"><label class="field-label">تاريخ أول قسط</label>
+                  <input class="input" id="dec-inst-start" type="date" value="${firstRow.dueDate || ''}" /></div>
+                <div class="field" style="margin-bottom:0;"><label class="field-label">كل كام شهر</label>
+                  <select class="select" id="dec-inst-every">
+                    <option value="1" ${instEvery === 1 ? 'selected' : ''}>كل شهر</option>
+                    <option value="2" ${instEvery === 2 ? 'selected' : ''}>كل شهرين</option>
+                    <option value="3" ${instEvery === 3 ? 'selected' : ''}>كل 3 شهور</option>
+                  </select></div>
+              </div>
+              <div id="dec-inst-preview" style="margin-top:12px;"></div>
+            </div>
           </div>
-          <button class="btn btn-primary btn-sm" id="dec-save" style="margin-top:16px;">حفظ القرار (Won)</button>`;
+          <button class="btn btn-primary btn-sm" id="dec-save" style="margin-top:16px;">حفظ القرار وخطة السداد</button>`;
+          
       } else if (mode === 'lost') {
         form = `
           <div class="field"><label class="field-label">سبب الخسارة الدقيق <span class="req">*</span></label>
@@ -2492,7 +2551,57 @@
         cohortNew.style.display = cohortSel.value === '__new__' ? 'block' : 'none';
       });
 
+
+      // ── [المدفوعات] معاينة حيّة لجدول الأقساط ──
+      const planRadios = panel.querySelectorAll('input[name="payPlan"]');
+      const fullBlock  = panel.querySelector('#dec-full-block');
+      const instBlock  = panel.querySelector('#dec-inst-block');
+      const prevEl     = panel.querySelector('#dec-inst-preview');
+
+      function drawPreview() {
+        if (!prevEl) return;
+        const totalEl = panel.querySelector('#dec-total');
+        const cntEl   = panel.querySelector('#dec-inst-count');
+        const stEl    = panel.querySelector('#dec-inst-start');
+        const evEl    = panel.querySelector('#dec-inst-every');
+        const total = Number((totalEl && totalEl.value) || 0);
+        const count = parseInt((cntEl && cntEl.value) || '0', 10);
+        const start = (stEl && stEl.value) || '';
+        const every = parseInt((evEl && evEl.value) || '1', 10);
+        if (!total || !count || count < 2) {
+          prevEl.innerHTML = `<div style="font-size:12px; color:var(--emc-muted);">اكتب الإجمالي وعدد الأقساط عشان تشوف الجدول.</div>`;
+          return;
+        }
+        const rows = EMC.payments.buildSchedule(total, count, start, every);
+        prevEl.innerHTML = `
+          <div style="font-size:11.5px; color:var(--emc-muted); margin-bottom:6px;">معاينة الجدول — هيتسجّل كده بالظبط</div>
+          <div style="border:1px solid var(--emc-line); border-radius:8px; overflow:hidden; background:#fff;">
+            ${rows.map(r => `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 12px; font-size:12.5px; border-bottom:1px solid var(--emc-line-soft);">
+                <span style="color:var(--emc-muted);">قسط ${r.no}</span>
+                <span style="color:var(--emc-ink); font-weight:700;">${Number(r.amount).toLocaleString('en-US')} ج.م</span>
+                <span style="color:var(--emc-muted); font-size:11.5px;">${r.dueDate}</span>
+              </div>`).join('')}
+          </div>`;
+      }
+
+      planRadios.forEach(r => r.addEventListener('change', () => {
+        panel.querySelectorAll('#dec-plan .chip-check').forEach(l => l.classList.toggle('checked', l.querySelector('input').checked));
+        const picked = panel.querySelector('input[name="payPlan"]:checked');
+        const isInst = picked && picked.value === 'installments';
+        if (fullBlock) fullBlock.style.display = isInst ? 'none' : 'grid';
+        if (instBlock) instBlock.style.display = isInst ? 'block' : 'none';
+        drawPreview();
+      }));
+      ['#dec-total', '#dec-inst-count', '#dec-inst-start', '#dec-inst-every'].forEach(sq => {
+        const el = panel.querySelector(sq);
+        if (el) el.addEventListener('input', drawPreview);
+        if (el && el.tagName === 'SELECT') el.addEventListener('change', drawPreview);
+      });
+      drawPreview();
+
       const doorLabel = panel.querySelector('#dec-door-label');
+      
       const door = panel.querySelector('#dec-door');
       if (door && doorLabel) door.addEventListener('change', () => doorLabel.classList.toggle('checked', door.checked));
 
@@ -2523,15 +2632,26 @@
                 sessions: []
               });
             }
+
+            const payment = {
+              ...(c.payment || {}),
+              plan: planVal,
+              totalAmount: totalVal,
+              currency: (c.proposal && c.proposal.currency) || 'EGP',
+              everyMonths: everyM,
+              installments: payRowsNew,
+              updatedAt: new Date().toISOString()
+            };
             const decision = {
               outcome: 'won',
               cohortId,
               cohort: cohortName,
-              paidAmount: amt === '' ? null : Number(amt),
-              paymentStatus: panel.querySelector('#dec-pay').value,
+              totalAmount: totalVal,
+              plan: planVal,
               decidedAt: saved.decidedAt || new Date().toISOString()
             };
-            await EMC.contacts.update(id, { decision });
+            await EMC.contacts.update(id, { decision, payment });
+            
             if (EMC.events?.log) {
               await EMC.events.log({ contactId: id, type: 'manual_note', stage: 9, channel: 'manual', data: { action: 'decision_won' } });
             }
