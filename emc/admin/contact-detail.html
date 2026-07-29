@@ -607,7 +607,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5l.3-.4c.1-.2 0-.3-.1-.5L9.6 7c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2 0 1.3.9 2.5 1.1 2.7.1.2 1.8 2.8 4.4 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.6.1.5-.1 1.6-.6 1.8-1.3.2-.7.2-1.2.1-1.3 0-.1-.2-.2-.5-.3zM12 2C6.5 2 2 6.5 2 12c0 1.7.4 3.4 1.3 4.9L2 22l5.2-1.4c1.4.8 3.1 1.2 4.8 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18.3c-1.5 0-3-.4-4.3-1.2l-.3-.2-3.1.8.8-3-.2-.3c-.9-1.4-1.3-3-1.3-4.5 0-4.6 3.8-8.3 8.4-8.3 4.6 0 8.3 3.8 8.3 8.3s-3.7 8.4-8.3 8.4z"/></svg>
             واتساب
           </a>
-          <button class="btn btn-outline btn-sm" id="move-stage-btn">↑ نقل لمرحلة</button>
+          <button class="btn btn-outline btn-sm" id="move-stage-btn">⇅ نقل لمرحلة</button>
         </div>
       </div>
 
@@ -802,15 +802,98 @@
   document.getElementById('next-step-text').textContent = nextStepMap[c.currentStage] || '—';
 
   // ─── Actions ───
-  document.getElementById('move-stage-btn').addEventListener('click', async () => {
-    const next = c.currentStage + 1;
-    if (next > 14) { EMC.utils.toast('وصل بالفعل لآخر مرحلة', 'default'); return; }
-    const nextStage = EMC.utils.getStage(next);
-    if (!confirm(`نقل ${c.identity.fullName} إلى المرحلة ${next} — ${nextStage.name}؟`)) return;
-    await EMC.contacts.moveToStage(id, next, 'نقل يدوي من صفحة التفاصيل');
-    EMC.utils.toast('تم نقل المرحلة', 'success');
-    setTimeout(() => window.location.reload(), 800);
+  document.getElementById('move-stage-btn').addEventListener('click', () => {
+    openStageMover();
   });
+
+  // ─── [نقل مرحلة] مودال النقل — تقديم أو رجوع لأي مرحلة ───
+  function openStageMover() {
+    const cur = c.currentStage;
+    const oldModal = document.getElementById('stage-mover-modal');
+    if (oldModal) oldModal.remove();
+
+    const options = EMC.STAGES.map(s => {
+      let tag = '';
+      if (s.id === cur) tag = ' — (المرحلة الحالية)';
+      else if (s.id > cur) tag = ' — تقدّم ↑';
+      else tag = ' — رجوع ↓';
+      return `<option value="${s.id}" ${s.id === cur ? 'disabled' : ''}>${String(s.id).padStart(2, '0')} · ${s.name}${tag}</option>`;
+    }).join('');
+
+    const wrap = document.createElement('div');
+    wrap.id = 'stage-mover-modal';
+    wrap.setAttribute('style', 'position:fixed; inset:0; background:rgba(11,23,48,0.55); backdrop-filter:blur(4px); z-index:90; display:flex; align-items:center; justify-content:center; padding:24px;');
+    wrap.innerHTML = `
+      <div style="background:#fff; border-radius:14px; width:100%; max-width:520px; box-shadow:0 30px 80px rgba(0,0,0,0.3); overflow:hidden;">
+        <div style="padding:18px 24px; border-bottom:1px solid var(--emc-line);">
+          <h3 style="margin:0; font-size:17px; color:var(--emc-navy); font-weight:700;">نقل المرحلة</h3>
+          <div style="font-size:12.5px; color:var(--emc-muted); margin-top:2px;">${c.identity.fullName} — دلوقتي في المرحلة ${cur}: ${EMC.utils.getStage(cur).name}</div>
+        </div>
+        <div style="padding:22px 24px;">
+          <div class="field">
+            <label class="field-label">انقل إلى <span class="req">*</span></label>
+            <select class="select" id="sm-target">
+              <option value="">— اختار المرحلة —</option>
+              ${options}
+            </select>
+          </div>
+          <div id="sm-warn" style="display:none; margin-bottom:14px; padding:12px 14px; background:#FBE0E2; border:1px solid #F1B6BB; border-radius:8px; font-size:12.5px; color:#A2202D; line-height:1.6;"></div>
+          <div class="field" style="margin-bottom:0;">
+            <label class="field-label">سبب النقل <span id="sm-req" class="req" style="display:none;">*</span></label>
+            <textarea class="textarea" id="sm-reason" rows="2" placeholder="ليه بتنقله؟ ده بيتسجّل في السجل الزمني."></textarea>
+          </div>
+        </div>
+        <div style="padding:14px 24px; border-top:1px solid var(--emc-line); display:flex; justify-content:flex-end; gap:8px; background:var(--emc-cream);">
+          <button class="btn btn-ghost btn-sm" id="sm-cancel">إلغاء</button>
+          <button class="btn btn-primary btn-sm" id="sm-save">تأكيد النقل</button>
+        </div>
+      </div>`;
+    document.body.appendChild(wrap);
+
+    const sel = wrap.querySelector('#sm-target');
+    const warn = wrap.querySelector('#sm-warn');
+    const reqStar = wrap.querySelector('#sm-req');
+
+    sel.addEventListener('change', () => {
+      const t = parseInt(sel.value || '0', 10);
+      if (t && t < cur) {
+        warn.style.display = 'block';
+        warn.innerHTML = `⚠️ ده <strong>رجوع للخلف</strong> من المرحلة ${cur} للمرحلة ${t}. البيانات القديمة مش هتتمسح، بس اللوحات هتتغيّر حسب المرحلة الجديدة. <strong>السبب إجباري.</strong>`;
+        reqStar.style.display = 'inline';
+      } else {
+        warn.style.display = 'none';
+        reqStar.style.display = 'none';
+      }
+    });
+
+    wrap.querySelector('#sm-cancel').addEventListener('click', () => wrap.remove());
+    wrap.addEventListener('click', (e) => { if (e.target === wrap) wrap.remove(); });
+
+    wrap.querySelector('#sm-save').addEventListener('click', async () => {
+      const target = parseInt(sel.value || '0', 10);
+      if (!target) { EMC.utils.toast('اختار المرحلة الأول', 'error'); return; }
+      if (target === cur) { EMC.utils.toast('ده نفس المرحلة الحالية', 'error'); return; }
+
+      const isBack = target < cur;
+      const reason = wrap.querySelector('#sm-reason').value.trim();
+      if (isBack && !reason) { EMC.utils.toast('اكتب سبب الرجوع', 'error'); return; }
+
+      const targetName = EMC.utils.getStage(target).name;
+      if (!confirm(`${isBack ? 'رجوع' : 'تقديم'} ${c.identity.fullName} من المرحلة ${cur} إلى المرحلة ${target} — ${targetName}؟`)) return;
+
+      const saveBtn = wrap.querySelector('#sm-save');
+      saveBtn.disabled = true; saveBtn.textContent = 'جاري النقل…';
+      try {
+        const label = isBack ? '↩︎ رجوع يدوي' : '↑ تقديم يدوي';
+        await EMC.contacts.moveToStage(id, target, `${label}: ${reason || 'من صفحة التفاصيل'}`);
+        EMC.utils.toast('تم نقل المرحلة', 'success');
+        setTimeout(() => window.location.reload(), 800);
+      } catch (err) {
+        EMC.utils.toast('خطأ في النقل: ' + (err.message || ''), 'error');
+        saveBtn.disabled = false; saveBtn.textContent = 'تأكيد النقل';
+      }
+    });
+  }
 
   document.getElementById('schedule-btn').addEventListener('click', () => {
     EMC.utils.toast('قريباً — نظام جدولة المهام', 'default');
