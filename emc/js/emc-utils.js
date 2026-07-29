@@ -415,7 +415,7 @@ window.EMC.ONBOARDING_OWNERS = {
 // مهام الإعداد — مسارين متوازيين، الترتيب مقصود
 window.EMC.ONBOARDING_TASKS = [
   // ── مسار عبد الله (إداري) ──
-  { key: 'payment_confirmed', owner: 'admin', icon: '💳', label: 'تأكيد الدفع الكامل', hint: 'اتأكد إن قيمة الكوهورت اتدفعت بالكامل أو حسب الاتفاق.' },
+  { key: 'payment_confirmed', owner: 'admin', icon: '💳', label: 'تأكيد حالة السداد', hint: 'دفعة واحدة: اتأكد إن المبلغ اتحصّل كامل. تقسيط: اتأكد إن أول قسط اتحصّل والجدول متسجّل.' },
   { key: 'coach_assigned',    owner: 'admin', icon: '🎯', label: 'تحديد المدرب المسؤول', hint: 'حدّد مين هيدرّب ويتابع العميل خلال الكوهورت.' },
   { key: 'added_to_group',    owner: 'admin', icon: '💬', label: 'إضافته لجروب الكوهورت', hint: 'ضيف العميل لقناة التواصل (واتساب/جروب) الخاصة بالكوهورت.' },
   { key: 'welcome_sent',      owner: 'admin', icon: '📦', label: 'إرسال حزمة الترحيب', hint: 'ابعت حزمة الترحيب الرسمية خلال 48 ساعة من الدفع.' },
@@ -572,6 +572,120 @@ window.EMC.IMPLEMENTATION_TOOLS = [
   { key: 'issues',         icon: '✅', label: 'حل المشكلات', hint: 'طريقة منظّمة لحسم المشكلات بقت متّبعة.' },
   { key: 'vision',         icon: '🧭', label: 'الرؤية على صفحة', hint: 'رؤية الشركة موثّقة وواضحة للفريق.' }
 ];
+
+
+// ═══════════════════════════════════════════════════════════════════
+// [المدفوعات] قواميس السداد والأقساط
+// ═══════════════════════════════════════════════════════════════════
+
+// طريقة السداد — دفعة واحدة = جدول بقسط واحد (توحيد مقصود)
+window.EMC.PAYMENT_PLANS = {
+  full:         { label: 'دفعة واحدة', icon: '💵', color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD' },
+  installments: { label: 'تقسيط',      icon: '🗓️', color: '#1B3A66', bg: '#E0EBF7', border: '#B5CFE8' }
+};
+
+// حالة القسط الواحد
+window.EMC.INSTALLMENT_STATUS = {
+  due:     { label: 'مستحق',   color: '#8C5915', bg: '#FAEEDB', border: '#ECD3A6' },
+  paid:    { label: 'محصّل ✓', color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD' },
+  overdue: { label: 'متأخر',   color: '#A2202D', bg: '#FBE0E2', border: '#F1B6BB' },
+  waived:  { label: 'مُعفى',    color: '#5F5E5A', bg: '#F1EFE8', border: '#D3D1C7' }
+};
+
+// الحالة الإجمالية للعميل — محسوبة تلقائياً، مش بتتحدد يدوياً
+window.EMC.PAYMENT_OVERALL = {
+  not_started: { label: 'لم يبدأ السداد', color: '#5F5E5A', bg: '#F1EFE8', border: '#D3D1C7' },
+  partial:     { label: 'سداد جزئي',      color: '#1B3A66', bg: '#E0EBF7', border: '#B5CFE8' },
+  late:        { label: 'عليه متأخرات',   color: '#A2202D', bg: '#FBE0E2', border: '#F1B6BB' },
+  complete:    { label: 'مكتمل ✓',        color: '#1E5C42', bg: '#E1F1E8', border: '#BFE0CD' }
+};
+
+// طرق التحصيل
+window.EMC.PAYMENT_METHODS = {
+  cash:     'كاش',
+  instapay: 'إنستاباي',
+  wallet:   'محفظة إلكترونية',
+  transfer: 'تحويل بنكي',
+  cheque:   'شيك',
+  other:    'طريقة أخرى'
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// [المدفوعات] محرّك الحساب — دوال نقية، مبتكتبش في قاعدة البيانات
+// ═══════════════════════════════════════════════════════════════════
+window.EMC.payments = {
+
+  // بيولّد جدول أقساط متساوي. الكسور بتروح على القسط الأخير
+  // عشان مجموع الأقساط يطابق إجمالي التعاقد بالمليم.
+  buildSchedule(total, count, firstDueDate, everyMonths) {
+    const t = Math.max(0, Math.round(Number(total) || 0));
+    const n = Math.max(1, parseInt(count, 10) || 1);
+    const step = Math.max(1, parseInt(everyMonths, 10) || 1);
+    const base = Math.floor(t / n);
+    const rows = [];
+    const start = firstDueDate ? new Date(firstDueDate) : new Date();
+    for (let i = 0; i < n; i++) {
+      const d = new Date(start.getTime());
+      d.setMonth(d.getMonth() + (i * step));
+      rows.push({
+        no: i + 1,
+        amount: (i === n - 1) ? (t - base * (n - 1)) : base,
+        dueDate: d.toISOString().slice(0, 10),
+        status: 'due',
+        paidAt: null,
+        method: '',
+        note: ''
+      });
+    }
+    return rows;
+  },
+
+  // الحالة الحقيقية للقسط — بيحوّل "مستحق" فات معاده لـ "متأخر"
+  // بالحساب مش بالكتابة، فمحدش محتاج يعلّم على حاجة يدوي.
+  rowStatus(row) {
+    if (!row) return 'due';
+    if (row.status === 'paid' || row.status === 'waived') return row.status;
+    const today = new Date().toISOString().slice(0, 10);
+    if (row.dueDate && row.dueDate < today) return 'overdue';
+    return 'due';
+  },
+
+  // ملخص السداد لأي عميل — ده اللي كل الشاشات هتقرا منه
+  summary(contact) {
+    const p = (contact && contact.payment) || {};
+    const rows = Array.isArray(p.installments) ? p.installments : [];
+    const total = Number(p.totalAmount) || 0;
+    const today = new Date().toISOString().slice(0, 10);
+
+    let collected = 0, waived = 0, overdueAmount = 0, overdueCount = 0;
+    let nextDue = null;
+
+    rows.forEach(r => {
+      const amt = Number(r.amount) || 0;
+      if (r.status === 'paid')   { collected += amt; return; }
+      if (r.status === 'waived') { waived += amt; return; }
+      if (r.dueDate && r.dueDate < today) { overdueAmount += amt; overdueCount++; }
+      if (!nextDue || (r.dueDate && r.dueDate < nextDue.dueDate)) nextDue = r;
+    });
+
+    const remaining = Math.max(0, total - collected - waived);
+    let overall = 'not_started';
+    if (total > 0 && remaining === 0) overall = 'complete';
+    else if (overdueCount > 0)        overall = 'late';
+    else if (collected > 0)           overall = 'partial';
+
+    const percent = total > 0 ? Math.min(100, Math.round((collected / total) * 100)) : 0;
+
+    return {
+      hasPlan: !!p.plan,
+      plan: p.plan || '',
+      total, collected, waived, remaining, percent,
+      overdueAmount, overdueCount, nextDue, overall,
+      count: rows.length,
+      paidCount: rows.filter(r => r.status === 'paid').length
+    };
+  }
+};
 
 // ═══════════════════════════════════════════════════════════════════
 // [المرحلة 13] قاموس الخريجين (Alumni)
