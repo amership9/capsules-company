@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>يوم القرار — قبل ما نبدأ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+
+<!-- Firebase compat -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<style>
+:root{
+  --navy-900:#060f24; --navy-800:#0b1b3b; --navy-700:#0f2347; --navy-600:#16305c;
+  --line:#1c3056;
+  --gold:#D4AF37; --gold-soft:#e7c766;
+  --sky:#7FB3D5; --sky-soft:#a5d8ff;
+  --ember:#E8623D;
+  --white:#f4f7fb; --mute:#9fb2cf; --mute-2:#6f86a8;
+  --radius:16px; --radius-s:10px; --maxw:760px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  background:
+    radial-gradient(1200px 700px at 80% -10%, #142a55 0%, transparent 55%),
+    radial-gradient(900px 600px at -10% 110%, #10204a 0%, transparent 50%),
+    var(--navy-900);
+  color:var(--white); font-family:'Tajawal',system-ui,sans-serif;
+  direction:rtl; line-height:1.75; min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+h1,h2,h3,.display{font-family:'Reem Kufi','Tajawal',sans-serif;font-weight:600;line-height:1.35}
+.wrap{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:24px 18px 120px}
+
+/* ---------- شريط التقدّم ---------- */
+.progress-bar{
+  position:fixed;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.06);z-index:50;
+}
+.progress-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--ember));transition:width .35s ease}
+
+/* ---------- الغلاف ---------- */
+.cover{padding-top:28px;text-align:center}
+.eyebrow{
+  display:inline-block;font-size:.72rem;letter-spacing:.16em;color:var(--mute-2);
+  border:1px solid var(--line);border-radius:999px;padding:6px 14px;margin-bottom:22px;
+}
+.cover h1{font-size:2rem;color:var(--gold);margin-bottom:6px}
+.cover .sub{color:var(--sky-soft);font-size:1.02rem;margin-bottom:26px}
+.cover-note{
+  text-align:right;background:rgba(255,255,255,.03);border:1px solid var(--line);
+  border-radius:var(--radius);padding:20px 20px;color:var(--mute);font-size:.97rem;
+}
+.cover-note strong{color:var(--white)}
+.cover-note p{margin-bottom:12px}
+.cover-note p:last-child{margin-bottom:0}
+
+/* ---------- الأقسام والأسئلة ---------- */
+.section{margin-top:36px}
+.section-head{
+  display:flex;align-items:center;gap:12px;margin-bottom:6px;
+}
+.section-head .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.section-head h2{font-size:1.12rem;color:var(--gold-soft)}
+.section-desc{color:var(--mute-2);font-size:.88rem;margin-bottom:18px;padding-right:20px}
+
+.q{
+  background:rgba(255,255,255,.028);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px 18px 16px;margin-bottom:14px;
+  transition:border-color .25s ease, background .25s ease;
+}
+.q.filled{border-color:rgba(212,175,55,.38);background:rgba(212,175,55,.045)}
+.q-label{display:block;font-size:1rem;font-weight:500;margin-bottom:6px;line-height:1.6}
+.q-num{color:var(--mute-2);font-size:.8rem;font-weight:400;margin-left:6px}
+.q-hint{color:var(--mute-2);font-size:.83rem;margin-bottom:12px;line-height:1.55}
+.optional{color:var(--sky);font-size:.75rem;border:1px solid rgba(127,179,213,.35);border-radius:6px;padding:1px 7px;margin-right:6px}
+
+textarea,input[type=text],select{
+  width:100%;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:var(--radius-s);
+  color:var(--white);font-family:inherit;font-size:.97rem;line-height:1.7;padding:12px 14px;
+  outline:none;transition:border-color .2s ease;
+}
+textarea{min-height:104px;resize:vertical}
+textarea:focus,input:focus,select:focus{border-color:var(--gold)}
+select option{background:var(--navy-800);color:var(--white)}
+.triple input{margin-bottom:9px}
+.triple input:last-child{margin-bottom:0}
+
+/* اختيارات */
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{
+  display:flex;align-items:flex-start;gap:11px;cursor:pointer;
+  background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:var(--radius-s);
+  padding:11px 13px;transition:all .18s ease;font-size:.95rem;line-height:1.55;
+}
+.choice:hover{border-color:var(--mute-2)}
+.choice input{width:19px;height:19px;flex-shrink:0;accent-color:var(--gold);margin-top:2px}
+.choice.on{border-color:var(--gold);background:rgba(212,175,55,.09)}
+
+/* ---------- الموافقة والإرسال ---------- */
+.consent{
+  margin-top:34px;background:rgba(232,98,61,.06);border:1px solid rgba(232,98,61,.3);
+  border-radius:var(--radius);padding:18px;
+}
+.consent label{display:flex;align-items:flex-start;gap:11px;cursor:pointer;font-size:.95rem;line-height:1.6}
+.consent input{width:21px;height:21px;flex-shrink:0;accent-color:var(--ember);margin-top:2px}
+
+.btn{
+  width:100%;margin-top:20px;padding:16px;border:none;border-radius:var(--radius-s);
+  font-family:'Reem Kufi',sans-serif;font-size:1.06rem;font-weight:600;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold),#c69a2a);color:#17203a;transition:opacity .2s ease;
+}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn:not(:disabled):hover{opacity:.9}
+
+.savenote{text-align:center;color:var(--mute-2);font-size:.82rem;margin-top:12px}
+
+/* ---------- شاشة الشكر ---------- */
+.done{text-align:center;padding:70px 10px}
+.done .mark{
+  width:64px;height:64px;border-radius:50%;margin:0 auto 24px;
+  background:linear-gradient(135deg,var(--gold),var(--ember));
+  display:flex;align-items:center;justify-content:center;font-size:1.9rem;color:#17203a;
+}
+.done h2{font-size:1.5rem;color:var(--gold);margin-bottom:12px}
+.done p{color:var(--mute);max-width:420px;margin:0 auto 10px}
+
+.err{
+  background:rgba(232,98,61,.12);border:1px solid var(--ember);color:#ffc4b1;
+  border-radius:var(--radius-s);padding:13px;margin-top:14px;font-size:.92rem;display:none;
+}
+.hidden{display:none!important}
+@media (max-width:520px){ .cover h1{font-size:1.65rem} .wrap{padding:18px 14px 110px} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><span id="progressFill"></span></div>
+
+<div class="wrap">
+
+  <!-- ============ الغلاف ============ -->
+  <section id="coverScreen">
+    <div class="cover">
+      <div class="eyebrow" id="coverEyebrow">Proactive Development Solutions</div>
+      <h1 id="coverTitle">يوم القرار</h1>
+      <div class="sub" id="coverSub"></div>
+      <div class="cover-note" id="coverNote"></div>
+      <button class="btn" id="startBtn">ابدأ</button>
+    </div>
+  </section>
+
+  <!-- ============ الاستمارة ============ -->
+  <form id="formScreen" class="hidden" autocomplete="off">
+    <div id="formBody"></div>
+
+    <div class="consent">
+      <label>
+        <input type="checkbox" id="consentChk">
+        <span id="consentText"></span>
+      </label>
+    </div>
+
+    <button type="button" class="btn" id="submitBtn" disabled>إرسال</button>
+    <div class="savenote" id="saveNote">إجاباتك بتتحفظ على جهازك أول بأول — تقدر تقفل وترجع.</div>
+    <div class="err" id="errBox"></div>
+  </form>
+
+  <!-- ============ الشكر ============ -->
+  <section id="doneScreen" class="hidden">
+    <div class="done">
+      <div class="mark">✓</div>
+      <h2>وصلت. شكرًا.</h2>
+      <p id="doneMsg"></p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ==========================================================================
+   ١ · إعداد Firebase — نفس مشروع emc-crm
+========================================================================== */
+var firebaseConfig = {
+  apiKey: "AIzaSyDG8eQaToGjmLx_CczY6Vz1q59GetC-P9E",
+  authDomain: "emc-crm.firebaseapp.com",
+  projectId: "emc-crm",
+  storageBucket: "emc-crm.firebasestorage.app",
+  messagingSenderId: "75520877393",
+  appId: "1:75520877393:web:71931155b19155ad73e970",
+  measurementId: "G-ZS8YC5G6XQ"
+};
+var COLLECTION = 'dd_intakes';
+var db = null;
+try{
+  if(!firebase.apps || !firebase.apps.length){ firebase.initializeApp(firebaseConfig); }
+  db = firebase.firestore();
+}catch(e){ console.error('Firebase init failed:', e); }
+
+/* ==========================================================================
+   ٢ · قراءة اللينك:  intake.html?c=english-capsules&r=team
+========================================================================== */
+function param(k, def){
+  var m = new RegExp('[?&]'+k+'=([^&]*)').exec(window.location.search);
+  return m ? decodeURIComponent(m[1]) : def;
+}
+var COMPANY   = param('c','english-capsules');
+var ROLE      = param('r','team');
+var COMPANY_LABEL = param('n','');   // اسم الشركة للعرض (اختياري)
+if(['team','sponsor','hr'].indexOf(ROLE) === -1) ROLE = 'team';
+
+/* ==========================================================================
+   ٣ · نصوص الأغلفة
+========================================================================== */
+var COVERS = {
+  team: {
+    sub: '٨ دقايق · مجهولة · من غير اسم',
+    note: '<p>دي مش استمارة تقييم، ومحدش هيتقيّم فيها. <strong>ومفيش خانة اسم.</strong></p>'
+        + '<p>إحنا مش بنسألك عن نفسك. بنسألك عن <strong>حاجات حصلت</strong>.</p>'
+        + '<p>واللي هتكتبه هنا هو اللي هيبني اليوم — يعني اليوم هيبقى عن شغلكم إنتو، مش أمثلة عامة من كتاب.</p>'
+        + '<p style="color:var(--gold-soft)">واللي مش هيرد... اليوم هيبقى عام بالنسباله.</p>',
+    consent: 'موافق إن الوقائع اللي كتبتها تتقال في اليوم <strong>بدون اسمي وبدون أي تفصيلة تكشف مين كتبها</strong>.',
+    done: 'اللي كتبته هيدخل في بناء اليوم. ومحدش هيعرف إنه منك.'
+  },
+  sponsor: {
+    sub: 'استمارة صاحب القرار · ١٢ دقيقة',
+    note: '<p>دي بتوصلني أنا شخصيًا، وبتتقري قبل ما أبني اليوم.</p>'
+        + '<p>فيها أسئلة عن <strong>الخطوط الحمرا</strong> — وهي أهم حاجة فيها. اللي هتقوله هنا مش هيتقال في القاعة، بس هو اللي هيمنعني أفتح باب مش وقته.</p>'
+        + '<p>ومحتاج منك <strong>صراحة أكتر من الدبلوماسية</strong>. اليوم بيتبني على الصراحة دي.</p>',
+    consent: 'اللي كتبته هنا للمدرّب بس، ومش هيتقال في القاعة إلا لو أنا قلت.',
+    done: 'وصلت. لو فيه حاجة تانية عايز تقولها قبل اليوم، ابعتها في أي وقت.'
+  },
+  hr: {
+    sub: 'استمارة الموارد البشرية · ١٠ دقايق',
+    note: '<p>إنت الوحيد اللي بيشوف <strong>ما بعد القرار</strong> — مين مشي، وأنهي شكوى اتكررت، وأنهي سياسة اتكتبت ومحدش فاكر ليه.</p>'
+        + '<p>ودي حتة مالهاش مصدر تاني عندي.</p>'
+        + '<p style="color:var(--gold-soft)">وقاعدة واحدة: الأسئلة دي عن <strong>أنماط، مش عن أشخاص</strong>. من فضلك من غير أسماء خالص — الدور بس («فريق الدعم»، «واحد في الفرع»).</p>',
+    consent: 'اللي كتبته هيتقال في اليوم <strong>كنمط عام، بدون أي اسم أو تفصيلة تكشف حد</strong>.',
+    done: 'وصلت. ودي أكتر مادة بتفرق في بناء اليوم.'
+  }
+};
+
+/* ==========================================================================
+   ٤ · بنك الأسئلة
+   type: long | short | triple | choice | select
+========================================================================== */
+var SETS = {};
+
+/* ---------------- فريق العمل ---------------- */
+SETS.team = [
+  { kind:'select', id:'roleBand', label:'موقعك في الشركة',
+    hint:'ده عشان أقرا الفرق بين الطبقات — مش عشان أعرف مين إنت.',
+    options:['مش عايز أحدد','فريق','إشراف / قيادة وسطى','إدارة عليا'] },
+
+  { kind:'section', title:'الجزء الأول — وقائع',
+    desc:'اكتب زي ما بتحكي. مفيش صياغة مطلوبة. ومن غير أسماء.' },
+
+  { kind:'long', id:'q1', label:'قرار اتاخد في آخر ٦ شهور، وكان شكله مظبوط... ولما جه التنفيذ ماشتغلش زي ما المفروض.',
+    hint:'إيه اللي حصل؟ (٣–٤ سطور)' },
+  { kind:'long', id:'q2', label:'فيه حاجة عندكم بتتأجل... وبتتأجل تاني... ولسه معلقة لحد النهارده؟',
+    hint:'إيه هي؟ وفي رأيك إيه اللي مانع الحسم فيها؟' },
+  { kind:'long', id:'q3', label:'آخر نقاش حاد حصل في اجتماع — الخلاف كان على إيه بالظبط؟',
+    hint:'مش مين كان صح. الخلاف كان على إيه.' },
+  { kind:'long', id:'q4', label:'فيه جملة بتتقال عندكم بتبدأ بـ «إحنا عارفين إن...» — وإنت جواك حاسس إن محدش اتأكد منها فعلًا؟',
+    hint:'اكتبها زي ما بتتقال.' },
+  { kind:'long', id:'q5', label:'قرار كان صح، ودفع تمنه ناس مش هما اللي خدوه.',
+    hint:'إيه كان؟ ومين دفع؟ (بالدور مش بالاسم — «فريق الدعم»، «اللي في الفرع»...)' },
+  { kind:'long', id:'q6', label:'حاجة بتحصل عندكم بشكل ثابت، متكتبتش في أي مكان، وكل واحد فاهمها بطريقة مختلفة شوية؟' },
+
+  { kind:'section', title:'الجزء التاني — لغة المكان',
+    desc:'وده أهم سؤال في الاستمارة كلها.' },
+
+  { kind:'triple', id:'q7', label:'اكتب تلات جمل بتتقال عندكم كتير في الاجتماعات.',
+    hint:'بالحرف، بالبلدي، حتى لو مضحكة.',
+    placeholders:['الجملة الأولى','الجملة التانية','الجملة التالتة'] },
+
+  { kind:'section', title:'الجزء التالت — أرقام سريعة',
+    desc:'٤٠ ثانية. اختيار بس.' },
+
+  { kind:'choice', id:'q8', label:'بعد ما القرار يتاخد في اجتماع، بيتكتب في حتة؟',
+    options:['دايمًا','أغلب الوقت','أحيانًا','نادرًا','أبدًا'] },
+  { kind:'choice', id:'q9', label:'لما القرار يتاخد، بتعرف مين المسؤول عن تنفيذه؟',
+    options:['دايمًا','أغلب الوقت','أحيانًا','نادرًا','أبدًا'] },
+  { kind:'choice', id:'q10', label:'في اجتماعاتكم، أنهي جملة بتسمعها أكتر؟',
+    options:['«استنى، إحنا عارفين إيه بالظبط؟»','«طب الناس هتاخدها إزاي؟»','«يلا بقى نقرر»','«خلينا نأجلها لحد ما نشوف»'] },
+  { kind:'choice', id:'q11', label:'وأنهي جملة نادرًا بتتقال؟',
+    options:['«استنى، إحنا عارفين إيه بالظبط؟»','«طب الناس هتاخدها إزاي؟»','«يلا بقى نقرر»','«خلينا نأجلها لحد ما نشوف»'] },
+  { kind:'choice', id:'q12', label:'لو قرار مهم لازم يوصل للإدارة، بيوصل في وقته؟',
+    options:['دايمًا','أغلب الوقت','أحيانًا','نادرًا','أبدًا'] },
+
+  { kind:'section', title:'الجزء الرابع — إنت عايز إيه',
+    desc:'آخر تلاتة.' },
+
+  { kind:'long', id:'q13', label:'لو اليوم ده نجح — إيه الحاجة الواحدة اللي هتبقى اتغيرت بعد شهر؟' },
+  { kind:'long', id:'q14', label:'إيه الحاجة اللي لو اتقالت في اليوم ده هتحسها مضيعة وقت؟',
+    hint:'كن صريح. ده هيمنعني أقولها.' },
+  { kind:'long', id:'q15', optional:true, label:'حاجة عايز تتقال في اليوم ده وإنت مش قادر تقولها في اجتماع عادي؟' }
+];
+
+/* ---------------- صاحب القرار ---------------- */
+SETS.sponsor = [
+  { kind:'section', title:'السياق' },
+  { kind:'long', id:'s1', label:'إيه الحاجة اللي بتتكرر في طريقة اتخاذ القرار عندكم وبتزهقك؟' },
+  { kind:'long', id:'s2', label:'فيه قرار معلّق دلوقتي إنت عارفه؟',
+    hint:'ممكن نستخدمه كمادة حية في اليوم — بموافقتك.' },
+  { kind:'long', id:'s8', label:'بعد شهر، إيه الحاجة اللي لو شفتها تقول «اليوم ده عمل شغل»؟' },
+
+  { kind:'section', title:'الخطوط الحمرا', desc:'وده أهم قسم في الاستمارة.' },
+  { kind:'long', id:'s3', label:'إيه الحاجة اللي ممنوع نفتحها في اليوم ده؟',
+    hint:'ملف، أو أزمة، أو موضوع لسه سخن. اكتبه بصراحة — ده مش هيتقال، ده هيتجنّب.' },
+  { kind:'long', id:'s4', label:'فيه شخص لو حس بإحراج في اليوم ده الحكاية هتبوظ؟',
+    hint:'من غير اسم لو صعب — يكفيني أعرف إن فيه، وفي أي موقع.' },
+
+  { kind:'section', title:'عنك إنت', desc:'والصراحة هنا بتفرق في إزاي هدير وحدة الرسوخ.' },
+  { kind:'choice', id:'s5', label:'لما حد يعترض على قرارك، رد فعلك المعتاد إيه؟',
+    options:['بسمع وأعدّل لو الحجة قوية','بسمع بس نادرًا بغيّر','بحس بضيق وبدافع عن قراري','بيعتمد على مين اللي بيعترض','مش متأكد'] },
+  { kind:'choice', id:'s6', label:'هتحضر اليوم كله؟',
+    options:['كله من الأول للآخر','جزء منه','مش هحضر'] },
+
+  { kind:'section', title:'السؤال الحاسم' },
+  { kind:'long', id:'s7',
+    label:'اليوم هيطلع منه بند واحد على الحيطة وله «حارس» — واحد من الفريق حقّه إنه يقول لأي حد في أي اجتماع «البند ده بيتكسر دلوقتي».',
+    hint:'السؤال: إنت مستعد إن الحارس ينبّهك إنت شخصيًا قدام الكل؟ جاوب بصراحة — ولو الإجابة «لأ» أو «مش مرتاح»، ده مش عيب، وده هيغيّر تصميم آخر نص ساعة في اليوم.' }
+];
+
+/* ---------------- الموارد البشرية ---------------- */
+SETS.hr = [
+  { kind:'section', title:'ما بعد القرار', desc:'كل الأسئلة دي عن أنماط. من فضلك من غير أسماء.' },
+  { kind:'long', id:'h1', label:'في آخر سنة، حد مشي (استقال) وإنت جواك عارف إن السبب الحقيقي كان قرار اتاخد قبلها بشهور؟',
+    hint:'إيه كان نمط القرار ده؟ (بالدور مش بالاسم)' },
+  { kind:'long', id:'h2', label:'إيه أكتر شكوى بتوصلك متكررة وليها علاقة بطريقة اتخاذ القرار — مش بمحتواه؟' },
+  { kind:'long', id:'h3', label:'لما قرار بيتاخد وبيأثر على ناس — بيعرفوا منين وامتى؟ وإيه اللي بيحصل في المسافة بين القرار والإعلان؟' },
+  { kind:'long', id:'h8', label:'إيه أكتر حاجة بتضطر تصلحها بعد ما القرار يتاخد؟' },
+
+  { kind:'section', title:'القواعد والصلاحية' },
+  { kind:'long', id:'h4', label:'فيه سياسة أو قاعدة مكتوبة عندكم محدش فاكر ليه اتعملت — وبتتطبق لحد النهارده؟' },
+  { kind:'long', id:'h6', label:'صلاحيات القرار عندكم مكتوبة في حتة؟ ولو لأ، الناس بتعرف حدودها منين؟' },
+  { kind:'choice', id:'h9', label:'لما حد في الفريق مش موافق على قرار — عنده طريقة يقولها؟',
+    options:['آه، وفيه مسار واضح','آه، بس بشكل غير رسمي','بيتقال لي أنا وبس','في الأغلب مبيتقالش','مش متأكد'] },
+
+  { kind:'section', title:'القرار الموجع' },
+  { kind:'long', id:'h5', label:'القرارات اللي بتوجع (اللي بتخص أشخاص) بتتاخد إزاي عندكم؟ وإيه اللي بيحصل بعدها؟',
+    hint:'المعيار بيتقال قبل ولا بعد؟ وإزاي بيتبلّغ؟' },
+
+  { kind:'section', title:'رأيك إنت' },
+  { kind:'long', id:'h7', label:'من كل اللي فات — إيه الحاجة اللي عايز اليوم ده يمسّها؟' },
+  { kind:'long', id:'h10', label:'وإيه الحاجة اللي لو اتفتحت في اليوم ده هتعمل ضرر أكتر من نفعها؟' }
+];
+
+/* ==========================================================================
+   ٥ · بناء الاستمارة
+========================================================================== */
+var QUESTIONS = SETS[ROLE];
+var DRAFT_KEY = 'dd_draft_' + COMPANY + '_' + ROLE;
+var answers = {};
+
+/* استرجاع مسودة */
+try{
+  var saved = localStorage.getItem(DRAFT_KEY);
+  if(saved) answers = JSON.parse(saved) || {};
+}catch(e){ answers = {}; }
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildForm(){
+  var html = '';
+  QUESTIONS.forEach(function(q, i){
+
+    if(q.kind === 'section'){
+      html += '<div class="section"><div class="section-head"><span class="dot"></span><h2>'+esc(q.title)+'</h2></div>';
+      if(q.desc) html += '<div class="section-desc">'+esc(q.desc)+'</div>';
+      html += '</div>';
+      return;
+    }
+
+    var val = answers[q.id] || (q.kind==='triple' ? ['','',''] : '');
+    var filled = q.kind==='triple' ? (val[0]||val[1]||val[2]) : String(val).trim().length>0;
+
+    html += '<div class="q'+(filled?' filled':'')+'" data-qid="'+q.id+'">';
+    html += '<label class="q-label">';
+    if(q.optional) html += '<span class="optional">اختياري</span>';
+    html += esc(q.label)+'</label>';
+    if(q.hint) html += '<div class="q-hint">'+esc(q.hint)+'</div>';
+
+    if(q.kind === 'long'){
+      html += '<textarea data-id="'+q.id+'" placeholder="اكتب هنا...">'+esc(val)+'</textarea>';
+    }
+    else if(q.kind === 'short'){
+      html += '<input type="text" data-id="'+q.id+'" value="'+esc(val)+'">';
+    }
+    else if(q.kind === 'triple'){
+      html += '<div class="triple">';
+      for(var t=0;t<3;t++){
+        html += '<input type="text" data-id="'+q.id+'" data-idx="'+t+'" placeholder="'+esc(q.placeholders[t])+'" value="'+esc(val[t]||'')+'">';
+      }
+      html += '</div>';
+    }
+    else if(q.kind === 'select'){
+      html += '<select data-id="'+q.id+'">';
+      q.options.forEach(function(o){
+        html += '<option value="'+esc(o)+'"'+(val===o?' selected':'')+'>'+esc(o)+'</option>';
+      });
+      html += '</select>';
+    }
+    else if(q.kind === 'choice'){
+      html += '<div class="choices">';
+      q.options.forEach(function(o, oi){
+        var on = (val === o);
+        html += '<label class="choice'+(on?' on':'')+'">'
+             +  '<input type="radio" name="'+q.id+'" data-id="'+q.id+'" value="'+esc(o)+'"'+(on?' checked':'')+'>'
+             +  '<span>'+esc(o)+'</span></label>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+
+  document.getElementById('formBody').innerHTML = html;
+  wireInputs();
+  updateProgress();
+}
+
+function wireInputs(){
+  var body = document.getElementById('formBody');
+
+  body.addEventListener('input', function(e){
+    var el = e.target;
+    var id = el.getAttribute('data-id');
+    if(!id) return;
+    if(el.hasAttribute('data-idx')){
+      if(!Array.isArray(answers[id])) answers[id] = ['','',''];
+      answers[id][parseInt(el.getAttribute('data-idx'),10)] = el.value;
+    } else {
+      answers[id] = el.value;
+    }
+    markFilled(el);
+    saveDraft();
+    updateProgress();
+  });
+
+  body.addEventListener('change', function(e){
+    var el = e.target;
+    var id = el.getAttribute('data-id');
+    if(!id) return;
+    answers[id] = el.value;
+    if(el.type === 'radio'){
+      var group = body.querySelectorAll('input[name="'+id+'"]');
+      for(var i=0;i<group.length;i++){ group[i].parentNode.classList.toggle('on', group[i].checked); }
+    }
+    markFilled(el);
+    saveDraft();
+    updateProgress();
+  });
+}
+
+function markFilled(el){
+  var card = el.closest('.q');
+  if(!card) return;
+  var id = card.getAttribute('data-qid');
+  var v = answers[id];
+  var has = Array.isArray(v) ? (v[0]||v[1]||v[2]) : (v && String(v).trim().length>0);
+  card.classList.toggle('filled', !!has);
+}
+
+function saveDraft(){
+  try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(answers)); }catch(e){}
+}
+
+function requiredIds(){
+  return QUESTIONS.filter(function(q){
+    return q.kind!=='section' && q.kind!=='select' && !q.optional;
+  }).map(function(q){ return q.id; });
+}
+
+function answeredCount(){
+  var ids = requiredIds(), n = 0;
+  ids.forEach(function(id){
+    var v = answers[id];
+    if(Array.isArray(v)){ if(v[0]&&String(v[0]).trim()) n++; }
+    else if(v && String(v).trim().length>0){ n++; }
+  });
+  return n;
+}
+
+function updateProgress(){
+  var total = requiredIds().length;
+  var done  = answeredCount();
+  document.getElementById('progressFill').style.width = Math.round(done/total*100)+'%';
+  refreshSubmit();
+}
+
+/* ==========================================================================
+   ٦ · الإرسال
+========================================================================== */
+function refreshSubmit(){
+  var ok = document.getElementById('consentChk').checked && answeredCount() >= Math.ceil(requiredIds().length*0.6);
+  document.getElementById('submitBtn').disabled = !ok;
+}
+
+function submit(){
+  var btn = document.getElementById('submitBtn');
+  var err = document.getElementById('errBox');
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'بيتبعت...';
+
+  if(!db){ showErr('مفيش اتصال بالسيرفر. جرّب تحدّث الصفحة.'); return; }
+
+  var payload = {
+    company: COMPANY,
+    role: ROLE,
+    roleBand: answers.roleBand || 'مش محدد',
+    answers: answers,
+    consent: true,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    submittedAtLocal: new Date().toISOString(),
+    ua: navigator.userAgent.slice(0,120)
+  };
+
+  db.collection(COLLECTION).add(payload)
+    .then(function(){
+      try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
+      document.getElementById('formScreen').classList.add('hidden');
+      document.getElementById('doneScreen').classList.remove('hidden');
+      document.getElementById('progressFill').style.width = '100%';
+      window.scrollTo(0,0);
+    })
+    .catch(function(e){
+      console.error(e);
+      showErr('حصل خطأ في الإرسال. اتأكد إنك أونلاين وجرّب تاني — إجاباتك محفوظة.');
+    });
+
+  function showErr(m){
+    err.textContent = m; err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'إرسال';
+  }
+}
+
+/* ==========================================================================
+   ٧ · التشغيل
+========================================================================== */
+function init(){
+  var cov = COVERS[ROLE];
+  document.getElementById('coverSub').textContent = cov.sub;
+  document.getElementById('coverNote').innerHTML = cov.note;
+  document.getElementById('consentText').innerHTML = cov.consent;
+  document.getElementById('doneMsg').textContent = cov.done;
+  if(COMPANY_LABEL){ document.getElementById('coverEyebrow').textContent = COMPANY_LABEL; }
+
+  document.getElementById('startBtn').addEventListener('click', function(){
+    document.getElementById('coverScreen').classList.add('hidden');
+    document.getElementById('formScreen').classList.remove('hidden');
+    window.scrollTo(0,0);
+  });
+  document.getElementById('consentChk').addEventListener('change', refreshSubmit);
+  document.getElementById('submitBtn').addEventListener('click', submit);
+
+  buildForm();
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else { init(); }
+
+})();
+</script>
+</body>
+</html>
