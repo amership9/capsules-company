@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>يوم القرار — لوحة التحضير</title>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --navy-900:#060f24; --navy-800:#0b1b3b; --navy-700:#0f2347;
+  --line:#1c3056; --gold:#D4AF37; --gold-soft:#e7c766;
+  --sky:#7FB3D5; --sky-soft:#a5d8ff; --ember:#E8623D; --green:#4ec9a0;
+  --white:#f4f7fb; --mute:#9fb2cf; --mute-2:#6f86a8;
+  --radius:14px; --radius-s:9px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  background:radial-gradient(1200px 700px at 80% -10%,#142a55 0%,transparent 55%),var(--navy-900);
+  color:var(--white);font-family:'Tajawal',system-ui,sans-serif;direction:rtl;line-height:1.7;min-height:100vh;
+}
+h1,h2,h3{font-family:'Reem Kufi','Tajawal',sans-serif;font-weight:600;line-height:1.35}
+.wrap{max-width:1080px;margin:0 auto;padding:22px 16px 90px}
+
+/* بوابة */
+.gate{max-width:380px;margin:16vh auto;text-align:center}
+.gate h1{color:var(--gold);font-size:1.5rem;margin-bottom:8px}
+.gate p{color:var(--mute-2);font-size:.9rem;margin-bottom:22px}
+
+input,select,textarea{
+  width:100%;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:var(--radius-s);
+  color:var(--white);font-family:inherit;font-size:.95rem;padding:11px 13px;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+.btn{
+  padding:12px 20px;border:none;border-radius:var(--radius-s);cursor:pointer;
+  font-family:'Reem Kufi',sans-serif;font-size:.98rem;font-weight:600;
+  background:linear-gradient(135deg,var(--gold),#c69a2a);color:#17203a;transition:opacity .18s;
+}
+.btn:hover{opacity:.9}
+.btn-block{width:100%;margin-top:14px}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--mute);font-weight:400}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold-soft)}
+.btn-sm{padding:6px 12px;font-size:.82rem}
+
+/* رأس */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+     padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.top h1{font-size:1.3rem;color:var(--gold)}
+.top .co{color:var(--mute-2);font-size:.85rem}
+.top .acts{display:flex;gap:8px;flex-wrap:wrap}
+
+/* تبويبات */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px}
+.tab{
+  padding:8px 16px;border:1px solid var(--line);border-radius:999px;cursor:pointer;
+  font-size:.9rem;color:var(--mute);background:transparent;font-family:inherit;transition:all .18s;
+}
+.tab:hover{color:var(--white)}
+.tab.on{background:rgba(212,175,55,.13);border-color:var(--gold);color:var(--gold-soft)}
+
+/* بطاقات */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px}
+.card{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.card .n{font-family:'Reem Kufi';font-size:1.9rem;color:var(--gold);line-height:1.1}
+.card .l{color:var(--mute-2);font-size:.83rem;margin-top:4px}
+.card.warn{border-color:rgba(232,98,61,.45);background:rgba(232,98,61,.07)}
+.card.warn .n{color:var(--ember)}
+.card.ok{border-color:rgba(78,201,160,.4)}
+.card.ok .n{color:var(--green)}
+
+.panel{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:var(--radius);
+       padding:18px;margin-bottom:16px}
+.panel h3{font-size:1.02rem;color:var(--gold-soft);margin-bottom:4px}
+.panel .sub{color:var(--mute-2);font-size:.83rem;margin-bottom:14px}
+
+/* شرائط */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:.88rem}
+.bar-row .lab{flex:0 0 44%;color:var(--mute);line-height:1.4}
+.bar-row .track{flex:1;height:9px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
+.bar-row .fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--gold));border-radius:99px}
+.bar-row .val{flex:0 0 34px;text-align:left;color:var(--gold-soft);font-size:.82rem}
+
+/* توصية */
+.reco{border-right:3px solid var(--gold);background:rgba(212,175,55,.07);
+      padding:12px 14px;border-radius:0 var(--radius-s) var(--radius-s) 0;margin-top:14px;font-size:.92rem}
+.reco b{color:var(--gold-soft)}
+
+/* إجابات خام */
+.qblock{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:var(--radius);
+        padding:16px;margin-bottom:14px}
+.qblock h4{font-size:.96rem;color:var(--sky-soft);margin-bottom:12px;font-family:'Reem Kufi';font-weight:500}
+.ans{border-right:2px solid var(--line);padding:2px 12px 2px;margin-bottom:11px;color:var(--white);
+     font-size:.93rem;white-space:pre-wrap;line-height:1.7}
+.ans .meta{display:block;color:var(--mute-2);font-size:.75rem;margin-bottom:2px}
+.empty{color:var(--mute-2);font-size:.88rem;font-style:italic}
+
+/* حزمة التغذية */
+#pkgBox{min-height:260px;font-family:ui-monospace,'Tajawal',monospace;font-size:.82rem;line-height:1.6;
+        white-space:pre;direction:rtl;text-align:right}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--gold);color:#17203a;
+       padding:11px 22px;border-radius:99px;font-weight:600;z-index:99;display:none}
+.hidden{display:none!important}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pill{font-size:.75rem;border:1px solid var(--line);border-radius:99px;padding:2px 10px;color:var(--mute-2)}
+@media(max-width:520px){ .bar-row .lab{flex:0 0 50%;font-size:.82rem} }
+</style>
+</head>
+<body>
+
+<!-- بوابة -->
+<div id="gate" class="gate">
+  <h1>لوحة التحضير</h1>
+  <p>يوم القرار — قراءة الاستمارات</p>
+  <input type="password" id="pass" placeholder="كود الدخول">
+  <button class="btn btn-block" id="gateBtn">دخول</button>
+  <div id="gateErr" style="color:var(--ember);font-size:.85rem;margin-top:10px"></div>
+</div>
+
+<!-- اللوحة -->
+<div id="app" class="wrap hidden">
+
+  <div class="top">
+    <div>
+      <h1>لوحة التحضير</h1>
+      <div class="co">الشركة: <b id="coName"></b> · <span id="lastSync"></span></div>
+    </div>
+    <div class="acts">
+      <button class="btn btn-ghost btn-sm" id="reloadBtn">تحديث</button>
+      <button class="btn btn-sm" id="pkgBtn">انسخ حزمة التغذية</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-view="overview">نظرة عامة</button>
+    <button class="tab" data-view="team">فريق العمل</button>
+    <button class="tab" data-view="hr">الموارد البشرية</button>
+    <button class="tab" data-view="sponsor">صاحب القرار</button>
+    <button class="tab" data-view="package">حزمة التغذية</button>
+  </div>
+
+  <div id="view"></div>
+</div>
+
+<div class="toast" id="toast">اتنسخت ✓</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ========== إعداد ========== */
+var firebaseConfig = {
+  apiKey: "AIzaSyDG8eQaToGjmLx_CczY6Vz1q59GetC-P9E",
+  authDomain: "emc-crm.firebaseapp.com",
+  projectId: "emc-crm",
+  storageBucket: "emc-crm.firebasestorage.app",
+  messagingSenderId: "75520877393",
+  appId: "1:75520877393:web:71931155b19155ad73e970"
+};
+var COLLECTION = 'dd_intakes';
+var PASSCODE   = 'decision-2025';     /* ← غيّره من هنا */
+
+var db=null;
+try{
+  if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+}catch(e){ console.error(e); }
+
+function param(k,d){ var m=new RegExp('[?&]'+k+'=([^&]*)').exec(location.search); return m?decodeURIComponent(m[1]):d; }
+var COMPANY = param('c','english-capsules');
+
+var DATA = { team:[], hr:[], sponsor:[] };
+var VIEW = 'overview';
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function $(id){ return document.getElementById(id); }
+
+/* ========== خرائط الأسئلة (للعرض والحزمة) ========== */
+var LABELS = {
+  q1:'قرار شكله مظبوط وماشتغلش في التنفيذ',
+  q2:'حاجة بتتأجل ولسه معلقة',
+  q3:'آخر نقاش حاد — الخلاف كان على إيه',
+  q4:'جملة «إحنا عارفين إن...» محدش اتأكد منها',
+  q5:'قرار صح ودفع تمنه ناس تانية',
+  q6:'حاجة ثابتة متكتبتش وكل واحد فاهمها بطريقة',
+  q7:'تلات جمل بتتقال كتير عندهم',
+  q8:'القرار بيتكتب؟',
+  q9:'بتعرف مين المسؤول؟',
+  q10:'الجملة الأكتر سماعًا (الأداة الغالبة)',
+  q11:'الجملة النادرة (الأداة الغايبة)',
+  q12:'التصعيد بيوصل في وقته؟',
+  q13:'لو اليوم نجح — إيه اللي هيتغير',
+  q14:'إيه اللي هيبقى مضيعة وقت (اعتراضات)',
+  q15:'حاجة مش بتتقال في اجتماع عادي',
+  s1:'اللي بيتكرر ويزهقني',
+  s2:'قرار معلّق دلوقتي',
+  s3:'🔴 ممنوع نفتحه',
+  s4:'🔴 شخص لو اتحرج الحكاية تبوظ',
+  s5:'رد فعلي على الاعتراض',
+  s6:'الحضور',
+  s7:'موافقة الحارس ينبّهني قدام الكل',
+  s8:'علامة النجاح بعد شهر',
+  h1:'استقالة سببها الحقيقي قرار قديم',
+  h2:'أكتر شكوى متكررة عن طريقة القرار',
+  h3:'المسافة بين القرار والإعلان',
+  h4:'سياسة محدش فاكر ليه اتعملت',
+  h5:'القرار الموجع بيتاخد إزاي',
+  h6:'الصلاحيات مكتوبة؟',
+  h7:'الحاجة اللي عايز اليوم يمسّها',
+  h8:'أكتر حاجة بضطر أصلحها بعد القرار',
+  h9:'مسار الاعتراض',
+  h10:'🔴 اللي لو اتفتح هيضر'
+};
+var TEAM_OPEN   = ['q1','q2','q3','q4','q5','q6','q13','q14','q15'];
+var TEAM_CHOICE = ['q8','q9','q10','q11','q12'];
+var HR_KEYS     = ['h1','h2','h3','h8','h4','h6','h9','h5','h7','h10'];
+var SP_KEYS     = ['s1','s2','s8','s3','s4','s5','s6','s7'];
+
+var TOOL_OF = {
+  '«استنى، إحنا عارفين إيه بالظبط؟»':'الفهم',
+  '«طب الناس هتاخدها إزاي؟»':'المراعاة',
+  '«يلا بقى نقرر»':'الحسم',
+  '«خلينا نأجلها لحد ما نشوف»':'التأجيل'
+};
+var CALIBRATION = {
+  'الفهم':'وسّع وحدة ٢ (المعلومة والانطباع + المعلومة اللي تغيّر قرارك) لـ١٦ د · قصّر شرح الحسم لـ٢ د.',
+  'المراعاة':'وسّع وحدة ١ ج٣ («صح على الورق ومات في التنفيذ») + وحدة ٢ ج٢ (التمن المستخبي) · قوّي قاعدة «الساكت مش فاضي» في وحدة ٦.',
+  'الحسم':'وسّع وحدة ٥ («التأجيل مش حياد») لـ١٦ د · قصّر وحدة ٢ لـ٩ د.',
+  'التأجيل':'الغرفة بتؤجل كعادة — ركّز على وحدة ٥ ج٢ وعلى «الحسم» كأداة غايبة.'
+};
+
+/* ========== تحميل ========== */
+function load(){
+  if(!db){ $('view').innerHTML = '<div class="panel">مفيش اتصال بالسيرفر.</div>'; return; }
+  $('view').innerHTML = '<div class="panel">بيحمّل...</div>';
+  db.collection(COLLECTION).where('company','==',COMPANY).get()
+    .then(function(snap){
+      DATA = { team:[], hr:[], sponsor:[] };
+      snap.forEach(function(d){
+        var v = d.data(); v._id = d.id;
+        var r = v.role || 'team';
+        if(!DATA[r]) DATA[r] = [];
+        DATA[r].push(v);
+      });
+      $('lastSync').textContent = 'آخر تحديث ' + new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+      render();
+    })
+    .catch(function(e){
+      console.error(e);
+      $('view').innerHTML = '<div class="panel">حصل خطأ في القراءة. اتأكد من قواعد Firestore.</div>';
+    });
+}
+
+/* ========== أدوات إحصاء ========== */
+function tally(list, key){
+  var m = {};
+  list.forEach(function(r){
+    var v = (r.answers||{})[key];
+    if(v && String(v).trim()){ m[v] = (m[v]||0)+1; }
+  });
+  return m;
+}
+function topOf(m){
+  var best=null, n=0;
+  for(var k in m){ if(m[k]>n){ n=m[k]; best=k; } }
+  return best ? {key:best, n:n} : null;
+}
+function barsHTML(m, total){
+  var keys = Object.keys(m);
+  if(!keys.length) return '<div class="empty">مفيش إجابات لسه.</div>';
+  keys.sort(function(a,b){ return m[b]-m[a]; });
+  return keys.map(function(k){
+    var pct = total ? Math.round(m[k]/total*100) : 0;
+    return '<div class="bar-row"><div class="lab">'+esc(k)+'</div>'
+         + '<div class="track"><div class="fill" style="width:'+pct+'%"></div></div>'
+         + '<div class="val">'+m[k]+'</div></div>';
+  }).join('');
+}
+
+/* مؤشر التشتت: بيقيس تنوّع الصياغات في سؤال مفتوح */
+function dispersion(list, key){
+  var texts = list.map(function(r){ return String((r.answers||{})[key]||'').trim(); }).filter(Boolean);
+  if(texts.length < 2) return null;
+  var sets = texts.map(function(t){
+    var w = t.replace(/[^\u0600-\u06FF\s]/g,' ').split(/\s+/).filter(function(x){ return x.length>3; });
+    return w.slice(0,40);
+  });
+  var pairs=0, sum=0;
+  for(var i=0;i<sets.length;i++){
+    for(var j=i+1;j<sets.length;j++){
+      var a=sets[i], b=sets[j], inter=0;
+      var bs={}; b.forEach(function(w){ bs[w]=1; });
+      a.forEach(function(w){ if(bs[w]) inter++; });
+      var uni = a.length + b.length - inter;
+      sum += uni ? inter/uni : 0; pairs++;
+    }
+  }
+  var overlap = pairs ? sum/pairs : 0;
+  var level = overlap > 0.28 ? 'اتفاق' : (overlap > 0.12 ? 'انقسام' : 'تشتت كامل');
+  return { level:level, score:Math.round(overlap*100), n:texts.length };
+}
+
+/* ========== العرض ========== */
+function render(){
+  $('coName').textContent = COMPANY;
+  if(VIEW === 'overview') return renderOverview();
+  if(VIEW === 'package')  return renderPackage();
+  return renderRole(VIEW);
+}
+
+function renderOverview(){
+  var t = DATA.team.length, h = DATA.hr.length, s = DATA.sponsor.length;
+  var dom = topOf(tally(DATA.team,'q10'));
+  var abs = topOf(tally(DATA.team,'q11'));
+  var domTool = dom ? (TOOL_OF[dom.key]||'—') : '—';
+  var absTool = abs ? (TOOL_OF[abs.key]||'—') : '—';
+
+  var html = '';
+
+  html += '<div class="cards">'
+        + card(t,'ردود فريق العمل', t>=6?'ok':(t>0?'warn':''))
+        + card(h,'الموارد البشرية', h>0?'ok':'warn')
+        + card(s,'صاحب القرار', s>0?'ok':'warn')
+        + card(domTool,'الأداة الغالبة','')
+        + card(absTool,'الأداة الغايبة','warn')
+        + '</div>';
+
+  /* تحذير لحظة المرآة */
+  if(t < 6){
+    html += '<div class="panel" style="border-color:rgba(232,98,61,.45)">'
+          + '<h3 style="color:var(--ember)">تنبيه — لحظة المرآة</h3>'
+          + '<div class="sub">قاعدة الأمان رقم ٦: لو ردود الفريق أقل من ٦، «دي كلماتكم» بتبقى كذبة والناس هتحسها.</div>'
+          + '<div>عدد الردود دلوقتي: <b>'+t+'</b>. إما تستنى ردود أكتر، أو تشيل لحظة المرآة من اليوم.</div></div>';
+  }
+
+  /* المعايرة */
+  if(absTool !== '—'){
+    html += '<div class="panel"><h3>معايرة الجرعة (خانة ١٣)</h3>'
+          + '<div class="sub">مبنية على الأداة الغايبة من إجابات الفريق.</div>'
+          + '<div class="reco"><b>الأداة الغايبة: '+esc(absTool)+'</b><br>'+esc(CALIBRATION[absTool]||'')+'</div>'
+          + '<div class="reco" style="border-color:var(--sky)"><b>الأداة الغالبة: '+esc(domTool)+'</b><br>'
+          + 'اشرحها من ناحية <b>طيفها الزايد</b>، مش من ناحية قوتها — الغرفة عارفة قوتها بالفعل.</div></div>';
+  }
+
+  /* التوزيعات */
+  html += '<div class="panel"><h3>الأرقام السريعة</h3><div class="sub">من '+t+' رد.</div>';
+  TEAM_CHOICE.forEach(function(k){
+    html += '<div style="margin-bottom:16px"><div style="font-size:.9rem;color:var(--white);margin-bottom:7px">'+esc(LABELS[k])+'</div>'
+          + barsHTML(tally(DATA.team,k), t) + '</div>';
+  });
+  html += '</div>';
+
+  /* التشتت */
+  html += '<div class="panel"><h3>مؤشر التشتت</h3>'
+        + '<div class="sub">بيقيس: هل الفريق بيوصف نفس الواقعة بنفس الكلام؟ التشتت العالي = مادة ذهبية للحظة المرآة.</div>';
+  ['q3','q1','q2','q6'].forEach(function(k){
+    var d = dispersion(DATA.team, k);
+    if(!d) return;
+    var col = d.level==='تشتت كامل' ? 'var(--ember)' : (d.level==='انقسام'?'var(--gold)':'var(--green)');
+    html += '<div class="row" style="margin-bottom:9px;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:9px">'
+          + '<div style="font-size:.9rem">'+esc(LABELS[k])+'</div>'
+          + '<div class="pill" style="color:'+col+';border-color:'+col+'">'+d.level+' · '+d.n+' إجابة</div></div>';
+  });
+  html += '</div>';
+
+  /* خطوط حمرا */
+  if(s > 0){
+    var sp = DATA.sponsor[0].answers||{};
+    html += '<div class="panel" style="border-color:rgba(232,98,61,.5)"><h3 style="color:var(--ember)">🔴 الخطوط الحمرا</h3>'
+          + '<div class="ans"><span class="meta">ممنوع نفتحه</span>'+esc(sp.s3||'—')+'</div>'
+          + '<div class="ans"><span class="meta">شخص حسّاس</span>'+esc(sp.s4||'—')+'</div>'
+          + '<div class="ans"><span class="meta">موافقة الحارس</span>'+esc(sp.s7||'—')+'</div></div>';
+  }
+
+  $('view').innerHTML = html;
+}
+
+function card(n,l,cls){
+  return '<div class="card '+(cls||'')+'"><div class="n">'+esc(n)+'</div><div class="l">'+esc(l)+'</div></div>';
+}
+
+function renderRole(role){
+  var list = DATA[role] || [];
+  var keys = role==='team' ? TEAM_OPEN.concat(TEAM_CHOICE) : (role==='hr' ? HR_KEYS : SP_KEYS);
+  if(!list.length){ $('view').innerHTML = '<div class="panel"><div class="empty">مفيش ردود لسه.</div></div>'; return; }
+
+  var html = '<div class="panel"><div class="row" style="justify-content:space-between">'
+           + '<div>عدد الردود: <b style="color:var(--gold)">'+list.length+'</b></div>'
+           + '<button class="btn btn-ghost btn-sm" id="delBtn">إدارة الردود</button></div>'
+           + '<div id="delZone" class="hidden" style="margin-top:12px"></div></div>';
+
+  keys.forEach(function(k){
+    html += '<div class="qblock"><h4>'+esc(LABELS[k]||k)+'</h4>';
+    var any = false;
+    list.forEach(function(r,i){
+      var v = (r.answers||{})[k];
+      if(Array.isArray(v)) v = v.filter(Boolean).join('\n— ');
+      if(!v || !String(v).trim()) return;
+      any = true;
+      var band = r.roleBand && r.roleBand!=='مش محدد' ? r.roleBand : ('رد '+(i+1));
+      html += '<div class="ans"><span class="meta">'+esc(band)+'</span>'+esc(v)+'</div>';
+    });
+    if(!any) html += '<div class="empty">مفيش إجابات.</div>';
+    html += '</div>';
+  });
+
+  /* جمل المكان */
+  if(role==='team'){
+    var lines = [];
+    list.forEach(function(r){
+      var v = (r.answers||{}).q7;
+      if(Array.isArray(v)) v.forEach(function(x){ if(x && x.trim()) lines.push(x.trim()); });
+    });
+    if(lines.length){
+      html = '<div class="qblock" style="border-color:var(--gold)"><h4 style="color:var(--gold)">لغة المكان — كل الجمل ('+lines.length+')</h4>'
+           + lines.map(function(l){ return '<div class="ans">'+esc(l)+'</div>'; }).join('')
+           + '</div>' + html;
+    }
+  }
+
+  $('view').innerHTML = html;
+
+  var db1 = $('delBtn');
+  if(db1) db1.addEventListener('click', function(){
+    var z = $('delZone'); z.classList.toggle('hidden');
+    z.innerHTML = list.map(function(r,i){
+      return '<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:7px 0">'
+        + '<span style="font-size:.85rem;color:var(--mute)">رد '+(i+1)+' · '+esc((r.submittedAtLocal||'').slice(0,16).replace('T',' '))+'</span>'
+        + '<button class="btn btn-ghost btn-sm" data-del="'+r._id+'">حذف</button></div>';
+    }).join('');
+    z.querySelectorAll('[data-del]').forEach(function(b){
+      b.addEventListener('click', function(){
+        if(!confirm('تحذف الرد ده نهائيًا؟')) return;
+        db.collection(COLLECTION).doc(b.getAttribute('data-del')).delete().then(load);
+      });
+    });
+  });
+}
+
+/* ========== حزمة التغذية ========== */
+function buildPackage(){
+  var t=DATA.team, h=DATA.hr, s=DATA.sponsor;
+  var L=[];
+  var P=function(x){ L.push(x==null?'':x); };
+
+  P('=== حزمة تغذية | يوم القرار ===');
+  P('الشركة: '+COMPANY);
+  P('تاريخ السحب: '+new Date().toLocaleDateString('ar-EG'));
+  P('الردود: فريق '+t.length+' · موارد بشرية '+h.length+' · صاحب قرار '+s.length);
+
+  var bands = tally(t,'roleBand');
+  var bstr = Object.keys(bands).map(function(k){ return k+' '+bands[k]; }).join(' · ');
+  if(bstr) P('التوزيع الوظيفي: '+bstr);
+  P('');
+
+  /* أرقام */
+  P('--- التوزيع الرقمي ---');
+  TEAM_CHOICE.forEach(function(k){
+    var m=tally(t,k);
+    var line = Object.keys(m).sort(function(a,b){return m[b]-m[a];}).map(function(x){ return x+' '+m[x]; }).join(' · ');
+    P(LABELS[k]+': '+(line||'—'));
+  });
+  var dom=topOf(tally(t,'q10')), abs=topOf(tally(t,'q11'));
+  var domT = dom?(TOOL_OF[dom.key]||'—'):'—';
+  var absT = abs?(TOOL_OF[abs.key]||'—'):'—';
+  P('');
+  P('>> الأداة الغالبة: '+domT);
+  P('>> الأداة الغايبة: '+absT);
+  P('>> معايرة مقترحة: '+(CALIBRATION[absT]||'—'));
+  P('');
+
+  /* تشتت */
+  P('--- مؤشر التشتت ---');
+  ['q1','q2','q3','q6'].forEach(function(k){
+    var d=dispersion(t,k);
+    if(d) P(LABELS[k]+': '+d.level+' ('+d.n+' إجابة)');
+  });
+  P('');
+
+  /* وقائع خام */
+  P('--- وقائع الفريق (خام) ---');
+  TEAM_OPEN.forEach(function(k){
+    P('');
+    P('['+LABELS[k]+']');
+    var n=0;
+    t.forEach(function(r){
+      var v=(r.answers||{})[k];
+      if(!v||!String(v).trim()) return;
+      n++;
+      P((r.roleBand&&r.roleBand!=='مش محدد'?'('+r.roleBand+') ':'')+'• '+String(v).replace(/\n+/g,' / '));
+    });
+    if(!n) P('• (مفيش)');
+  });
+  P('');
+
+  /* لغة المكان */
+  P('--- لغة المكان (جمل بالحرف) ---');
+  var lines=[];
+  t.forEach(function(r){
+    var v=(r.answers||{}).q7;
+    if(Array.isArray(v)) v.forEach(function(x){ if(x&&x.trim()) lines.push(x.trim()); });
+  });
+  if(lines.length) lines.forEach(function(x){ P('• '+x); }); else P('• (مفيش)');
+  P('');
+
+  /* HR */
+  P('--- الموارد البشرية ---');
+  if(h.length){
+    HR_KEYS.forEach(function(k){
+      var vals = h.map(function(r){ return (r.answers||{})[k]; }).filter(function(x){ return x && String(x).trim(); });
+      P('');
+      P('['+LABELS[k]+']');
+      if(vals.length) vals.forEach(function(x){ P('• '+String(x).replace(/\n+/g,' / ')); }); else P('• (مفيش)');
+    });
+  } else { P('(مفيش رد)'); }
+  P('');
+
+  /* Sponsor */
+  P('--- صاحب القرار ---');
+  if(s.length){
+    SP_KEYS.forEach(function(k){
+      var vals = s.map(function(r){ return (r.answers||{})[k]; }).filter(function(x){ return x && String(x).trim(); });
+      P('');
+      P('['+LABELS[k]+']');
+      if(vals.length) vals.forEach(function(x){ P('• '+String(x).replace(/\n+/g,' / ')); }); else P('• (مفيش)');
+    });
+  } else { P('(مفيش رد)'); }
+  P('');
+
+  P('=== نهاية الحزمة ===');
+  return L.join('\n');
+}
+
+function renderPackage(){
+  var txt = buildPackage();
+  $('view').innerHTML =
+      '<div class="panel"><h3>حزمة التغذية</h3>'
+    + '<div class="sub">انسخ الكل والزقه في محادثة جديدة عشان نبني الاسكربت المفصّل.</div>'
+    + '<div class="row" style="margin-bottom:12px">'
+    + '<button class="btn btn-sm" id="copyBtn">انسخ الكل</button>'
+    + '<button class="btn btn-ghost btn-sm" id="dlBtn">نزّل ملف نصي</button></div>'
+    + '<textarea id="pkgBox" readonly></textarea></div>';
+  $('pkgBox').value = txt;
+  $('copyBtn').addEventListener('click', function(){ copy(txt); });
+  $('dlBtn').addEventListener('click', function(){
+    var b = new Blob([txt], {type:'text/plain;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'feed-'+COMPANY+'.txt';
+    a.click();
+  });
+}
+
+function copy(txt){
+  var ta = document.createElement('textarea');
+  ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); toast(); }catch(e){ alert('انسخ يدوي من الصندوق تحت.'); }
+  document.body.removeChild(ta);
+}
+function toast(){
+  var t=$('toast'); t.style.display='block';
+  setTimeout(function(){ t.style.display='none'; }, 1600);
+}
+
+/* ========== تشغيل ========== */
+function enter(){
+  if($('pass').value.trim() !== PASSCODE){ $('gateErr').textContent='الكود مش مظبوط.'; return; }
+  sessionStorage.setItem('dd_admin','1');
+  $('gate').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  load();
+}
+
+$('gateBtn').addEventListener('click', enter);
+$('pass').addEventListener('keydown', function(e){ if(e.key==='Enter') enter(); });
+$('reloadBtn').addEventListener('click', load);
+$('pkgBtn').addEventListener('click', function(){
+  VIEW='package';
+  document.querySelectorAll('.tab').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-view')==='package'); });
+  render();
+});
+document.querySelectorAll('.tab').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    VIEW = b.getAttribute('data-view');
+    render();
+  });
+});
+
+if(sessionStorage.getItem('dd_admin')==='1'){
+  $('gate').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  load();
+}
+
+})();
+</script>
+</body>
+</html>
